@@ -1,0 +1,99 @@
+[
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_addrINO",
+                "type": "address"
+            }
+        ],
+        "name": "getInoInfo",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "nftAddress",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "startTime",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "endTime",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "floorPoint",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint32",
+                "name": "limitItemPerUser",
+                "type": "uint32"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_addrINO",
+                "type": "address"
+            }
+        ],
+        "name": "getInoPayment",
+        "outputs": [
+            {
+                "internalType": "address[]",
+                "name": "paymentToken",
+                "type": "address[]"
+            },
+            {
+                "internalType": "uint256[]",
+                "name": "priceItem",
+                "type": "uint256[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_addrINO",
+                "type": "address"
+            }
+        ],
+        "name": "getInoStatus",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "numParticipants",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256[]",
+                "name": "tokenIds",
+                "type": "uint256[]"
+            },
+            {
+                "internalType": "uint256[]",
+                "name": "quantity",
+                "type": "uint256[]"
+            },
+            {
+                "internalType": "bool",
+                "name": "finalized",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    }
+]

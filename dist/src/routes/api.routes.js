@@ -1,0 +1,36 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const path_1 = __importDefault(require("path")); // use for static route
+const collection_routes_1 = __importDefault(require("./collection.routes"));
+const history_routes_1 = __importDefault(require("./history.routes"));
+const item_routes_1 = __importDefault(require("./item.routes"));
+const user_routes_1 = __importDefault(require("./user.routes"));
+const sell_routes_1 = __importDefault(require("./sell.routes"));
+const buy_routes_1 = __importDefault(require("./buy.routes"));
+const order_routes_1 = __importDefault(require("./order.routes"));
+const interaction_routes_1 = __importDefault(require("./interaction.routes"));
+const offer_routes_1 = __importDefault(require("../routes/offer.routes"));
+const auction_routes_1 = __importDefault(require("./auction.routes"));
+const notification_routes_1 = __importDefault(require("./notification.routes"));
+const admin_routes_1 = __importDefault(require("./admin.routes"));
+const advertise_routes_1 = __importDefault(require("./advertise.routes"));
+const APIRouter = express_1.default.Router();
+APIRouter.use("/static", express_1.default.static(path_1.default.join(__dirname, "../../dist")));
+APIRouter.use("/users", user_routes_1.default);
+APIRouter.use("/collections", collection_routes_1.default);
+APIRouter.use("/items", item_routes_1.default);
+APIRouter.use("/sell", sell_routes_1.default);
+APIRouter.use("/buy", buy_routes_1.default);
+APIRouter.use("/histories", history_routes_1.default);
+APIRouter.use("/orders", order_routes_1.default);
+APIRouter.use("/interactions", interaction_routes_1.default);
+APIRouter.use("/offers", offer_routes_1.default);
+APIRouter.use("/auctions", auction_routes_1.default);
+APIRouter.use("/notifications", notification_routes_1.default);
+APIRouter.use("/admin", admin_routes_1.default);
+APIRouter.use("/advertise", advertise_routes_1.default);
+exports.default = APIRouter;

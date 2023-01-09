@@ -1,0 +1,2 @@
+export const SIGNATURE = 'signature';
+export const SIGNSTRING = 'Welcome to Metaspacecy looks forward to providing an innovative NFT solution for all of savvy hodlers to create a mutual community and become a future destination in the NFT decentralised world.\nNonce: ';

@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: be-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: NFTSpacex/backend:{{BUILD_NUMBER}}
+          env:
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: config-app
+                  key: backend-port
+            - name: MONGODB_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: config-app
+                  key: mongo-username
+            - name: MONGODB_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: config-app
+                  key: mongo-password
+            - name: MONGODB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: config-app
+                  key: mongo-host
+            - name: MONGODB_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: config-app
+                  key: mongo-database
+          resources:
+            limits:
+              memory: 1Gi
+              cpu: '0.4'
+            requests:
+              memory: 1Gi
+              cpu: '0.4'
+      nodeSelector:
+        role: master
+      dnsPolicy: Default

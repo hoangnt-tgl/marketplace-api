@@ -1,0 +1,12 @@
+node_modules
+Dockerfile
+.git
+.gitignore
+.env
+.env.exmaple
+.eslintrc.js
+.prettierignore
+.prettierrc.js
+jest.config.js
+jest.unit.json
+deploy

@@ -1,0 +1,4 @@
+node_modules
+.env
+public/topCollection.json
+.DS_Store
