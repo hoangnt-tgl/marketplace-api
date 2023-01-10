@@ -1,3 +1,5 @@
+import path from "path";
+
 export const DEFAULT_PICTURE: string =
 	"https://bafybeih6mubtpixfmstrhshqepjx5jzrxdekkalzgs6joe2trshbwti4m4.ipfs.w3s.link/2023-01-09%2017.45.49.jpg";
 
@@ -37,3 +39,5 @@ export const FILE_EXTEND: { [key: string]: object } = {
 	avif: {},
 	json: {},
 };
+
+export const STATIC_FOLDER = path.join(__dirname, "../../");

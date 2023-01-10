@@ -10,33 +10,25 @@ import {
 import { findOneService, updateOneService } from "../services/model.services";
 import userModel from "../models/user.model";
 import { createService } from "../services/model.services";
+import { removeUndefinedOfObj } from "../services/other.services";
 import formidable from "formidable";
 import { handlePromiseUpload } from "../services/uploadFile.service";
 import { LoginUser, User } from "../interfaces/user.interfaces";
 import { ResponseAPI } from "../interfaces/responseData.interfaces";
 import { ERROR_RESPONSE } from "../constant/response.constants";
-
+import { sendMailService } from "../services/mail.services";
+import { STATIC_FOLDER } from "../constant/default.constant";
+import jwt from "jsonwebtoken";
+import fs from "fs";
 const createUserController = async (req: Request, res: Response) => {
 	try {
 		let { userAddress, signature } = req.body;
 		userAddress = userAddress.toLowerCase();
-
 		const user: User = await createUserIfNotExistService(userAddress, signature);
-
 		return res.status(200).json({ data: user });
 	} catch (error: any) {
 		return res.status(403).json({ error: ERROR_RESPONSE[403] });
 	}
-};
-
-const cookie = async (req: Request, res: Response) => {
-	await res.cookie("signature", "Done", {
-		domain: "http://192.168.0.128:3001",
-		path: "/",
-		httpOnly: true,
-		expires: new Date(Date.now() + 3600000),
-	});
-	return res.status(200).json("Done");
 };
 
 const uploadUserImageController = async (req: Request, res: Response) => {
@@ -49,42 +41,58 @@ const uploadUserImageController = async (req: Request, res: Response) => {
 	}
 };
 
-const getUserProfileController = async (req: Request, res: Response) => {
+const updateUserController = async (req: Request, res: Response) => {
 	try {
 		const { userAddress } = req.params;
-		const user = await getOneUserService(userAddress);
-
-		if (user) res.status(200).json({ data: { ...user } });
-		else res.status(403).json({ message: ERROR_RESPONSE[403] });
-	} catch (error: any) {
-		return res.status(500).json({ error: ERROR_RESPONSE[500] });
-	}
-};
-const updateUserController = async (req: Request, res: Response) => {
-	const userAddress = req.params.userAddress;
-	const { avatar, background, username, email, social, bio } = req.body;
-	const avatarURL = avatar.data.result;
-	const backgroundURL = background.data.result;
-	console.log(avatarURL, backgroundURL);
-	try {
-		const user = await updateUserService(userAddress, avatarURL, backgroundURL, username, email, social, bio);
-		return res.status(200).json({ data: user });
-	} catch (error: any) {}
-	return res.status(500).json({ error: ERROR_RESPONSE[403] });
-};
-
-const logoutController = async (req: Request, res: Response) => {
-	try {
-		const { userAddress } = req.body;
-		const user = await findOneService(userModel, { userAddress });
-		if (user.signature) {
-			await updateOneService(userModel, { userAddress }, { signature: "" });
+		let data: User = req.body;
+		data = removeUndefinedOfObj(data);
+		const user = await updateOneService(userModel, { userAddress }, data);
+		if (data.email && (!user.confirmEmail || user.email !== data.email)) {
+			let html = fs.readFileSync(`${STATIC_FOLDER}/views/verificationEmail.html`, { encoding: "utf8" });
+			let token = jwt.sign({ userAddress }, "secret", { expiresIn: "10m" });
+			token = encodeURIComponent(token)
+			let host = req.headers.host?.includes("localhost") ? "http://" : "https://";
+			host += req.headers.host;
+			let link = `${host}/users/verify-email/${userAddress}/${token}`;
+			html = html.replace("{{link}}", link);
+			await sendMailService(data.email, "Verify your email", html);
 		}
-		return res.status(200).json({ message: "Logout successfully" });
+		return res.status(200).json({ data: user });
+	} catch (error: any) {
+		return res.status(500).json({ error: ERROR_RESPONSE[403] });
+	}
+};
+
+const verificationEmailController = async (req: Request, res: Response) => {
+	try {
+		let { userAddress, token } = req.params;
+		userAddress = userAddress.toLowerCase();
+		token = decodeURIComponent(token);
+		const user = await findOneService(userModel, { userAddress });
+		if (!user) return res.status(403).json({ error: ERROR_RESPONSE[403] });
+		const decoded = jwt.verify(token, "secret");
+		if (decoded) {
+			await updateOneService(userModel, { userAddress }, { confirmEmail: true });
+			return res.status(200).json({ message: "Verify email successfully" });
+		}
+		return res.status(403).json({ error: ERROR_RESPONSE[403] });
 	} catch (error: any) {
 		return res.status(500).json({ error: ERROR_RESPONSE[500] });
 	}
 };
+
+// const logoutController = async (req: Request, res: Response) => {
+// 	try {
+// 		const { userAddress } = req.body;
+// 		const user = await findOneService(userModel, { userAddress });
+// 		if (user.signature) {
+// 			await updateOneService(userModel, { userAddress }, { signature: "" });
+// 		}
+// 		return res.status(200).json({ message: "Logout successfully" });
+// 	} catch (error: any) {
+// 		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+// 	}
+// };
 
 const getQueryUserController = async (req: Request, res: Response) => {
 	const { pageSize, pageId } = req.params;
@@ -113,13 +121,4 @@ const getSearchUserByIdController = async (req: Request, res: Response) => {
 	}
 };
 
-export {
-	createUserController,
-	updateUserController,
-	logoutController,
-	uploadUserImageController,
-	getQueryUserController,
-	getSearchUserByIdController,
-	cookie,
-	getUserProfileController,
-};
+export { createUserController, updateUserController, uploadUserImageController, verificationEmailController };
