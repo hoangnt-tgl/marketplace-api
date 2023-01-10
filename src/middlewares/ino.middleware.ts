@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { ERROR_RESPONSE } from "../constant/response.constants";
 import { INOType } from "../constant/INO.constant";
-import { checkINOExistService, checkINOIsCompleteService } from "../services/INO.service";
+
 
 const checkCreateINOMiddleware = (req: Request, res: Response, next: NextFunction) => {
 	const { addressINO, ownerINO, nameINO, descriptionINO, typeINO } = req.body;
@@ -27,20 +27,5 @@ const checkCreateINOMiddleware = (req: Request, res: Response, next: NextFunctio
 	}
 };
 
-const checkINOExistMiddleware = async (req: Request, res: Response, next: NextFunction) => {
-	const inoId = req.body.inoId || req.params.inoId;
-	try {
-		const check = await checkINOExistService(inoId);
-		const isComplete = await checkINOIsCompleteService(inoId);
-		if (!check) {
-			return res.status(403).json({ error: ERROR_RESPONSE[403] });
-		}
-		if (isComplete) {
-			return res.status(403).json({ error: ERROR_RESPONSE[403] });
-		}
-		return next();
-	} catch (error) {}
-	return res.status(500).json({ error: ERROR_RESPONSE[500] });
-};
 
-export { checkCreateINOMiddleware, checkINOExistMiddleware };
+export { checkCreateINOMiddleware };

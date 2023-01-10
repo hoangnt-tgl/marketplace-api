@@ -21,7 +21,7 @@ const collections = new Schema({
     description: { type: String, default: "" },
     category: { type: Number, default: default_constant_1.DEFAULT_ITEM_CATEGORY },
     isConfirm: { type: Boolean, default: true },
-    isINO: { type: Number, default: 1 },
+    isINO: { type: Number, default: 0 },
 }, {
     timestamps: true,
     toObject: { virtuals: true },

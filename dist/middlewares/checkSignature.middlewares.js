@@ -16,6 +16,7 @@ exports.refreshSignature = exports.checkSignatureValid = void 0;
 const model_services_1 = require("../services/model.services");
 const user_model_1 = __importDefault(require("../models/user.model"));
 const response_constants_1 = require("../constant/response.constants");
+const uploadFile_service_1 = require("../services/uploadFile.service");
 const checkSignatureValid = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const userAddress = req.params.userAddress || req.body.userAddress;
@@ -31,6 +32,11 @@ const checkSignatureValid = (req, res, next) => __awaiter(void 0, void 0, void 0
             return next();
     }
     catch (error) {
+        if (req.body.fileBackgroundName) {
+            (0, uploadFile_service_1.removeFileCloundinary)(req.body.fileBackgroundName.toString());
+            (0, uploadFile_service_1.removeFileCloundinary)(req.body.fileLogoName.toString());
+        }
+        console.log(error);
         return res.status(500).json({ error: response_constants_1.ERROR_RESPONSE[500] });
     }
 });
@@ -56,6 +62,7 @@ const refreshSignature = (req, res, next) => __awaiter(void 0, void 0, void 0, f
         return next();
     }
     catch (error) {
+        console.log(error);
         return res.status(500).json({ error: response_constants_1.ERROR_RESPONSE[500] });
     }
 });

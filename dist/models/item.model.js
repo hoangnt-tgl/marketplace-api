@@ -28,7 +28,7 @@ const items = new Schema({
     itemStandard: { type: String, default: default_constant_1.DEFAULT_STANDARD },
     chainId: { type: Number, required: true },
     isFreeze: { type: Boolean, default: false },
-    isINO: { type: Boolean, default: true },
+    isINO: { type: Number, default: 0 },
 }, {
     timestamps: true,
     toObject: { virtuals: true },

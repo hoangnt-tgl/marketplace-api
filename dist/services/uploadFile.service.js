@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.handleAdminUpload = exports.uploadRawFile = exports.handlePromiseUpload = exports.checkUploadService = exports.uploadFileToStorageService = exports.uploadFileToIpfsService = exports.uploadImageToStorageService = void 0;
+exports.removeFileCloundinary = exports.handleAdminUpload = exports.uploadRawFile = exports.handlePromiseUpload = exports.checkUploadService = exports.uploadFileToStorageService = exports.uploadFileToIpfsService = exports.uploadImageToStorageService = void 0;
 const cloudinary_1 = __importDefault(require("cloudinary"));
 const fs_1 = __importDefault(require("fs"));
 const uploadIPFS_1 = require("../utils/uploadIPFS");
@@ -43,7 +43,8 @@ const uploadImageToStorageService = (folderName, fileName, image) => __awaiter(v
             });
         };
         const result = yield promise();
-        return result;
+        const a = { result, fileName };
+        return a;
     }
     catch (error) {
         console.log(error);
@@ -72,7 +73,8 @@ const uploadFileToStorageService = (folderName, fileName, filepath, isGif = fals
             });
         };
         const result = yield promise();
-        return result;
+        const a = { result, fileName };
+        return a;
     }
     catch (error) {
         return error;
@@ -92,7 +94,7 @@ const uploadRawFile = (folderName, fileName, filepath) => __awaiter(void 0, void
                         rejects(error);
                     }
                     else {
-                        resolve(result.secure_url);
+                        resolve({ result: result.secure_url, fileName });
                     }
                 });
             });
@@ -217,3 +219,26 @@ const handleAdminUpload = (form, req, folderPath) => __awaiter(void 0, void 0, v
     return yield promise();
 });
 exports.handleAdminUpload = handleAdminUpload;
+const removeFileCloundinary = (fileName) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const promise = () => {
+            return new Promise((resolve, rejects) => {
+                cloud.uploader.destroy(("collections/" + fileName).toString(), (error, result) => {
+                    if (error) {
+                        rejects(error);
+                    }
+                    else {
+                        resolve(result.secure_url);
+                    }
+                });
+            });
+        };
+        const result = yield promise();
+        return result;
+    }
+    catch (error) {
+        console.log(error);
+        return null;
+    }
+});
+exports.removeFileCloundinary = removeFileCloundinary;

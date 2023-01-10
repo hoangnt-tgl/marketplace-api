@@ -9,6 +9,7 @@ const Schema = mongoose_1.default.Schema;
 const collectionInfo = new Schema({
     collectionId: { type: mongoose_1.default.Types.ObjectId, required: true },
     image: { type: String },
+    logo: { type: String },
     tittle: { type: String },
     totalNFT: { type: Number },
     availableNFT: { type: Number },
@@ -25,6 +26,7 @@ const collectionInfo = new Schema({
     ERC: { type: String, require: true },
     item: { type: Array, default: [] },
     content: { type: Object, required: true },
+    socialMedia: { type: Object, required: true },
     active: { type: Boolean },
 }, {
     timestamps: true,
