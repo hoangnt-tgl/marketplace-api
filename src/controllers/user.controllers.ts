@@ -61,13 +61,13 @@ const getUserProfileController = async (req: Request, res: Response) => {
 	}
 };
 const updateUserController = async (req: Request, res: Response) => {
-	const userAddress = req.params.userAddress;
-	const { avatar, background, username, email, social, bio } = req.body;
-	const avatarURL = avatar.data.result;
-	const backgroundURL = background.data.result;
-	console.log(avatarURL, backgroundURL);
 	try {
-		const user = await updateUserService(userAddress, avatarURL, backgroundURL, username, email, social, bio);
+		const userAddress = req.params.userAddress;
+		const { avatar, background, username, email, social, bio } = req.body;
+		// const avatarURL = avatar.data.result;
+		// const backgroundURL = background.data.result;
+		console.log(avatar, background);
+		const user = await updateUserService(userAddress, avatar, background, username, email, social, bio);
 		return res.status(200).json({ data: user });
 	} catch (error: any) {}
 	return res.status(500).json({ error: ERROR_RESPONSE[403] });
