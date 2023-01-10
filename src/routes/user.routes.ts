@@ -2,15 +2,11 @@ import express from "express";
 import {
 	createUserController,
 	updateUserController,
-	logoutController,
-	getUserProfileController,
 	uploadUserImageController,
-	getQueryUserController,
-	getSearchUserByIdController,
-	cookie
+	verificationEmailController
 } from "../controllers/user.controllers";
-import { checkUserExistMiddleware } from "../middlewares/checkUser.middlewares";
-import { checkSignatureValid, refreshSignature } from "../middlewares/checkSignature.middlewares";
+import { checkUserExist, checkUserAddressValid } from "../middlewares/checkUser.middlewares";
+import { refreshSignature } from "../middlewares/checkSignature.middlewares";
 
 const userRouter = express.Router();
 
@@ -18,31 +14,23 @@ const userRouter = express.Router();
  *				POST ROUTE					                *
  ********************************************/
 
-userRouter.post("/login", createUserController);
-//userRouter.post("/login", checkSignatureValid, checkUserMatchOnBlockchain, createUserController);
-//userRouter.post("/login", checkSignatureValid, createUserController);checkUserMatchOnBlockchain,
-
-userRouter.post("/refreshSignature", refreshSignature, createUserController);
-
-userRouter.post("/logout", checkUserExistMiddleware, logoutController);
-
+userRouter.post("/login", checkUserAddressValid, createUserController);
 userRouter.post("/upload", uploadUserImageController);
 
-userRouter.post("/query/pageSize/:pageSize/page/:pageId", getQueryUserController);
+// userRouter.post("/query/pageSize/:pageSize/page/:pageId", getQueryUserController);
 
-userRouter.get("/test1", cookie);
 
 /* ******************************************
  *				PUT ROUTE					                *
  ********************************************/
-// userRouter.put("/userAddress/:userAddress", checkSignatureValid, checkUserExistMiddleware, updateUserController);
+
+ userRouter.put("/userAddress/:userAddress", checkUserExist, updateUserController);
+
 
 /* ******************************************
  *				GET ROUTE					                *
  ********************************************/
-userRouter.get("/userAddress/:userAddress", getUserProfileController);
-userRouter.put("/userAddress/:userAddress", checkUserExistMiddleware, updateUserController);
-
-userRouter.get("/search/userId/:userId", getSearchUserByIdController);
+userRouter.get("/verify-email/:userAddress/:token", verificationEmailController);
+// userRouter.get("/search/userId/:userId", getSearchUserByIdController);
 
 export default userRouter;

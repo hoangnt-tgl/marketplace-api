@@ -1,5 +1,4 @@
 import { Types } from "mongoose";
-import { Item } from "./item.interfaces";
 import { ChainId } from "./other.interfaces";
 
 export interface Order {
@@ -34,7 +33,7 @@ export interface Order {
 	v: string;
 	type: number;
 	isDeleted: boolean;
-	itemInfo: Item;
+	// itemInfo: Item;
 }
 
 export interface ExtraOrderInfo extends Order {

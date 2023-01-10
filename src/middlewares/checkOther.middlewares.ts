@@ -1,9 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { SymbolToName } from "../constant/token.constant";
-
 import { ERROR_RESPONSE } from "../constant/response.constants";
-import { removeFileCloundinary } from "../services/uploadFile.service"
-
+import { BASE_URL } from "../constant/apiAptos.constant";
 
 
 const checkPageIdMiddleware = (req: Request, res: Response, next: NextFunction) => {
@@ -20,19 +18,21 @@ const checkPageIdMiddleware = (req: Request, res: Response, next: NextFunction) 
 	}
 };
 
-const checkPriceTypeMiddleware = async (req: Request, res: Response, next: NextFunction) => {
-	const priceType = req.body.priceType || req.body.from || req.params.from;
+
+
+const checkChainIdValid = async (req: Request, res: Response, next: NextFunction) => {
 	try {
-		if (!priceType) {
+		const chainId = req.params.chainId;
+		if (!chainId) {
 			return res.status(400).json({ error: ERROR_RESPONSE[400] });
 		}
-		if (!SymbolToName.hasOwnProperty(priceType.toUpperCase())) {
-			return res.status(403).json({ error: ERROR_RESPONSE[403] });
+		if (!Object.keys(BASE_URL).includes(chainId)) {
+			return res.status(404).json({ error: ERROR_RESPONSE[404] });
 		}
-		return next();
+		next();
 	} catch (error: any) {
 		return res.status(500).json({ error: ERROR_RESPONSE[500] });
 	}
 };
 
-export { checkPageIdMiddleware, checkPriceTypeMiddleware };
+export { checkPageIdMiddleware, checkChainIdValid };

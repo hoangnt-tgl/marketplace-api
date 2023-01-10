@@ -1,3 +1,5 @@
+import path from "path";
+
 export const DEFAULT_PICTURE: string =
 	"https://res.cloudinary.com/dbb2csh01/image/upload/v1673315233/meta-asset/background_gs0eqv.jpg";
 
@@ -37,3 +39,5 @@ export const FILE_EXTEND: { [key: string]: object } = {
 	avif: {},
 	json: {},
 };
+
+export const STATIC_FOLDER = path.join(__dirname, "../../");

@@ -2,26 +2,26 @@ import { Request, Response, NextFunction } from "express";
 import { findOneService, updateOneService } from "../services/model.services";
 import userModel from "../models/user.model";
 import { ERROR_RESPONSE } from "../constant/response.constants";
-import { removeFileCloundinary } from "../services/uploadFile.service"
+// import { removeFileCloundinary } from "../services/uploadFile.service"
 
-const checkSignatureValid = async (req: Request, res: Response, next: NextFunction) => {
-	try {
-		const userAddress = req.params.userAddress || req.body.userAddress;
-		const user = await findOneService(userModel, { userAddress: userAddress.toLowerCase() });
-		if (user && user.signature.length > 0) {
-			const isSignatureExpired = checkSignatureExpired(user);
-			if (isSignatureExpired) return res.status(401).json({ error: ERROR_RESPONSE[401] });
-			else return next();
-		} else return next();
-	} catch (error: any) {
-		if(req.body.fileBackgroundName){
-			removeFileCloundinary(req.body.fileBackgroundName.toString())
-			removeFileCloundinary(req.body.fileLogoName.toString())
-		}	
-		console.log(error);
-		return res.status(500).json({ error: ERROR_RESPONSE[500] });
-	}
-};
+// const checkSignatureValid = async (req: Request, res: Response, next: NextFunction) => {
+// 	try {
+// 		const userAddress = req.params.userAddress || req.body.userAddress;
+// 		const user = await findOneService(userModel, { userAddress: userAddress.toLowerCase() });
+// 		if (user && user.signature.length > 0) {
+// 			const isSignatureExpired = checkSignatureExpired(user);
+// 			if (isSignatureExpired) return res.status(401).json({ error: ERROR_RESPONSE[401] });
+// 			else return next();
+// 		} else return next();
+// 	} catch (error: any) {
+// 		if(req.body.fileBackgroundName){
+// 			removeFileCloundinary(req.body.fileBackgroundName.toString())
+// 			removeFileCloundinary(req.body.fileLogoName.toString())
+// 		}	
+// 		console.log(error);
+// 		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+// 	}
+// };
 
 const checkSignatureExpired = (user: any) => {
 	const dateToMS = 86400;
@@ -53,4 +53,4 @@ const refreshSignature = async (req: Request, res: Response, next: NextFunction)
 	}
 };
 
-export { checkSignatureValid, refreshSignature };
+export { refreshSignature };

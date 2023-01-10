@@ -6,10 +6,10 @@ const Schema = mongoose.Schema;
 // Custom type isINO Boolean to Number
 const collections = new Schema(
 	{
-		collectionAddress: { type: String, lowercase: true, required: true },
+		collectionAddress: { type: String, lowercase: true },
 		userAddress: { type: String, lowercase: true, required: true },
 		logo: { type: String, required: true },
-		background: { type: String, required: true },
+		background: { type: String },
 		collectionName: { type: String, required: true },
 		chainId: { type: Number, required: true },
 		collectionStandard: { type: String, default: DEFAULT_STANDARD },

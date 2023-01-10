@@ -12,7 +12,7 @@ const Schema = mongoose.Schema;
 
 const items = new Schema(
 	{
-		itemTokenId: { type: String, required: true },
+		itemTokenId: { type: String },
 		itemName: { type: String, required: true },
 		description: { type: String, default: "" },
 		itemMedia: { type: String, default: DEFAULT_PICTURE },
@@ -26,7 +26,7 @@ const items = new Schema(
 		status: { type: Number, default: DEFAULT_ITEM_STATUS },
 		offer_status: { type: Number, default: DEFAULT_OFFER_ITEM_STATUS },
 		price: { type: String, default: "0" },
-		priceType: { type: String, default: "eth" },
+		priceType: { type: String, default: "apt" },
 		collectionId: { type: mongoose.Types.ObjectId, required: true },
 		itemStandard: { type: String, default: DEFAULT_STANDARD },
 		chainId: { type: Number, required: true },

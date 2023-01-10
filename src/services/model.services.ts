@@ -3,8 +3,11 @@ import mongoose, { Types } from "mongoose";
 import { ListResponseAPI } from "../interfaces/responseData.interfaces";
 
 const createObjIdService = (id: string): Types.ObjectId => {
-	const objId = new mongoose.Types.ObjectId(id);
-	return objId;
+	try {
+		return new mongoose.Types.ObjectId(id);
+	} catch (error: any) {
+		throw new Error(error.message);
+	}
 };
 
 const createService = async (model: any, newObject: object) => {
