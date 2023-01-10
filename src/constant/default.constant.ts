@@ -1,8 +1,8 @@
 export const DEFAULT_PICTURE: string =
-	"https://bafybeih6mubtpixfmstrhshqepjx5jzrxdekkalzgs6joe2trshbwti4m4.ipfs.w3s.link/2023-01-09%2017.45.49.jpg";
+	"https://res.cloudinary.com/dbb2csh01/image/upload/v1673315233/meta-asset/background_gs0eqv.jpg";
 
 export const DEFAULT_AVATAR: string =
-	"https://bafybeielpszma7egbeavbev3fvxwtarkhgrjsg3xuugoj7ao4mrrwanwii.ipfs.w3s.link/Group%20146436.png";
+	"https://res.cloudinary.com/dbb2csh01/image/upload/v1673315223/meta-asset/avatar_default_jurfhx.png";
 
 export const DEFAULT_STANDARD: string = "ERC1155";
 
