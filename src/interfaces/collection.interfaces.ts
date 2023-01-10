@@ -1,6 +1,6 @@
 import { Types } from "mongoose";
 import { Item } from "./item.interfaces";
-import { ChainId, Query, Standard } from "./other.interfaces";
+import { ChainId, Query } from "./other.interfaces";
 import { User } from "./user.interfaces";
 export interface Collection {
 	_id: Types.ObjectId;
@@ -9,7 +9,7 @@ export interface Collection {
 	logo: string;
 	background: string;
 	collectionName: string;
-	collectionStandard: Standard;
+	collectionStandard: string;
 	royalties: number;
 	description: string;
 	volumeTrade: number;
@@ -59,7 +59,7 @@ export interface Collection1{
 	logo: string;
 	background: string;
 	collectionName: string;
-	collectionStandard: Standard;
+	collectionStandard: string;
 	royalties: number;
 	description: string;
 	volumeTrade: number;

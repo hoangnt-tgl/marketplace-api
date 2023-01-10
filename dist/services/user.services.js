@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUserName = exports.getAvatar = exports.getNonceUserService = exports.updateNonceUserService = exports.getSearchUserByIdService = exports.getAllUsersService = exports.getManyUserService = exports.getBlacklistService = exports.checkUserIsInBlacklistService = exports.removeUserFromBlacklistService = exports.addUserToBlacklistService = exports.getOneUserService = exports.updateUserService = exports.checkUserExistsService = exports.createUserIfNotExistService = void 0;
+exports.getUserNameService = exports.getAvatarService = exports.getNonceUserService = exports.updateNonceUserService = exports.getSearchUserByIdService = exports.getAllUsersService = exports.getManyUserService = exports.getBlacklistService = exports.checkUserIsInBlacklistService = exports.removeUserFromBlacklistService = exports.addUserToBlacklistService = exports.getOneUserService = exports.updateUserService = exports.checkUserExistsService = exports.createUserIfNotExistService = void 0;
 const user_model_1 = __importDefault(require("../models/user.model"));
 const model_services_1 = require("./model.services");
 const blacklist_model_1 = __importDefault(require("../models/blacklist.model"));
@@ -109,14 +109,14 @@ const getNonceUserService = (userAddress) => __awaiter(void 0, void 0, void 0, f
 });
 exports.getNonceUserService = getNonceUserService;
 /*-----------Get Avatar by User Address----------------*/
-const getAvatar = (userAddress) => __awaiter(void 0, void 0, void 0, function* () {
+const getAvatarService = (userAddress) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield (0, model_services_1.findOneService)(user_model_1.default, { userAddress: userAddress.toLowerCase() });
     return user.avatar.toString();
 });
-exports.getAvatar = getAvatar;
+exports.getAvatarService = getAvatarService;
 /*-----------Get User Name by User Address----------------*/
-const getUserName = (userAddress) => __awaiter(void 0, void 0, void 0, function* () {
+const getUserNameService = (userAddress) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield (0, model_services_1.findOneService)(user_model_1.default, { userAddress: userAddress.toLowerCase() });
     return user.username.toString();
 });
-exports.getUserName = getUserName;
+exports.getUserNameService = getUserNameService;

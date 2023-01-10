@@ -12,52 +12,26 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.cookie = exports.getSearchUserByIdController = exports.getQueryUserController = exports.uploadUserImageController = exports.getUserProfileController = exports.logoutController = exports.updateUserController = exports.createUserController = void 0;
+exports.cookie = exports.getSearchUserByIdController = exports.getQueryUserController = exports.uploadUserImageController = exports.logoutController = exports.updateUserController = exports.createUserController = void 0;
 const user_services_1 = require("../services/user.services");
 const model_services_1 = require("../services/model.services");
 const user_model_1 = __importDefault(require("../models/user.model"));
-const item_services_1 = require("../services/item.services");
+const model_services_2 = require("../services/model.services");
 const formidable_1 = __importDefault(require("formidable"));
 const uploadFile_service_1 = require("../services/uploadFile.service");
 const response_constants_1 = require("../constant/response.constants");
 const createUserController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    let { userAddress, signature } = req.body;
-    userAddress = userAddress.toLowerCase();
     try {
-        const user = yield (0, user_services_1.createUserIfNotExistService)(userAddress, signature);
-        const items = yield (0, item_services_1.getManyItemService)({ owner: userAddress }, "_id");
-        if (!items)
-            return res.status(403).json({ error: response_constants_1.ERROR_RESPONSE[403] });
-        const data = Object.assign(Object.assign({}, user), { totalItems: items.length });
-        const response = {
-            data,
-        };
-        return res.status(200).json(response);
+        let { userAddress, signature } = req.body;
+        userAddress = userAddress.toLowerCase();
+        const user = yield (0, model_services_2.createService)(user_model_1.default, { userAddress });
+        return res.status(200).json({ data: user });
     }
     catch (error) {
         return res.status(403).json({ error: response_constants_1.ERROR_RESPONSE[403] });
     }
 });
 exports.createUserController = createUserController;
-const createUserController1 = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        let { userAddress, signature, nonce } = req.body;
-        yield res.cookie('signature', signature, { domain: '.metaspacecy.com', path: '/', expires: new Date(Date.now() + 3600000) });
-        yield updateNonceUserController(userAddress, nonce);
-        const user = yield (0, user_services_1.createUserIfNotExistService)(userAddress, nonce);
-        const items = yield (0, item_services_1.getManyItemService)({ owner: userAddress }, "_id");
-        if (!items)
-            return res.status(403).json({ error: response_constants_1.ERROR_RESPONSE[403] });
-        const data = Object.assign(Object.assign({}, user), { totalItems: items.length });
-        const response = {
-            data,
-        };
-        return res.status(200).json(response);
-    }
-    catch (error) {
-        return res.status(403).json({ error: response_constants_1.ERROR_RESPONSE[403] });
-    }
-});
 const cookie = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     yield res.cookie('signature', "Done", { domain: 'http://192.168.0.128:3001', path: '/', httpOnly: true, expires: new Date(Date.now() + 3600000) });
     return res.status(200).json("Done");
@@ -77,17 +51,16 @@ exports.uploadUserImageController = uploadUserImageController;
 const updateUserController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const userAddress = req.params.userAddress;
     const { avatar, background, username, email, social, bio } = req.body;
+    const avatarURL = avatar.result;
+    const backgroundURL = background.result;
     try {
-        const user = yield (0, user_services_1.updateUserService)(userAddress, avatar, background, username, email, social, bio);
+        const user = yield (0, user_services_1.updateUserService)(userAddress, avatarURL, backgroundURL, username, email, social, bio);
         return res.status(200).json({ data: user });
     }
     catch (error) { }
     return res.status(500).json({ error: response_constants_1.ERROR_RESPONSE[403] });
 });
 exports.updateUserController = updateUserController;
-const updateNonceUserController = (userAddress, nonce) => __awaiter(void 0, void 0, void 0, function* () {
-    yield (0, user_services_1.updateNonceUserService)(userAddress, nonce);
-});
 const logoutController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { userAddress } = req.body;
@@ -102,21 +75,6 @@ const logoutController = (req, res) => __awaiter(void 0, void 0, void 0, functio
     }
 });
 exports.logoutController = logoutController;
-const getUserProfileController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const { userAddress } = req.params;
-        const user = yield (0, user_services_1.getOneUserService)(userAddress);
-        const totalItems = yield (0, item_services_1.getManyItemService)({ owner: userAddress }, "_id");
-        if (user)
-            res.status(200).json({ data: Object.assign(Object.assign({}, user), { totalItems: totalItems.length }) });
-        else
-            res.status(403).json({ message: response_constants_1.ERROR_RESPONSE[403] });
-    }
-    catch (error) {
-        return res.status(500).json({ error: response_constants_1.ERROR_RESPONSE[500] });
-    }
-});
-exports.getUserProfileController = getUserProfileController;
 const getQueryUserController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { pageSize, pageId } = req.params;
     try {

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { checkSlotExistService } from "../services/staking.services";
+
 import { NCA_TYPE, STAKING_OPTION } from "../constant/item.constant";
 import { ERROR_RESPONSE } from "../constant/response.constants";
 
@@ -17,19 +17,6 @@ const checkQueryStakingMiddleware = (req: Request, res: Response, next: NextFunc
 	return next();
 };
 
-const checkSlotStakingExistMiddleware = async (req: Request, res: Response, next: NextFunction) => {
-	const slotId = req.params.slotId;
-	if (!slotId) {
-		return res.status(400).json({ error: ERROR_RESPONSE[400] });
-	}
-	try {
-		const check = await checkSlotExistService(slotId);
-		if (check) {
-			return next();
-		}
-		return res.status(404).json({ error: ERROR_RESPONSE[404] });
-	} catch (error) {}
-	return res.status(500).json({ error: ERROR_RESPONSE[500] });
-};
 
-export { checkQueryStakingMiddleware, checkSlotStakingExistMiddleware };
+
+export { checkQueryStakingMiddleware };

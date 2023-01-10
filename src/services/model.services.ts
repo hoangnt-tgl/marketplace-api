@@ -8,9 +8,7 @@ const createObjIdService = (id: string): Types.ObjectId => {
 };
 
 const createService = async (model: any, newObject: object) => {
-	console.log(newObject);
 	const result = await new model(newObject);
-	console.log(result);
 	await result.save();
 	return result;
 };
@@ -34,7 +32,7 @@ const queryItemsOfModelInPageService = async (
 	properties: string = "",
 ): Promise<ListResponseAPI<any>> => {
 	objectQuery = removeUndefinedOfObj(objectQuery);
-	
+
 	const currentPage: number = Number(page);
 	const totalItems: number = await model.countDocuments(objectQuery);
 	const totalPages: number = Math.ceil(totalItems / pageSize);
@@ -73,8 +71,6 @@ const queryItemsOfModelInPageService = async (
 	};
 };
 
-
-
 const updateOneService = async (
 	model: any,
 	objectQuery: object,
@@ -86,7 +82,6 @@ const updateOneService = async (
 	const result = await model.findOneAndUpdate(objectQuery, objectUpdate, option);
 	return result;
 };
-
 
 const findOneService = async (model: any, objQuery: any, properties: string = "", hintObj: any = { _id: 1 }) => {
 	objQuery = removeUndefinedOfObj(objQuery);
@@ -161,5 +156,4 @@ export {
 	createObjIdService,
 	countByQueryService,
 	deleteManyService,
-	
 };

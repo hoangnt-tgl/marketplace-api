@@ -9,6 +9,7 @@ const changePrice = new Schema({
     pair: { type: String, default: "eth-usd", unique: true },
     priceFeedContract: { type: String, lowercase: true },
     result: { type: Number, default: 0 },
+    decimal: { type: Number, default: 18 },
 }, {
     timestamps: true,
 });

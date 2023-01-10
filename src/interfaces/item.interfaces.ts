@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { ChainId, Standard } from "./other.interfaces";
+import { ChainId } from "./other.interfaces";
 import { MongooseObjectId } from "./responseData.interfaces";
 import { User } from "./user.interfaces";
 import { Collection } from "./collection.interfaces";
@@ -25,7 +25,7 @@ export interface Item {
 	price: string;
 	priceType: string;
 	collectionId: Types.ObjectId;
-	itemStandard: Standard;
+	itemStandard: string;
 	isFreeze: boolean;
 	external_url: string;
 	ownerInfo: User[];
@@ -86,7 +86,7 @@ export interface Item1{
 	price: string;
 	priceType: string;
 	collectionId: Types.ObjectId;
-	itemStandard: Standard;
+	itemStandard: string;
 	isFreeze: boolean;
 	isINO: boolean;
 	external_url: string;

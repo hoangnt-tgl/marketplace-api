@@ -9,33 +9,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkPriceTypeMiddleware = exports.checkPageIdMiddleware = exports.checkChainIdMiddleware = void 0;
+exports.checkPriceTypeMiddleware = exports.checkPageIdMiddleware = void 0;
 const token_constant_1 = require("../constant/token.constant");
-const contract_constant_1 = require("../constant/contract.constant");
 const response_constants_1 = require("../constant/response.constants");
-const checkChainIdMiddleware = (req, res, next) => {
-    const chainId = req.params.chainId || req.body.chainId || req.query.chainId || req.body.network;
-    //console.log("chainId: ", chainId);
-    try {
-        if (!chainId) {
-            return res.status(404).json({ error: response_constants_1.ERROR_RESPONSE[404] });
-        }
-        if (Array.isArray(chainId)) {
-            for (const id of chainId) {
-                if (!contract_constant_1.MetaSpacecyAssetShared.hasOwnProperty(id)) {
-                    return res.status(403).json({ error: response_constants_1.ERROR_RESPONSE[403] });
-                }
-            }
-        }
-        if (!contract_constant_1.MetaSpacecyAssetShared.hasOwnProperty(chainId)) {
-            return res.status(403).json({ error: response_constants_1.ERROR_RESPONSE[403] });
-        }
-        return next();
-    }
-    catch (error) { }
-    return res.status(500).json({ error: response_constants_1.ERROR_RESPONSE[500] });
-};
-exports.checkChainIdMiddleware = checkChainIdMiddleware;
 const checkPageIdMiddleware = (req, res, next) => {
     const pageId = req.params.pageId || req.body.pageId;
     try {
