@@ -32,6 +32,7 @@ const items = new Schema(
 		chainId: { type: Number, required: true },
 		isFreeze: { type: Boolean, default: false },
 		isINO: { type: Number, default: 0 },
+		royalties: { type: Number, default: 0 },
 	},
 	{
 		timestamps: true,

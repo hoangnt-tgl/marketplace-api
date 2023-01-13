@@ -2,13 +2,7 @@ import { Request, Response } from "express";
 import { Item } from "../interfaces/item.interfaces";
 import ItemModel from "../models/item.model";
 import { ERROR_RESPONSE } from "../constant/response.constants";
-import {
-	findOneService,
-	updateOneService,
-	createService,
-	queryExistService,
-	createObjIdService,
-} from "../services/model.services";
+import { findOneService, updateOneService, createService, queryExistService } from "../services/model.services";
 
 const createItem = async (req: Request, res: Response) => {
 	try {
