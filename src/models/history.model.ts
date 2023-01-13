@@ -11,7 +11,7 @@ const historySchema = new mongoose.Schema(
 		from: { type: String, default: NULL_ADDRESS, lowercase: true },
 		to: { type: String, default: NULL_ADDRESS, lowercase: true },
 		price: { type: String, default: "0" },
-		priceType: { type: String, default: "eth" },
+		priceType: { type: String, default: "apt" },
 		quantity: { type: Number, default: 0 },
 		txHash: { type: String },
 		type: { type: Number },
