@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { Item } from "../interfaces/item.interfaces";
 import ItemModel from "../models/item.model";
 import { ERROR_RESPONSE } from "../constant/response.constants";
+import historyModel from "../models/history.model";
 import { findOneService, updateOneService, createService, queryExistService } from "../services/model.services";
 
 const createItem = async (req: Request, res: Response) => {
@@ -16,6 +17,15 @@ const createItem = async (req: Request, res: Response) => {
 		});
 		if (existItem) return res.status(403).json({ error: ERROR_RESPONSE[403] });
 		let itemInfo = await createService(ItemModel, newItem);
+		let newHistory = {
+			collectionId: newItem.collectionId,
+			itemId: itemInfo._id,
+			from: userAddress,
+			to: req.body.to,
+			type: 1,
+			txHash: req.body.txHash,
+		};
+		createService(historyModel, newHistory);
 		return res.status(200).json({ data: itemInfo });
 	} catch (error: any) {
 		return res.status(500).json({ error: ERROR_RESPONSE[500] });
