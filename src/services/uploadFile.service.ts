@@ -120,22 +120,22 @@ const checkUploadService = (result: any, checkImage = false) => {
 	return "";
 };
 
-// const uploadFileToIpfsService = async (file: any) => {
-// 	//---OLD
-// 	// const readFile: any = fs.readFileSync(file);
-// 	// const ipfs = await addIPFS(readFile);
-// 	// console.log("ipfs: ", ipfs)
-// 	// const url = "https://ipfs.io/ipfs/" + ipfs.path;
+const uploadFileToIpfsService = async (file: any) => {
+	//---OLD
+	// const readFile: any = fs.readFileSync(file);
+	// const ipfs = await addIPFS(readFile);
+	// console.log("ipfs: ", ipfs)
+	// const url = "https://ipfs.io/ipfs/" + ipfs.path;
 
-// 	// return { url: url, cid: ipfs.path };
+	// return { url: url, cid: ipfs.path };
 
-// 	//---NEW
-// 	const readFile: any = fs.createReadStream(file);
-// 	const ipfsHash = await pinataUploadIPFS(readFile);
-// 	const url = "https://ipfs.io/ipfs/" + ipfsHash;
+	//---NEW
+	const readFile: any = fs.createReadStream(file);
+	const ipfsHash = await pinataUploadIPFS(readFile);
+	const url = "https://ipfs.io/ipfs/" + ipfsHash;
 
-// 	return { url: url, cid: ipfsHash };
-// };
+	return { url: url, cid: ipfsHash };
+};
 
 const handlePromiseUpload = (form: IncomingForm, req: any, filename: string) => {
 	return new Promise((resolve: any, rejects: any) => {
@@ -247,7 +247,7 @@ const handlePromiseUpload = (form: IncomingForm, req: any, filename: string) => 
 
 export {
 	uploadImageToStorageService,
-	// uploadFileToIpfsService,
+	uploadFileToIpfsService,
 	uploadFileToStorageService,
 	checkUploadService,
 	handlePromiseUpload,

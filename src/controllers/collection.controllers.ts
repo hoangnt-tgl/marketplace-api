@@ -2,15 +2,7 @@ import { Request, Response } from "express";
 import { Collection } from "../interfaces/collection.interfaces";
 import collectionModel from "../models/collection.model";
 
-import {
-	createUserIfNotExistService,
-	getManyUserService,
-	getOneUserService,
-	getSearchUserByIdService,
-	updateUserService,
-	updateNonceUserService,
-} from "../services/user.services";
-import { findOneService, updateOneService, createService, queryExistService } from "../services/model.services";
+import { findOneService, updateOneService, createService, queryExistService, findManyService } from "../services/model.services";
 import userModel from "../models/user.model";
 
 import formidable from "formidable";
@@ -49,4 +41,15 @@ const getCollectionById = async (req: Request, res: Response) => {
 	}
 };
 
-export { createCollection, getCollectionById };
+const getCollectionByUserAddress = async (req: Request, res: Response) => {
+	try {
+		let { userAddress, chainId } = req.params;
+		userAddress = userAddress.toLowerCase();
+		let collectionInfo = await findManyService(collectionModel, { userAddress, chainId });
+		return res.status(200).json({ data: collectionInfo });
+	} catch (error: any) {
+		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+	}
+};
+
+export { createCollection, getCollectionById, getCollectionByUserAddress };
