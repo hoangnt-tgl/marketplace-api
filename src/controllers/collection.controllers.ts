@@ -1,10 +1,17 @@
 import { Request, Response } from "express";
 import { Collection } from "../interfaces/collection.interfaces";
 import collectionModel from "../models/collection.model";
+import itemModel from "../models/item.model";
 import historyModel from "../models/history.model";
 import { History } from "../interfaces/history.interfaces";
 
-import { findOneService, updateOneService, createService, queryExistService, findManyService } from "../services/model.services";
+import {
+	findOneService,
+	updateOneService,
+	createService,
+	queryExistService,
+	findManyService,
+} from "../services/model.services";
 import userModel from "../models/user.model";
 
 import formidable from "formidable";
@@ -12,6 +19,8 @@ import { handlePromiseUpload } from "../services/uploadFile.service";
 import { LoginUser, User } from "../interfaces/user.interfaces";
 import { ResponseAPI } from "../interfaces/responseData.interfaces";
 import { ERROR_RESPONSE } from "../constant/response.constants";
+import { promises } from "fs";
+import { async } from "@firebase/util";
 
 const createCollection = async (req: Request, res: Response) => {
 	try {
@@ -26,10 +35,8 @@ const createCollection = async (req: Request, res: Response) => {
 			collectionName: newCollection.collectionName,
 		});
 
-		
-		
 		if (existCollection) return res.status(403).json({ error: ERROR_RESPONSE[403] });
-		
+
 		let collectionInfo = await createService(collectionModel, newCollection);
 		let newHistory = {
 			collectionId: collectionInfo._id,
@@ -37,9 +44,9 @@ const createCollection = async (req: Request, res: Response) => {
 			to: req.body.to,
 			type: 1,
 			txHash: req.body.txHash,
-		}
-		createService(historyModel, newHistory)
-		
+		};
+		createService(historyModel, newHistory);
+
 		return res.status(200).json({ data: collectionInfo });
 	} catch (error: any) {
 		return res.status(500).json({ error: ERROR_RESPONSE[500] });
@@ -50,6 +57,9 @@ const getCollectionById = async (req: Request, res: Response) => {
 	try {
 		let { collectionId } = req.params;
 		let collectionInfo = await findOneService(collectionModel, { _id: collectionId });
+		if (!collectionInfo) return res.status(404).json({ error: ERROR_RESPONSE[404] });
+		let items = await findManyService(itemModel, { collectionId: collectionInfo._id });
+		collectionInfo.listItem = items;
 		return res.status(200).json({ data: collectionInfo });
 	} catch (error: any) {
 		return res.status(500).json({ error: ERROR_RESPONSE[500] });
@@ -67,4 +77,36 @@ const getCollectionByUserAddress = async (req: Request, res: Response) => {
 	}
 };
 
-export { createCollection, getCollectionById, getCollectionByUserAddress };
+const getCollectionByCategory = async (req: Request, res: Response) => {
+	try {
+		let { category, chainId } = req.params;
+		let collections = await findManyService(collectionModel, { category, chainId });
+		await Promise.all(
+			collections.map(async (collection: any, index: number) => {
+				let items = await findManyService(itemModel, { collectionId: collection._id });
+				collections[index].listItem = items;
+			}),
+		);
+		return res.status(200).json({ data: collections });
+	} catch (error: any) {
+		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+	}
+};
+
+const getAllCollection = async (req: Request, res: Response) => {
+	try {
+		let { chainId } = req.params;
+		let collections = await findManyService(collectionModel, { chainId });
+		await Promise.all(
+			collections.map(async (collection: any, index: number) => {
+				let items = await findManyService(itemModel, { collectionId: collection._id });
+				collections[index].listItem = items;
+			}),
+		);
+		return res.status(200).json({ data: collections });
+	} catch (error: any) {
+		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+	}
+};
+
+export { createCollection, getCollectionById, getCollectionByUserAddress, getCollectionByCategory, getAllCollection };
