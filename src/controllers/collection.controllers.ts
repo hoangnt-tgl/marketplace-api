@@ -71,6 +71,12 @@ const getCollectionByUserAddress = async (req: Request, res: Response) => {
 		let { userAddress, chainId } = req.params;
 		userAddress = userAddress.toLowerCase();
 		let collectionInfo = await findManyService(collectionModel, { userAddress, chainId });
+		await Promise.all(
+			collectionInfo.map(async (collection: any, index: number) => {
+				let items = await findManyService(itemModel, { collectionId: collection._id });
+				collectionInfo[index].listItem = items;
+			}),
+		);
 		return res.status(200).json({ data: collectionInfo });
 	} catch (error: any) {
 		return res.status(500).json({ error: ERROR_RESPONSE[500] });
@@ -109,4 +115,27 @@ const getAllCollection = async (req: Request, res: Response) => {
 	}
 };
 
-export { createCollection, getCollectionById, getCollectionByUserAddress, getCollectionByCategory, getAllCollection };
+const getTopCollection = async (req: Request, res: Response) => {
+	try {
+		let { chainId } = req.params;
+		const sortBy:
+			| "volumeTrade"
+			| "floorPrice"
+			| "volume24Hour"
+			| "volume7Days"
+			| "volume30Days"
+			| "percent24Hour"
+			| "percent7Days"
+			| "percent30Days" = req.body.sortBy;
+		const sortFrom: "asc" | "desc" = req.body.sortFrom;
+		const { pageSize, pageId } = req.params;
+		const { collectionName, collectionStandard, category }: Collection = req.body;
+		let collections = await findManyService(collectionModel, { chainId });
+	} catch (error: any) {
+		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+	}
+};
+
+
+
+export { createCollection, getCollectionById, getCollectionByUserAddress, getCollectionByCategory, getAllCollection, getTopCollection };

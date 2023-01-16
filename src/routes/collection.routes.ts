@@ -1,7 +1,14 @@
 import express from "express";
 
 import { checkUserExist } from "../middlewares/checkUser.middlewares";
-import { createCollection, getCollectionById, getCollectionByUserAddress, getCollectionByCategory,  getAllCollection} from "../controllers/collection.controllers";
+import {
+	createCollection,
+	getCollectionById,
+	getCollectionByUserAddress,
+	getCollectionByCategory,
+	getAllCollection,
+	getTopCollection,
+} from "../controllers/collection.controllers";
 import { checkChainIdValid } from "../middlewares/checkOther.middlewares";
 
 const collectionRouter = express.Router();
@@ -10,6 +17,7 @@ collectionRouter.post(
 	"/create/userAddress/:userAddress/chainId/:chainId",
 	checkUserExist,
 	checkChainIdValid,
+	
 	createCollection,
 );
 
@@ -26,4 +34,6 @@ collectionRouter.get("/category/:category/chainId/:chainId", getCollectionByCate
 collectionRouter.get("/get-all/chainId/:chainId", getAllCollection);
 
 collectionRouter.get("/get-info/collectionId/:collectionId", getCollectionById);
+
+collectionRouter.get("/top/chainId/:chainId/pageSize/:pageSize/page/:pageId", getTopCollection);
 export default collectionRouter;
