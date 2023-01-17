@@ -26,11 +26,12 @@ const sellItem = async (req: Request, res: Response) => {
 	try {
 		let { userAddress, chainId } = req.params;
 		userAddress = userAddress.toLowerCase();
-		let { price, quantity, itemId, to, txHash, collectionId, owner, collectionName, itemName } = req.body;
-		let collectionInfo = await findOneService(collectionModel, { collectionName, userAddress: owner, chainId });
+		let { price, quantity, itemId, to, txHash, collectionId, owner, collectionName, itemName, creator } = req.body;
+		let collectionInfo = await findOneService(collectionModel, { collectionName, userAddress: creator, chainId });
 		if (!collectionInfo) return res.status(404).json({ error: ERROR_RESPONSE[404] });
 		let itemInfo = await findOneService(itemModel, { itemName, collectionId: collectionInfo._id });
 		if (!itemInfo) return res.status(404).json({ error: ERROR_RESPONSE[404] });
+		await updateOneService(itemModel, { _id: itemInfo._id }, { price: price, status: 1 });
 		let newOrder = {
 			maker: userAddress,
 			chainId: chainId,
@@ -62,11 +63,15 @@ const buyItem = async (req: Request, res: Response) => {
 	try {
 		let { userAddress, chainId } = req.params;
 		userAddress = userAddress.toLowerCase();
-		let { quantity, itemId, to, txHash, collectionId, owner, collectionName, itemName, price } = req.body;
-		let collectionInfo = await findOneService(collectionModel, { collectionName, userAddress: owner, chainId });
+		let { quantity, itemId, to, txHash, collectionId, owner, collectionName, itemName, price, creator } = req.body;
+		let collectionInfo = await findOneService(collectionModel, { collectionName, userAddress: creator, chainId });
 		if (!collectionInfo) return res.status(404).json({ error: ERROR_RESPONSE[404] });
 		let itemInfo = await findOneService(itemModel, { itemName, collectionId: collectionInfo._id });
 		if (!itemInfo) return res.status(404).json({ error: ERROR_RESPONSE[404] });
+		let owners = itemInfo.owner.filter((item: any) => item !== owner);
+		owners.push(userAddress);
+		await updateOneService(itemModel, { _id: itemInfo._id }, { owner: owners, status: 0 });
+		updateOneService(collectionModel, { _id: collectionInfo._id }, { volumeTrade: collectionInfo.volumeTrade + price });
 		deleteOneService(orderModel, { itemId: itemInfo._id });
 		let newHistory = {
 			collectionId: collectionInfo._id,
