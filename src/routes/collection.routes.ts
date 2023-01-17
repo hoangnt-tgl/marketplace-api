@@ -17,7 +17,7 @@ collectionRouter.post(
 	"/create/userAddress/:userAddress/chainId/:chainId",
 	checkUserExist,
 	checkChainIdValid,
-	
+
 	createCollection,
 );
 
@@ -35,5 +35,5 @@ collectionRouter.get("/get-all/chainId/:chainId", getAllCollection);
 
 collectionRouter.get("/get-info/collectionId/:collectionId", getCollectionById);
 
-collectionRouter.get("/top/chainId/:chainId/pageSize/:pageSize/page/:pageId", getTopCollection);
+collectionRouter.post("/top/chainId/:chainId/pageSize/:pageSize/page/:pageId", getTopCollection);
 export default collectionRouter;

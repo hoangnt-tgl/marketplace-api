@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-// import { Item } from "./item.interfaces";
+import { Item } from "./item.interfaces";
 import { ChainId } from "./other.interfaces";
 
 export interface History {
@@ -14,7 +14,7 @@ export interface History {
     txHash: string;
     type: number;
     createdAt: Date;
-    // itemInfo: Item;
+    itemInfo: Item;
 }
 
 export interface ExtraHistory extends History {
@@ -23,7 +23,7 @@ export interface ExtraHistory extends History {
 }
 
 export interface HistoryTrade extends History {
-    chainId: ChainId;
+    chainId: string;
     usdPrice: number
 }
 

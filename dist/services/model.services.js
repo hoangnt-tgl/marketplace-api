@@ -16,8 +16,12 @@ exports.deleteManyService = exports.countByQueryService = exports.createObjIdSer
 const other_services_1 = require("./other.services");
 const mongoose_1 = __importDefault(require("mongoose"));
 const createObjIdService = (id) => {
-    const objId = new mongoose_1.default.Types.ObjectId(id);
-    return objId;
+    try {
+        return new mongoose_1.default.Types.ObjectId(id);
+    }
+    catch (error) {
+        throw new Error(error.message);
+    }
 };
 exports.createObjIdService = createObjIdService;
 const createService = (model, newObject) => __awaiter(void 0, void 0, void 0, function* () {

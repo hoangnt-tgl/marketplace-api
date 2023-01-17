@@ -1,5 +1,5 @@
 import transporter from "../config/mail.config";
-const EMAIL_ADDRESS = process.env.EMAIL_ADDRESS || "space.nvkien@gmail.com";
+const EMAIL_ADDRESS = process.env.EMAIL_ADDRESS || "space.tronghoang@gmail.com";
 export const sendMailService = async (to: string, subject: string, html: string) => {
 	const mailOptions = {
 		from: EMAIL_ADDRESS,
@@ -20,7 +20,7 @@ export const sendMailService = async (to: string, subject: string, html: string)
 			});
 		};
 		const result: any = await promise();
-        console.log(result);
+		console.log(result);
 		return result;
 	} catch (error) {
 		console.log(error);

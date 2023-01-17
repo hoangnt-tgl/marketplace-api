@@ -12,11 +12,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkUserExistMiddleware = void 0;
+exports.checkUserAddressValid = exports.checkUserExist = void 0;
 const model_services_1 = require("../services/model.services");
 const user_model_1 = __importDefault(require("../models/user.model"));
 const response_constants_1 = require("../constant/response.constants");
-const checkUserExistMiddleware = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+const checkUserExist = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let { userAddress } = req.params;
         userAddress = userAddress.toLowerCase();
@@ -30,9 +30,19 @@ const checkUserExistMiddleware = (req, res, next) => __awaiter(void 0, void 0, v
         return next();
     }
     catch (error) {
-        console.log(error);
         return res.status(500).json({ error: response_constants_1.ERROR_RESPONSE[500] });
     }
-    // return next();
 });
-exports.checkUserExistMiddleware = checkUserExistMiddleware;
+exports.checkUserExist = checkUserExist;
+const checkUserAddressValid = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let { userAddress } = req.body;
+        if (userAddress.length !== 66)
+            return res.status(400).json({ error: response_constants_1.ERROR_RESPONSE[400] });
+        next();
+    }
+    catch (error) {
+        return res.status(500).json({ error: response_constants_1.ERROR_RESPONSE[500] });
+    }
+});
+exports.checkUserAddressValid = checkUserAddressValid;

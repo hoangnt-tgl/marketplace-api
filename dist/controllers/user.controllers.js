@@ -12,19 +12,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.cookie = exports.getSearchUserByIdController = exports.getQueryUserController = exports.uploadUserImageController = exports.logoutController = exports.updateUserController = exports.createUserController = void 0;
+exports.verificationEmailController = exports.uploadUserImageController = exports.updateUserController = exports.createUserController = void 0;
 const user_services_1 = require("../services/user.services");
 const model_services_1 = require("../services/model.services");
 const user_model_1 = __importDefault(require("../models/user.model"));
-const model_services_2 = require("../services/model.services");
+const other_services_1 = require("../services/other.services");
 const formidable_1 = __importDefault(require("formidable"));
 const uploadFile_service_1 = require("../services/uploadFile.service");
 const response_constants_1 = require("../constant/response.constants");
+const mail_services_1 = require("../services/mail.services");
+const default_constant_1 = require("../constant/default.constant");
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const fs_1 = __importDefault(require("fs"));
 const createUserController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let { userAddress, signature } = req.body;
         userAddress = userAddress.toLowerCase();
-        const user = yield (0, model_services_2.createService)(user_model_1.default, { userAddress });
+        const user = yield (0, user_services_1.createUserIfNotExistService)(userAddress, signature);
         return res.status(200).json({ data: user });
     }
     catch (error) {
@@ -32,11 +36,6 @@ const createUserController = (req, res) => __awaiter(void 0, void 0, void 0, fun
     }
 });
 exports.createUserController = createUserController;
-const cookie = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    yield res.cookie('signature', "Done", { domain: 'http://192.168.0.128:3001', path: '/', httpOnly: true, expires: new Date(Date.now() + 3600000) });
-    return res.status(200).json("Done");
-});
-exports.cookie = cookie;
 const uploadUserImageController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const form = (0, formidable_1.default)();
@@ -49,32 +48,61 @@ const uploadUserImageController = (req, res) => __awaiter(void 0, void 0, void 0
 });
 exports.uploadUserImageController = uploadUserImageController;
 const updateUserController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const userAddress = req.params.userAddress;
-    const { avatar, background, username, email, social, bio } = req.body;
-    const avatarURL = avatar.result;
-    const backgroundURL = background.result;
+    var _a;
     try {
-        const user = yield (0, user_services_1.updateUserService)(userAddress, avatarURL, backgroundURL, username, email, social, bio);
+        const { userAddress } = req.params;
+        let data = req.body;
+        data = (0, other_services_1.removeUndefinedOfObj)(data);
+        const user = yield (0, model_services_1.updateOneService)(user_model_1.default, { userAddress }, data);
+        if (data.email && (!user.confirmEmail || user.email !== data.email)) {
+            let html = fs_1.default.readFileSync(`${default_constant_1.STATIC_FOLDER}/views/verificationEmail.html`, { encoding: "utf8" });
+            let token = jsonwebtoken_1.default.sign({ userAddress }, "secret", { expiresIn: "10m" });
+            token = encodeURIComponent(token);
+            let host = ((_a = req.headers.host) === null || _a === void 0 ? void 0 : _a.includes("localhost")) ? "http://" : "https://";
+            host += req.headers.host;
+            let link = `${host}/users/verify-email/${userAddress}/${token}`;
+            html = html.replace("{{link}}", link);
+            yield (0, mail_services_1.sendMailService)(data.email, "Verify your email", html);
+        }
         return res.status(200).json({ data: user });
     }
-    catch (error) { }
-    return res.status(500).json({ error: response_constants_1.ERROR_RESPONSE[403] });
+    catch (error) {
+        return res.status(500).json({ error: response_constants_1.ERROR_RESPONSE[403] });
+    }
 });
 exports.updateUserController = updateUserController;
-const logoutController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const verificationEmailController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { userAddress } = req.body;
+        let { userAddress, token } = req.params;
+        userAddress = userAddress.toLowerCase();
+        token = decodeURIComponent(token);
         const user = yield (0, model_services_1.findOneService)(user_model_1.default, { userAddress });
-        if (user.signature) {
-            yield (0, model_services_1.updateOneService)(user_model_1.default, { userAddress }, { signature: "" });
+        if (!user)
+            return res.status(403).json({ error: response_constants_1.ERROR_RESPONSE[403] });
+        const decoded = jsonwebtoken_1.default.verify(token, "secret");
+        if (decoded) {
+            yield (0, model_services_1.updateOneService)(user_model_1.default, { userAddress }, { confirmEmail: true });
+            return res.status(200).json({ message: "Verify email successfully" });
         }
-        return res.status(200).json({ message: "Logout successfully" });
+        return res.status(403).json({ error: response_constants_1.ERROR_RESPONSE[403] });
     }
     catch (error) {
         return res.status(500).json({ error: response_constants_1.ERROR_RESPONSE[500] });
     }
 });
-exports.logoutController = logoutController;
+exports.verificationEmailController = verificationEmailController;
+// const logoutController = async (req: Request, res: Response) => {
+// 	try {
+// 		const { userAddress } = req.body;
+// 		const user = await findOneService(userModel, { userAddress });
+// 		if (user.signature) {
+// 			await updateOneService(userModel, { userAddress }, { signature: "" });
+// 		}
+// 		return res.status(200).json({ message: "Logout successfully" });
+// 	} catch (error: any) {
+// 		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+// 	}
+// };
 const getQueryUserController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { pageSize, pageId } = req.params;
     try {
@@ -90,7 +118,6 @@ const getQueryUserController = (req, res) => __awaiter(void 0, void 0, void 0, f
         return res.status(500).json({ error: response_constants_1.ERROR_RESPONSE[500] });
     }
 });
-exports.getQueryUserController = getQueryUserController;
 const getSearchUserByIdController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { userId } = req.params;
     try {
@@ -105,4 +132,3 @@ const getSearchUserByIdController = (req, res) => __awaiter(void 0, void 0, void
         return res.status(500).json({ error: response_constants_1.ERROR_RESPONSE[500] });
     }
 });
-exports.getSearchUserByIdController = getSearchUserByIdController;

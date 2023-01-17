@@ -9,9 +9,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkPriceTypeMiddleware = exports.checkPageIdMiddleware = void 0;
-const token_constant_1 = require("../constant/token.constant");
+exports.checkChainIdValid = exports.checkPageIdMiddleware = void 0;
 const response_constants_1 = require("../constant/response.constants");
+const apiAptos_constant_1 = require("../constant/apiAptos.constant");
 const checkPageIdMiddleware = (req, res, next) => {
     const pageId = req.params.pageId || req.body.pageId;
     try {
@@ -25,19 +25,19 @@ const checkPageIdMiddleware = (req, res, next) => {
     }
 };
 exports.checkPageIdMiddleware = checkPageIdMiddleware;
-const checkPriceTypeMiddleware = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const priceType = req.body.priceType || req.body.from || req.params.from;
+const checkChainIdValid = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        if (!priceType) {
+        const chainId = req.params.chainId;
+        if (!chainId) {
             return res.status(400).json({ error: response_constants_1.ERROR_RESPONSE[400] });
         }
-        if (!token_constant_1.SymbolToName.hasOwnProperty(priceType.toUpperCase())) {
-            return res.status(403).json({ error: response_constants_1.ERROR_RESPONSE[403] });
+        if (!Object.keys(apiAptos_constant_1.BASE_URL).includes(chainId)) {
+            return res.status(404).json({ error: response_constants_1.ERROR_RESPONSE[404] });
         }
-        return next();
+        next();
     }
     catch (error) {
         return res.status(500).json({ error: response_constants_1.ERROR_RESPONSE[500] });
     }
 });
-exports.checkPriceTypeMiddleware = checkPriceTypeMiddleware;
+exports.checkChainIdValid = checkChainIdValid;

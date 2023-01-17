@@ -9,7 +9,7 @@ const collection_model_1 = __importDefault(require("./collection.model"));
 const user_model_1 = __importDefault(require("./user.model"));
 const Schema = mongoose_1.default.Schema;
 const items = new Schema({
-    itemTokenId: { type: String, required: true },
+    itemTokenId: { type: String },
     itemName: { type: String, required: true },
     description: { type: String, default: "" },
     itemMedia: { type: String, default: default_constant_1.DEFAULT_PICTURE },
@@ -23,12 +23,13 @@ const items = new Schema({
     status: { type: Number, default: default_constant_1.DEFAULT_ITEM_STATUS },
     offer_status: { type: Number, default: default_constant_1.DEFAULT_OFFER_ITEM_STATUS },
     price: { type: String, default: "0" },
-    priceType: { type: String, default: "eth" },
+    priceType: { type: String, default: "apt" },
     collectionId: { type: mongoose_1.default.Types.ObjectId, required: true },
     itemStandard: { type: String, default: default_constant_1.DEFAULT_STANDARD },
     chainId: { type: Number, required: true },
     isFreeze: { type: Boolean, default: false },
     isINO: { type: Number, default: 0 },
+    royalties: { type: Number, default: 0 },
 }, {
     timestamps: true,
     toObject: { virtuals: true },

@@ -21,7 +21,7 @@ import { ResponseAPI } from "../interfaces/responseData.interfaces";
 import { ERROR_RESPONSE } from "../constant/response.constants";
 import { promises } from "fs";
 import { async } from "@firebase/util";
-
+import { getTopCollectionService } from "../services/collection.services";
 const createCollection = async (req: Request, res: Response) => {
 	try {
 		let { userAddress, chainId } = req.params;
@@ -117,7 +117,6 @@ const getAllCollection = async (req: Request, res: Response) => {
 
 const getTopCollection = async (req: Request, res: Response) => {
 	try {
-		let { chainId } = req.params;
 		const sortBy:
 			| "volumeTrade"
 			| "floorPrice"
@@ -128,14 +127,34 @@ const getTopCollection = async (req: Request, res: Response) => {
 			| "percent7Days"
 			| "percent30Days" = req.body.sortBy;
 		const sortFrom: "asc" | "desc" = req.body.sortFrom;
-		const { pageSize, pageId } = req.params;
-		const { collectionName, collectionStandard, category }: Collection = req.body;
-		let collections = await findManyService(collectionModel, { chainId });
+		const { pageSize, pageId, chainId } = req.params;
+		const { userAddress, collectionName, collectionStandard, category }: Collection = req.body;
+		const objectQuery = {
+			userAddress,
+			collectionName,
+			collectionStandard,
+			category,
+		};
+		const collections = await getTopCollectionService(
+			sortBy,
+			sortFrom,
+			objectQuery,
+			Number(pageSize),
+			Number(pageId),
+			chainId,
+		);
+
+		return res.status(200).json(collections);
 	} catch (error: any) {
 		return res.status(500).json({ error: ERROR_RESPONSE[500] });
 	}
 };
 
-
-
-export { createCollection, getCollectionById, getCollectionByUserAddress, getCollectionByCategory, getAllCollection, getTopCollection };
+export {
+	createCollection,
+	getCollectionById,
+	getCollectionByUserAddress,
+	getCollectionByCategory,
+	getAllCollection,
+	getTopCollection,
+};
