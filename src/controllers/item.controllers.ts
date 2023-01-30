@@ -1,9 +1,17 @@
 import { Request, Response } from "express";
 import { Item } from "../interfaces/item.interfaces";
 import ItemModel from "../models/item.model";
+import interactionModel from "../models/interaction.model";
 import { ERROR_RESPONSE } from "../constant/response.constants";
 import historyModel from "../models/history.model";
-import { findOneService, updateOneService, createService, queryExistService } from "../services/model.services";
+import {
+	findOneService,
+	findManyService,
+	updateOneService,
+	createService,
+	queryExistService,
+	countByQueryService,
+} from "../services/model.services";
 
 const createItem = async (req: Request, res: Response) => {
 	try {
@@ -43,4 +51,21 @@ const getItemById = async (req: Request, res: Response) => {
 	}
 };
 
-export { createItem, getItemById };
+const getAllItem = async (req: Request, res: Response) => {
+	try {
+		let { chainId } = req.params;
+		let listItem = await findManyService(ItemModel, { chainId });
+		listItem = await Promise.all(
+			listItem.map((item: any) => {
+				let newItem = item;
+				newItem.countFav = countByQueryService(interactionModel, { itemId: item._id, state: true });
+				return newItem;
+			}),
+		);
+		listItem = listItem.sort((a: any, b: any) => b.countFav - a.countFav);
+		return res.status(200).json({ data: listItem });
+	} catch (error: any) {
+		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+	}
+};
+export { createItem, getItemById, getAllItem };

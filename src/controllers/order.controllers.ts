@@ -91,4 +91,33 @@ const buyItem = async (req: Request, res: Response) => {
 	}
 };
 
-export { buyItem, sellItem };
+const cancelOrder = async (req: Request, res: Response) => {
+	try {
+		let { userAddress, chainId } = req.params;
+		userAddress = userAddress.toLowerCase();
+		let { itemId, collectionId, owner, collectionName, itemName, creator, to, txHash, quantity } = req.body;
+		let collectionInfo = await findOneService(collectionModel, { collectionName, userAddress: creator, chainId });
+		if (!collectionInfo) return res.status(404).json({ error: ERROR_RESPONSE[404] });
+		let itemInfo = await findOneService(itemModel, { itemName, collectionId: collectionInfo._id });
+		if (!itemInfo) return res.status(404).json({ error: ERROR_RESPONSE[404] });
+		await updateOneService(itemModel, { _id: itemInfo._id }, { price: 0, status: 0 });
+		deleteOneService(orderModel, { itemId: itemInfo._id });
+		let newHistory = {
+			collectionId: collectionInfo._id,
+			itemId: itemInfo._id,
+			from: userAddress,
+			to: to,
+			quantity: quantity,
+			type: 5,
+			txHash: txHash,
+			price: 0,
+		};
+		createService(historyModel, newHistory);
+		return res.status(200).json({ message: "Cancel order success" });
+	} catch (error: any) {
+		console.log(error);
+		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+	}
+};
+
+export { buyItem, sellItem, cancelOrder };

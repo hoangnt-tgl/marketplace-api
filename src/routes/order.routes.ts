@@ -9,10 +9,16 @@ import {
 	getAllCollection,
 } from "../controllers/collection.controllers";
 import { checkChainIdValid } from "../middlewares/checkOther.middlewares";
-import { sellItem, buyItem } from "../controllers/order.controllers";
-
+import { sellItem, buyItem, cancelOrder } from "../controllers/order.controllers";
 const orderRouter = express.Router();
 
 orderRouter.post("/sell-item/userAddress/:userAddress/chainId/:chainId", checkUserExist, checkChainIdValid, sellItem);
 orderRouter.post("/buy-item/userAddress/:userAddress/chainId/:chainId", checkUserExist, checkChainIdValid, buyItem);
+orderRouter.post(
+	"/cancel-order/userAddress/:userAddress/chainId/:chainId",
+	checkUserExist,
+	checkChainIdValid,
+	cancelOrder,
+);
+
 export default orderRouter;

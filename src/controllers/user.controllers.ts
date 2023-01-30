@@ -124,7 +124,7 @@ const getSearchUserByIdController = async (req: Request, res: Response) => {
 const getUserProfileController = async (req: Request, res: Response) => {
 	try {
 		const { userAddress } = req.params;
-		const user = await userModel.findOne({ userAddress });
+		const user = await findOneService(userModel, { userAddress });
 		return res.status(200).json({ data: user });
 	} catch (error: any) {
 		return res.status(500).json({ error: ERROR_RESPONSE[500] });
