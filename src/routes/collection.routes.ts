@@ -17,7 +17,6 @@ collectionRouter.post(
 	"/create/userAddress/:userAddress/chainId/:chainId",
 	checkUserExist,
 	checkChainIdValid,
-
 	createCollection,
 );
 

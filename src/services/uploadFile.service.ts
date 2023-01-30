@@ -141,6 +141,7 @@ const handlePromiseUpload = (form: IncomingForm, req: any, filename: string) => 
 	return new Promise((resolve: any, rejects: any) => {
 		let fileURL;
 		form.parse(req, async (error: any, fields: any, files: any) => {
+			console.log("form.parse");
 			if (error) {
 				rejects(error);
 			} else {

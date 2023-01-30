@@ -17,5 +17,4 @@ itemRouter.post(
 
 itemRouter.get("/get-info/itemId/:itemId", getItemById);
 
-
 export default itemRouter;
