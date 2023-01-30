@@ -31,5 +31,8 @@ const getOneItemService = async (objQuery: any, properties: string = ""): Promis
 		.populate({ path: "creatorInfo", select: "userAddress avatar username" });
 	return item;
 };
+const checkItemExistsService = async (queryObj: object): Promise<boolean> => {
+	return await queryExistService(itemModel, queryObj);
+};
 
-export { getOneItemService };
+export { getOneItemService, checkItemExistsService};

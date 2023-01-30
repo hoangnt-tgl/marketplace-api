@@ -6,6 +6,7 @@ import collectionRouter from "./collection.routes";
 import itemRouter from "./item.routes";
 import orderRouter from "./order.routes";
 import testRouter from "./test.routes";
+import interactionRouter from "./interaction.routes";
 
 const APIRouter = express.Router();
 
@@ -15,6 +16,7 @@ APIRouter.use("/users", userRouter);
 APIRouter.use("/collection", collectionRouter);
 APIRouter.use("/item", itemRouter);
 APIRouter.use("/order", orderRouter);
+APIRouter.use("/interaction", interactionRouter)
 
 
 APIRouter.use("/test", testRouter);

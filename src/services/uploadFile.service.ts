@@ -244,6 +244,31 @@ const handlePromiseUpload = (form: IncomingForm, req: any, filename: string) => 
 // 		return null;
 // 	}
 // };
+const removeFileCloundinary = async(fileName: string, ) => {
+	try {
+		const promise = () => {
+			return new Promise((resolve: any, rejects: any) => {
+				cloud.uploader.destroy(
+					("collections/" + fileName).toString(),
+					
+					(error: any, result: any) => {
+						if (error) {
+							rejects(error);
+						} else {
+							resolve(result.secure_url);
+						}
+					},
+				);
+			});
+		};
+		const result = await promise();
+		return result;
+	} catch (error) {
+		console.log(error);
+		return null;
+	}
+}
+
 
 export {
 	uploadImageToStorageService,
@@ -253,5 +278,5 @@ export {
 	handlePromiseUpload,
 	// uploadRawFile,
 	// handleAdminUpload,
-	// removeFileCloundinary,
+	removeFileCloundinary,
 };
