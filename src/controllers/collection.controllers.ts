@@ -49,7 +49,7 @@ const createCollection = async (req: Request, res: Response) => {
 
 		return res.status(200).json({ data: collectionInfo });
 	} catch (error: any) {
-		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+		return res.status(500).json({ error: "Cannot Create Collection" });
 	}
 };
 
@@ -62,7 +62,7 @@ const getCollectionById = async (req: Request, res: Response) => {
 		collectionInfo.listItem = items;
 		return res.status(200).json({ data: collectionInfo });
 	} catch (error: any) {
-		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+		return res.status(500).json({ error: "Cannot get Collection" });
 	}
 };
 
@@ -79,7 +79,7 @@ const getCollectionByUserAddress = async (req: Request, res: Response) => {
 		);
 		return res.status(200).json({ data: collectionInfo });
 	} catch (error: any) {
-		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+		return res.status(500).json({ error: "Cannot get Collection" });
 	}
 };
 
@@ -95,7 +95,7 @@ const getCollectionByCategory = async (req: Request, res: Response) => {
 		);
 		return res.status(200).json({ data: collections });
 	} catch (error: any) {
-		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+		return res.status(500).json({ error: "Cannot get Collection" });
 	}
 };
 
@@ -111,7 +111,7 @@ const getAllCollection = async (req: Request, res: Response) => {
 		);
 		return res.status(200).json({ data: collections });
 	} catch (error: any) {
-		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+		return res.status(500).json({ error: "Cannot get all Collection" });
 	}
 };
 
@@ -146,7 +146,7 @@ const getTopCollection = async (req: Request, res: Response) => {
 
 		return res.status(200).json(collections);
 	} catch (error: any) {
-		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+		return res.status(500).json({ error: "Cannot get top Collection" });
 	}
 };
 

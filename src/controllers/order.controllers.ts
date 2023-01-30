@@ -55,7 +55,7 @@ const sellItem = async (req: Request, res: Response) => {
 		return res.status(200).json({ data: orderInfo });
 	} catch (error: any) {
 		console.log(error);
-		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+		return res.status(500).json({ error: "Cannot Sell Item" });
 	}
 };
 
@@ -87,7 +87,7 @@ const buyItem = async (req: Request, res: Response) => {
 		return res.status(200).json({ data: newHistory });
 	} catch (error: any) {
 		console.log(error);
-		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+		return res.status(500).json({ error: "Cannot buy Item" });
 	}
 };
 

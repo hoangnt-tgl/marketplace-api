@@ -28,7 +28,7 @@ const createItem = async (req: Request, res: Response) => {
 		createService(historyModel, newHistory);
 		return res.status(200).json({ data: itemInfo });
 	} catch (error: any) {
-		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+		return res.status(500).json({ error: "Cannot Create Item" });
 	}
 };
 
@@ -39,7 +39,7 @@ const getItemById = async (req: Request, res: Response) => {
 		if (!itemInfo) return res.status(404).json({ error: ERROR_RESPONSE[404] });
 		return res.status(200).json({ data: itemInfo });
 	} catch (error: any) {
-		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+		return res.status(500).json({ error: "Cannot get Item" });
 	}
 };
 

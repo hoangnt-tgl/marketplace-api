@@ -10,7 +10,7 @@ const checkSignatureValid = async (req: Request, res: Response, next: NextFuncti
 		const user = await findOneService(userModel, { userAddress: userAddress.toLowerCase() });
 		if (user && user.signature.length > 0) {
 			const isSignatureExpired = checkSignatureExpired(user);
-			if (isSignatureExpired) return res.status(401).json({ error: ERROR_RESPONSE[401] });
+			if (isSignatureExpired) return res.status(401).json({ error: "Signature expired" });
 			else return next();
 		} else return next();
 	} catch (error: any) {
@@ -19,7 +19,7 @@ const checkSignatureValid = async (req: Request, res: Response, next: NextFuncti
 			removeFileCloundinary(req.body.fileLogoName.toString())
 		}	
 		console.log(error);
-		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+		return res.status(500).json({ error: "Cannot check signature" });
 	}
 };
 
@@ -50,7 +50,7 @@ const refreshSignature = async (req: Request, res: Response, next: NextFunction)
 		return next();
 	} catch (error: any) {
 		console.log(error);
-		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+		return res.status(500).json({ error: "Cannot Refresh Signature" });
 	}
 };
 

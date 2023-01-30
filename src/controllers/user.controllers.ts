@@ -27,7 +27,7 @@ const createUserController = async (req: Request, res: Response) => {
 		const user: User = await createUserIfNotExistService(userAddress, signature);
 		return res.status(200).json({ data: user });
 	} catch (error: any) {
-		return res.status(403).json({ error: ERROR_RESPONSE[403] });
+		return res.status(403).json({ error: "Cannot Create User" });
 	}
 };
 
@@ -37,7 +37,7 @@ const uploadUserImageController = async (req: Request, res: Response) => {
 		const result = await handlePromiseUpload(form, req, "users");
 		return res.status(200).json({ data: result });
 	} catch (error: any) {
-		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+		return res.status(500).json({ error: "Cannot Upload Image" });
 	}
 };
 
@@ -59,7 +59,7 @@ const updateUserController = async (req: Request, res: Response) => {
 		}
 		return res.status(200).json({ data: user });
 	} catch (error: any) {
-		return res.status(500).json({ error: ERROR_RESPONSE[403] });
+		return res.status(500).json({ error: "Cannot Update User" });
 	}
 };
 
@@ -69,7 +69,7 @@ const verificationEmailController = async (req: Request, res: Response) => {
 		userAddress = userAddress.toLowerCase();
 		token = decodeURIComponent(token);
 		const user = await findOneService(userModel, { userAddress });
-		if (!user) return res.status(403).json({ error: ERROR_RESPONSE[403] });
+		if (!user) return res.status(403).json({ error: "Not Found User" });
 		const decoded = jwt.verify(token, "secret");
 		if (decoded) {
 			await updateOneService(userModel, { userAddress }, { confirmEmail: true });
@@ -77,7 +77,7 @@ const verificationEmailController = async (req: Request, res: Response) => {
 		}
 		return res.status(403).json({ error: ERROR_RESPONSE[403] });
 	} catch (error: any) {
-		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+		return res.status(500).json({ error: "Cannot Verify Email" });
 	}
 };
 
