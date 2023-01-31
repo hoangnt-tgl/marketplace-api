@@ -6,7 +6,10 @@ import {
 	getSearchUserByIdService,
 	updateUserService,
 	updateNonceUserService,
+	getAllUsersService,
+	topTraderService
 } from "../services/user.services";
+import { getManyHistoryService } from "../services/history.services";
 import { findOneService, updateOneService } from "../services/model.services";
 import userModel from "../models/user.model";
 import { createService } from "../services/model.services";
@@ -20,6 +23,7 @@ import { sendMailService } from "../services/mail.services";
 import { STATIC_FOLDER } from "../constant/default.constant";
 import jwt from "jsonwebtoken";
 import fs from "fs";
+import { async } from "@firebase/util";
 const createUserController = async (req: Request, res: Response) => {
 	try {
 		let { userAddress, signature } = req.body;
@@ -121,4 +125,18 @@ const getSearchUserByIdController = async (req: Request, res: Response) => {
 	}
 };
 
-export { createUserController, updateUserController, uploadUserImageController, verificationEmailController };
+export const topTraderController = async(req: Request, res: Response) => {
+	try {
+		const request = 
+			req.params.request || 
+			req.query.request;
+		const chainId = 
+			req.params.chainId ||
+			req.query.chainId;
+		return res.status(200).json(await topTraderService(Number(request), Number(chainId)));
+	} catch (error: any) {
+		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+	}
+} 
+
+export { createUserController, updateUserController, uploadUserImageController, verificationEmailController,};

@@ -3,7 +3,8 @@ import {
 	createUserController,
 	updateUserController,
 	uploadUserImageController,
-	verificationEmailController
+	verificationEmailController,
+	topTraderController
 } from "../controllers/user.controllers";
 import { checkUserExist, checkUserAddressValid } from "../middlewares/checkUser.middlewares";
 import { refreshSignature } from "../middlewares/checkSignature.middlewares";
@@ -31,6 +32,7 @@ userRouter.post("/upload", uploadUserImageController);
  *				GET ROUTE					                *
  ********************************************/
 userRouter.get("/verify-email/:userAddress/:token", verificationEmailController);
+userRouter.get("/toptrader", topTraderController);
 // userRouter.get("/search/userId/:userId", getSearchUserByIdController);
 
 export default userRouter;

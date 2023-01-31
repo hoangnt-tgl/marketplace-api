@@ -9,10 +9,12 @@ import {
 	queryItemsOfModelInPageService,
 	createObjIdService,
 } from "./model.services";
+import { getManyHistoryService } from "./history.services";
 import blacklistModel from "../models/blacklist.model";
 import { getSortObj } from "./other.services";
 import { BlackUser, User } from "../interfaces/user.interfaces";
 import { ListResponseAPI } from "../interfaces/responseData.interfaces";
+import { checkChainIdCollectionService } from "./collection.services";
 
 const createUserIfNotExistService = async (userAddress: string, nonce: string): Promise<User> => {
 	let user: User = await findOneService(userModel, { userAddress });
@@ -145,6 +147,40 @@ const getAvatarService = async (userAddress: string) => {
 const getUserNameService = async (userAddress: string) => {
 	const user: User = await findOneService(userModel, { userAddress: userAddress.toLowerCase() });
 	return user.username.toString();
+}
+
+export const topTraderService = async(request: Number, chainID: Number) => {
+		let trd = new Array<Object>
+		let data: {address: String, tradeUser: Number}[] = []; 
+		const user = await getAllUsersService();
+		await Promise.all(
+			user.map(async (user, index) => {
+				const date = new Date(new Date().setDate(new Date().getDate() - Number(request)));
+				const trade = await getManyHistoryService({from: user.userAddress, createdAt: {$gte: date}});
+				let sum = 0;
+				await Promise.all(
+					trade.map(async (trader) => {
+						const check = await checkChainIdCollectionService(String(trader.collectionId), chainID);
+						if(check === true){
+							sum= sum + Number(trader.price);	
+						}
+					})
+				)
+				const tradeOne = {
+					address: user.userAddress,
+					tradeUser: sum
+				}
+				data.push(tradeOne);
+			})
+		);
+		data.sort((a: any, b: any) => parseFloat(b.tradeUser.toString()) - parseFloat(a.tradeUser.toString()));
+		console.log(data);
+		data.map((data,index) => {
+			// if(index<10){
+			trd.push(data);
+			// }
+		})
+		return trd;
 }
 
 export {

@@ -21,7 +21,7 @@ import { ResponseAPI } from "../interfaces/responseData.interfaces";
 import { ERROR_RESPONSE } from "../constant/response.constants";
 import { promises } from "fs";
 import { async } from "@firebase/util";
-import { getTopCollectionService } from "../services/collection.services";
+import { getTopCollectionService, getNewCollectionService } from "../services/collection.services";
 const createCollection = async (req: Request, res: Response) => {
 	try {
 		let { userAddress, chainId } = req.params;
@@ -149,6 +149,15 @@ const getTopCollection = async (req: Request, res: Response) => {
 		return res.status(500).json({ error: "Cannot get top Collection" });
 	}
 };
+
+export const getNewCollectionController = async (req: Request, res: Response) => {
+	try {
+		const collection = await getNewCollectionService()
+		return res.status(200).json(collection);
+	} catch (error: any) {
+		return res.status(500).json({ error: "Cannot get new Collection" });
+	}
+}
 
 export {
 	createCollection,
