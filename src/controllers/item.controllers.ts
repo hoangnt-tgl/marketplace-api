@@ -13,6 +13,8 @@ import {
 	countByQueryService,
 } from "../services/model.services";
 
+import { getAllItemService } from "../services/item.services";
+
 const createItem = async (req: Request, res: Response) => {
 	try {
 		let { chainId, userAddress } = req.params;
@@ -54,11 +56,11 @@ const getItemById = async (req: Request, res: Response) => {
 const getAllItem = async (req: Request, res: Response) => {
 	try {
 		let { chainId } = req.params;
-		let listItem = await findManyService(ItemModel, { chainId });
+		let listItem = await getAllItemService({ chainId });
 		listItem = await Promise.all(
-			listItem.map((item: any) => {
+			listItem.map(async (item: any) => {
 				let newItem = item;
-				newItem.countFav = countByQueryService(interactionModel, { itemId: item._id, state: true });
+				newItem.countFav = await countByQueryService(interactionModel, { itemId: item._id, state: true });
 				return newItem;
 			}),
 		);

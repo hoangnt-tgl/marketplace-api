@@ -120,4 +120,16 @@ const cancelOrder = async (req: Request, res: Response) => {
 	}
 };
 
-export { buyItem, sellItem, cancelOrder };
+const getOrderSellItem = async (req: Request, res: Response) => {
+	try {
+		let { userAddress, chainId } = req.params;
+		userAddress = userAddress.toLowerCase();
+		let { itemId } = req.body;
+		let orders = await findOneService(orderModel, { isDeleted: false, itemId, chainId, type: 6 });
+		return res.status(200).json({ data: orders });
+	} catch (error: any) {
+		console.log(error);
+		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+	}
+};
+export { buyItem, sellItem, cancelOrder, getOrderSellItem };

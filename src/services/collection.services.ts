@@ -237,4 +237,10 @@ const getExtraInfoCollectionService = async (collectionId: Types.ObjectId): Prom
 	return extraCollection;
 };
 
-export { getTopCollectionService, writeTopCollectionService };
+const getListCollectionService = async (query: object) => {
+	const collections = await collectionModel.find(query).lean().populate("ownerInfo");
+	return collections;
+};
+
+
+export { getTopCollectionService, writeTopCollectionService, getListCollectionService };

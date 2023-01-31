@@ -1,6 +1,6 @@
 import express from "express";
 import { checkUserExist } from "../middlewares/checkUser.middlewares";
-import { createInteractionController } from "../controllers/interaction.controllers";
+import { createInteractionController, getListItemInteractionController } from "../controllers/interaction.controllers";
 const interactionRouter = express.Router();
 
 /* ******************************************
@@ -8,12 +8,13 @@ const interactionRouter = express.Router();
  ********************************************/
 
 interactionRouter.post(
-	"/create",
+	"/create/userAddress/:userAddress",
 	checkUserExist,
 	// checkSignLikeItemMiddleware,
 	createInteractionController,
 );
 
+interactionRouter.get("/userAddress/:userAddress", checkUserExist, getListItemInteractionController);
 /* ******************************************
  *				GET ROUTE					*
  ********************************************/

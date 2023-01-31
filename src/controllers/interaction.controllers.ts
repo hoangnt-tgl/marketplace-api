@@ -21,14 +21,15 @@ const createInteractionController = async (req: Request, res: Response) => {
 		userAddress = userAddress.toLowerCase();
 		let itemExist = await queryExistService(itemModel, { _id: itemId });
 		if (!itemExist) return res.status(404).json({ error: ERROR_RESPONSE[404] });
-		let interactionInfo = findOneService(interactionModel, { itemId, userAddress });
-		if (interactionInfo) {
-			updateOneService(interactionInfo, { itemId, userAddress }, { state });
+		let interactionExist = await queryExistService(interactionModel, { itemId, userAddress });
+		if (interactionExist) {
+			await updateOneService(interactionModel, { itemId, userAddress }, { state });
 		} else {
-			createService(interactionModel, { itemId, userAddress, state });
+			await createService(interactionModel, { itemId, userAddress, state });
 		}
-		return res.status(200).json();
+		return res.status(200).json("Like item success");
 	} catch (error: any) {
+		console.log(error);
 		return res.status(500).json({ error: ERROR_RESPONSE[500] });
 	}
 };
