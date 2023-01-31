@@ -13,7 +13,7 @@ import {
 	countByQueryService,
 } from "../services/model.services";
 
-import { getAllItemService } from "../services/item.services";
+import { getAllItemService, getOneItemService } from "../services/item.services";
 
 const createItem = async (req: Request, res: Response) => {
 	try {
@@ -21,6 +21,7 @@ const createItem = async (req: Request, res: Response) => {
 		let newItem: Item = req.body;
 		newItem.creator = userAddress;
 		newItem.chainId = chainId;
+		newItem.owner = [userAddress];
 		const existItem = await queryExistService(ItemModel, {
 			collectionId: newItem.collectionId,
 			itemName: newItem.itemName,
@@ -45,7 +46,7 @@ const createItem = async (req: Request, res: Response) => {
 const getItemById = async (req: Request, res: Response) => {
 	try {
 		let { itemId } = req.params;
-		let itemInfo = await findOneService(ItemModel, { _id: itemId });
+		let itemInfo = await getOneItemService({ _id: itemId });
 		if (!itemInfo) return res.status(404).json({ error: ERROR_RESPONSE[404] });
 		return res.status(200).json({ data: itemInfo });
 	} catch (error: any) {

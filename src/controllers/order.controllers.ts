@@ -21,17 +21,23 @@ import { handlePromiseUpload } from "../services/uploadFile.service";
 import { LoginUser, User } from "../interfaces/user.interfaces";
 import { ResponseAPI } from "../interfaces/responseData.interfaces";
 import { ERROR_RESPONSE } from "../constant/response.constants";
+import { getBalanceTokenForAccount } from "../services/aptos.services";
 
 const sellItem = async (req: Request, res: Response) => {
 	try {
 		let { userAddress, chainId } = req.params;
 		userAddress = userAddress.toLowerCase();
-		let { price, quantity, itemId, to, txHash, collectionId, owner, collectionName, itemName, creator } = req.body;
+		let { price, quantity, itemId, to, txHash, collectionId, collectionName, itemName, creator } = req.body;
 		let collectionInfo = await findOneService(collectionModel, { collectionName, userAddress: creator, chainId });
 		if (!collectionInfo) return res.status(404).json({ error: ERROR_RESPONSE[404] });
 		let itemInfo = await findOneService(itemModel, { itemName, collectionId: collectionInfo._id });
 		if (!itemInfo) return res.status(404).json({ error: ERROR_RESPONSE[404] });
-		await updateOneService(itemModel, { _id: itemInfo._id }, { price: price, status: 1 });
+		let balanceOwner = await getBalanceTokenForAccount(userAddress, creator, collectionName, itemName, chainId);
+		let owners = itemInfo.owner;
+		if (balanceOwner === 0) {
+			owners = itemInfo.owner.filter((item: any) => item !== userAddress);
+		}
+		await updateOneService(itemModel, { _id: itemInfo._id }, { price: price, status: 1, owner: owners });
 		let newOrder = {
 			maker: userAddress,
 			chainId: chainId,
@@ -68,10 +74,14 @@ const buyItem = async (req: Request, res: Response) => {
 		if (!collectionInfo) return res.status(404).json({ error: ERROR_RESPONSE[404] });
 		let itemInfo = await findOneService(itemModel, { itemName, collectionId: collectionInfo._id });
 		if (!itemInfo) return res.status(404).json({ error: ERROR_RESPONSE[404] });
-		let owners = itemInfo.owner.filter((item: any) => item !== owner);
+		updateOneService(collectionModel, { _id: collectionInfo._id }, { volumeTrade: collectionInfo.volumeTrade + price });
+		let balanceOwner = await getBalanceTokenForAccount(owner, creator, collectionName, itemName, chainId);
+		let owners = itemInfo.owner;
+		if (balanceOwner === 0) {
+			owners = itemInfo.owner.filter((item: any) => item !== owner);
+		}
 		owners.push(userAddress);
 		await updateOneService(itemModel, { _id: itemInfo._id }, { owner: owners, status: 0 });
-		updateOneService(collectionModel, { _id: collectionInfo._id }, { volumeTrade: collectionInfo.volumeTrade + price });
 		deleteOneService(orderModel, { itemId: itemInfo._id });
 		let newHistory = {
 			collectionId: collectionInfo._id,
