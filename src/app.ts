@@ -11,6 +11,7 @@ import APIRouter from "./routes/api.routes";
 import os from "os";
 import http from 'http';
 import { Server } from 'socket.io';
+import cookieParser from "cookie-parser";
 
 (<any>process.env.UV_THREADPOOL_SIZE) = os.cpus().length;
 
@@ -31,6 +32,7 @@ export const runningApp = async () => {
 	app.use(express.urlencoded({ limit: "5000mb", extended: true, parameterLimit: 500000 }));
 	app.use(express.json({limit: '5000mb'}));
 	app.use(cors(corsOptions));
+	app.use(cookieParser())
 	app.use(logger("dev"));
 
 	app.use("/", APIRouter);

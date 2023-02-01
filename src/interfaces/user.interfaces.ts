@@ -6,14 +6,14 @@ export interface User {
 	email: string;
 	social: string;
 	bio: string;
-	signature_expired_time: number;
+	nonce: number;
 }
 
 export interface LoginUser extends User {
 	totalItems: number;
 }
 
-export interface UserAvatar extends User{
+export interface UserAvatar extends User {
 	avatar: string;
 }
 

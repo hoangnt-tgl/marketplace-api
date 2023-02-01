@@ -3,10 +3,10 @@ import {
 	createUserController,
 	updateUserController,
 	uploadUserImageController,
-	verificationEmailController
+	verificationEmailController,
+	logoutUserController,
 } from "../controllers/user.controllers";
-import { checkUserExist, checkUserAddressValid } from "../middlewares/checkUser.middlewares";
-import { refreshSignature } from "../middlewares/checkSignature.middlewares";
+import { checkUserExist, checkUserAddressValid, checkUserAuthen } from "../middlewares/checkUser.middlewares";
 
 const userRouter = express.Router();
 
@@ -14,18 +14,18 @@ const userRouter = express.Router();
  *				POST ROUTE					                *
  ********************************************/
 
-userRouter.post("/login", checkUserAddressValid, createUserController);
+userRouter.post("/login", checkUserAddressValid, checkUserAuthen, createUserController);
+userRouter.post("/logout", checkUserAddressValid, checkUserAuthen, logoutUserController);
 userRouter.post("/upload", uploadUserImageController);
 
+userRouter.get("/:userAddress", checkUserAuthen, async (req, res) => res.send("oke"));
 // userRouter.post("/query/pageSize/:pageSize/page/:pageId", getQueryUserController);
-
 
 /* ******************************************
  *				PUT ROUTE					                *
  ********************************************/
 
- userRouter.put("/userAddress/:userAddress", checkUserExist, updateUserController);
-
+userRouter.put("/userAddress/:userAddress", checkUserExist, updateUserController);
 
 /* ******************************************
  *				GET ROUTE					                *

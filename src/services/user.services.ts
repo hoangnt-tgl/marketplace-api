@@ -1,4 +1,5 @@
 import userModel from "../models/user.model";
+import nacl from "tweetnacl";
 import {
 	createService,
 	findOneService,
@@ -14,10 +15,12 @@ import { getSortObj } from "./other.services";
 import { BlackUser, User } from "../interfaces/user.interfaces";
 import { ListResponseAPI } from "../interfaces/responseData.interfaces";
 
-const createUserIfNotExistService = async (userAddress: string, nonce: string): Promise<User> => {
+const createUserIfNotExistService = async (userAddress: string, nonce: number): Promise<User> => {
 	let user: User = await findOneService(userModel, { userAddress });
 	if (!user) {
 		user = await createService(userModel, { userAddress, nonce });
+	} else {
+		await updateOneService(userModel, { userAddress }, { nonce });
 	}
 	return user;
 };
@@ -29,9 +32,6 @@ const checkUserExistsService = async (userAddress: string): Promise<boolean> => 
 
 const getOneUserService = async (userAddress: string): Promise<User> => {
 	let user: User = await findOneService(userModel, { userAddress: userAddress.toLowerCase() });
-	if (!user) {
-		user = await createService(userModel, { userAddress });
-	}
 	return user;
 };
 
@@ -41,12 +41,10 @@ const getManyUserService = async (
 	pageSize: number,
 	pageId: number,
 ): Promise<ListResponseAPI<User>> => {
-	const userAddress:any = text ? { userAddress: { $regex: text, $options: "i" } } : undefined;
-	const username:any = text ? { username: { $regex: text, $options: "i" } } : undefined;
-	
-	const objQuery = (userAddress && username) ? { $or: [userAddress, username] } : {};
-	
-	
+	const userAddress: any = text ? { userAddress: { $regex: text, $options: "i" } } : undefined;
+	const username: any = text ? { username: { $regex: text, $options: "i" } } : undefined;
+
+	const objQuery = userAddress && username ? { $or: [userAddress, username] } : {};
 
 	let returnUser: ListResponseAPI<User> = await queryItemsOfModelInPageService(
 		userModel,
@@ -54,18 +52,11 @@ const getManyUserService = async (
 		pageId,
 		pageSize,
 		getSortObj(sort),
-		"userAddress"
-		
+		"userAddress",
 	);
 
 	return returnUser;
 };
-const updateNonceUserService = async(userAddress: string, nonce: string) => {
-	let user: User = await findOneService(userModel, { userAddress: userAddress.toLowerCase() });
-	if (user) {
-		user = await updateOneService(userModel,{userAddress},{nonce},{new: true})	
-	}
-}
 
 const updateUserService = async (
 	userAddress: string,
@@ -97,26 +88,6 @@ const updateUserService = async (
 	return user;
 };
 
-const addUserToBlacklistService = async (address: string): Promise<BlackUser> => {
-	const user: BlackUser = await createService(blacklistModel, { userAddress: address });
-	return user;
-};
-
-const removeUserFromBlacklistService = async (address: string): Promise<BlackUser> => {
-	const user: BlackUser = await deleteOneService(blacklistModel, { userAddress: address });
-	return user;
-};
-
-const getBlacklistService = async (): Promise<BlackUser[]> => {
-	const users: BlackUser[] = await findManyService(blacklistModel, {}, "userAddress");
-	return users;
-};
-
-const checkUserIsInBlacklistService = async (userAddress: string): Promise<boolean> => {
-	const user: BlackUser = await findOneService(blacklistModel, { userAddress });
-	return user ? true : false;
-};
-
 const getAllUsersService = async () => {
 	const usersInBlackList = await userModel.find().populate("userInBlackList").lean();
 	return usersInBlackList;
@@ -127,41 +98,23 @@ const getSearchUserByIdService = async (userId: string): Promise<User> => {
 	return user;
 };
 
-/*-----------Get Nonce Login using Cookie----------------*/
+const verifySignUserService = (userAddress: string, publicKey: string, nonce: number, signature: string): Boolean => {
+	const fullMessage = `APTOS\naddress: ${userAddress}\napplication: ${process.env.DOMAIN}\nnonce: ${nonce}\nmessage: Login Marketplace`;
 
-const getNonceUserService = async (userAddress: string) => {
-	let user = await findOneService(userModel, { userAddress: userAddress.toLowerCase() });
-	if (!user) {
-		user = await createService(userModel, { userAddress });
-	}
-	return user;
-}
-/*-----------Get Avatar by User Address----------------*/
-const getAvatarService = async (userAddress: string) => {
-	const user: User = await findOneService(userModel, { userAddress: userAddress.toLowerCase() });
-	return user.avatar.toString();
-}
-/*-----------Get User Name by User Address----------------*/
-const getUserNameService = async (userAddress: string) => {
-	const user: User = await findOneService(userModel, { userAddress: userAddress.toLowerCase() });
-	return user.username.toString();
-}
+	return nacl.sign.detached.verify(
+		Buffer.from(fullMessage),
+		Buffer.from(signature.slice(2), "hex"),
+		Buffer.from(publicKey.slice(2), "hex"),
+	);
+};
 
 export {
 	createUserIfNotExistService,
 	checkUserExistsService,
 	updateUserService,
 	getOneUserService,
-	addUserToBlacklistService,
-	removeUserFromBlacklistService,
-	checkUserIsInBlacklistService,
-	getBlacklistService,
 	getManyUserService,
 	getAllUsersService,
 	getSearchUserByIdService,
-/*-----------Add Service----------------*/
-	updateNonceUserService,
-	getNonceUserService,
-	getAvatarService,
-	getUserNameService,
+	verifySignUserService,
 };

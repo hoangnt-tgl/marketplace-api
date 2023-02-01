@@ -5,7 +5,6 @@ import {
 	getOneUserService,
 	getSearchUserByIdService,
 	updateUserService,
-	updateNonceUserService,
 } from "../services/user.services";
 import { findOneService, updateOneService } from "../services/model.services";
 import userModel from "../models/user.model";
@@ -22,10 +21,29 @@ import jwt from "jsonwebtoken";
 import fs from "fs";
 const createUserController = async (req: Request, res: Response) => {
 	try {
-		let { userAddress, signature } = req.body;
+		let { userAddress, signature, publicKey, nonce, isFirst } = req.body;
 		userAddress = userAddress.toLowerCase();
-		const user: User = await createUserIfNotExistService(userAddress, signature);
-		return res.status(200).json({ data: user });
+
+		if (isFirst) {
+			const user: User = await createUserIfNotExistService(userAddress, nonce);
+			const { nonce: _, ...data } = user;
+
+			res.cookie("signature", signature, {
+				httpOnly: true,
+				domain: undefined,
+				maxAge: 86400 * 1000,
+			});
+			res.cookie("publicKey", publicKey, {
+				httpOnly: true,
+				domain: undefined,
+				maxAge: 86400 * 1000,
+			});
+			return res.status(200).json({ data: data });
+		} else {
+			const user: User = await getOneUserService(userAddress);
+			const { nonce: _, ...data } = user;
+			return res.status(200).json({ data: data });
+		}
 	} catch (error: any) {
 		return res.status(403).json({ error: ERROR_RESPONSE[403] });
 	}
@@ -50,7 +68,7 @@ const updateUserController = async (req: Request, res: Response) => {
 		if (data.email && (!user.confirmEmail || user.email !== data.email)) {
 			let html = fs.readFileSync(`${STATIC_FOLDER}/views/verificationEmail.html`, { encoding: "utf8" });
 			let token = jwt.sign({ userAddress }, "secret", { expiresIn: "10m" });
-			token = encodeURIComponent(token)
+			token = encodeURIComponent(token);
 			let host = req.headers.host?.includes("localhost") ? "http://" : "https://";
 			host += req.headers.host;
 			let link = `${host}/users/verify-email/${userAddress}/${token}`;
@@ -81,18 +99,17 @@ const verificationEmailController = async (req: Request, res: Response) => {
 	}
 };
 
-// const logoutController = async (req: Request, res: Response) => {
-// 	try {
-// 		const { userAddress } = req.body;
-// 		const user = await findOneService(userModel, { userAddress });
-// 		if (user.signature) {
-// 			await updateOneService(userModel, { userAddress }, { signature: "" });
-// 		}
-// 		return res.status(200).json({ message: "Logout successfully" });
-// 	} catch (error: any) {
-// 		return res.status(500).json({ error: ERROR_RESPONSE[500] });
-// 	}
-// };
+const logoutUserController = async (req: Request, res: Response) => {
+	try {
+		const { userAddress } = req.body;
+		await updateOneService(userModel, { userAddress }, { nonce: null });
+		res.clearCookie("signature").clearCookie("publicKey");
+		return res.status(200).json({ message: "Logout successfully" });
+	} catch (error: any) {
+		console.log("error: ", error);
+		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+	}
+};
 
 const getQueryUserController = async (req: Request, res: Response) => {
 	const { pageSize, pageId } = req.params;
@@ -121,4 +138,10 @@ const getSearchUserByIdController = async (req: Request, res: Response) => {
 	}
 };
 
-export { createUserController, updateUserController, uploadUserImageController, verificationEmailController };
+export {
+	createUserController,
+	updateUserController,
+	uploadUserImageController,
+	verificationEmailController,
+	logoutUserController,
+};
