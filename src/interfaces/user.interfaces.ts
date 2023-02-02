@@ -6,7 +6,7 @@ export interface User {
 	email: string;
 	social: string;
 	bio: string;
-	nonce: number;
+	nonce: string;
 }
 
 export interface LoginUser extends User {

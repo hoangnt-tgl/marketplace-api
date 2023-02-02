@@ -1,5 +1,6 @@
 import userModel from "../models/user.model";
 import nacl from "tweetnacl";
+import sha256 from "sha256";
 import {
 	createService,
 	findOneService,
@@ -15,7 +16,7 @@ import { getSortObj } from "./other.services";
 import { BlackUser, User } from "../interfaces/user.interfaces";
 import { ListResponseAPI } from "../interfaces/responseData.interfaces";
 
-const createUserIfNotExistService = async (userAddress: string, nonce: number): Promise<User> => {
+const createUserIfNotExistService = async (userAddress: string, nonce: string): Promise<User> => {
 	let user: User = await findOneService(userModel, { userAddress });
 	if (!user) {
 		user = await createService(userModel, { userAddress, nonce });
@@ -98,13 +99,15 @@ const getSearchUserByIdService = async (userId: string): Promise<User> => {
 	return user;
 };
 
-const verifySignUserService = (userAddress: string, publicKey: string, nonce: number, signature: string): Boolean => {
-	const fullMessage = `APTOS\naddress: ${userAddress}\napplication: ${process.env.DOMAIN}\nnonce: ${nonce}\nmessage: Login Marketplace`;
-
+const verifySignUserService = (publicKey: string, nonce: string, signature: string): Boolean => {
+	const fullMessage = `APTOS\napplication: ${process.env.DOMAIN}\nmessage: ${sha256(publicKey)}\nnonce: ${nonce}`;
+	console.log("fullMessage: ", fullMessage);
+	//const msg =
+	//"APTOS\napplication: localhost.com:3000\nmessage: 5c8c457d0c8da479a272855f7cdf16249b77f03620a005349a686eef892d3a22\nnonce: 1234";
 	return nacl.sign.detached.verify(
 		Buffer.from(fullMessage),
-		Buffer.from(signature.slice(2), "hex"),
-		Buffer.from(publicKey.slice(2), "hex"),
+		Buffer.from(signature, "hex"),
+		Buffer.from(publicKey, "hex"),
 	);
 };
 

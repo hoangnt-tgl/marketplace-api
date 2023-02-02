@@ -14,7 +14,7 @@ const users = new Schema(
 		social: { type: String, default: "" },
 		bio: { type: String, default: "Introduce yourself to everyone" },
 		confirmEmail: { type: Boolean, default: false },
-		nonce: { type: Number, require: true },
+		nonce: { type: String, require: true },
 	},
 	{
 		timestamps: true,

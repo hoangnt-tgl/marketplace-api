@@ -30,14 +30,15 @@ export const checkUserAuthen = async (req: Request, res: Response, next: NextFun
 			const userExist = await checkUserExistsService(userAddress);
 			if (userExist) {
 				const user = await getOneUserService(userAddress);
-				const isValid = verifySignUserService(userAddress, cookies.publicKey, user.nonce, cookies.signature);
+				const isValid = verifySignUserService(cookies.publicKey, user.nonce, cookies.signature);
 				if (isValid) {
 					req.body.isFirst = false;
 					return next();
 				}
 			}
 		} else {
-			const isValid = verifySignUserService(userAddress, publicKey, nonce, signature);
+			console.log("body:", req.body);
+			const isValid = verifySignUserService(publicKey, nonce, signature);
 			if (isValid) {
 				req.body.isFirst = true;
 				return next();
