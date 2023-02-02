@@ -22,6 +22,7 @@ import { ERROR_RESPONSE } from "../constant/response.constants";
 import { promises } from "fs";
 import { async } from "@firebase/util";
 import { getTopCollectionService, getNewCollectionService } from "../services/collection.services";
+import { getListCollectionService } from "../services/collection.services";
 const createCollection = async (req: Request, res: Response) => {
 	try {
 		let { userAddress, chainId } = req.params;
@@ -102,7 +103,7 @@ const getCollectionByCategory = async (req: Request, res: Response) => {
 const getAllCollection = async (req: Request, res: Response) => {
 	try {
 		let { chainId } = req.params;
-		let collections = await findManyService(collectionModel, { chainId });
+		let collections: any = await getListCollectionService({ chainId });
 		await Promise.all(
 			collections.map(async (collection: any, index: number) => {
 				let items = await findManyService(itemModel, { collectionId: collection._id });
@@ -157,6 +158,10 @@ export const getNewCollectionController = async (req: Request, res: Response) =>
 	} catch (error: any) {
 		return res.status(500).json({ error: "Cannot get new Collection" });
 	}
+}
+
+export const getAllCollectionC = async() => {
+
 }
 
 export {

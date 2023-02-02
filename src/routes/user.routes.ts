@@ -4,7 +4,8 @@ import {
 	updateUserController,
 	uploadUserImageController,
 	verificationEmailController,
-	topTraderController
+	topTraderController,
+	getUserProfileController,
 } from "../controllers/user.controllers";
 import { checkUserExist, checkUserAddressValid } from "../middlewares/checkUser.middlewares";
 import { refreshSignature } from "../middlewares/checkSignature.middlewares";
@@ -20,13 +21,12 @@ userRouter.post("/upload", uploadUserImageController);
 
 // userRouter.post("/query/pageSize/:pageSize/page/:pageId", getQueryUserController);
 
-
 /* ******************************************
  *				PUT ROUTE					                *
  ********************************************/
 
- userRouter.put("/userAddress/:userAddress", checkUserExist, updateUserController);
-
+userRouter.put("/userAddress/:userAddress", checkUserExist, updateUserController);
+userRouter.get("/userAddress/:userAddress", checkUserExist, getUserProfileController);
 
 /* ******************************************
  *				GET ROUTE					                *

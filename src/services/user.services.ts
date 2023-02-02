@@ -151,7 +151,7 @@ const getUserNameService = async (userAddress: string) => {
 
 export const topTraderService = async(request: Number, chainID: Number) => {
 		let trd = new Array<Object>
-		let data: {address: String, volumeTrade: Number}[] = []; 
+		let data: {user: User, volumeTrade: Number}[] = []; 
 		const user = await getAllUsersService();
 		await Promise.all(
 			user.map(async (user, index) => {
@@ -166,14 +166,14 @@ export const topTraderService = async(request: Number, chainID: Number) => {
 						}
 					})
 				)
-				const tradeOne = {
-					address: user.userAddress,
+				const tradeOne: any = {
+					user,
 					volumeTrade: sum
 				}
 				data.push(tradeOne);
 			})
 		);
-		data.sort((a: any, b: any) => parseFloat(b.tradeUser.toString()) - parseFloat(a.tradeUser.toString()));
+		data.sort((a: any, b: any) => parseFloat(b.volumeTrade.toString()) - parseFloat(a.volumeTrade.toString()));
 		console.log(data);
 		data.map((data,index) => {
 			// if(index<10){

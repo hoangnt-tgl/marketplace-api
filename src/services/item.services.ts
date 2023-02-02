@@ -35,4 +35,15 @@ const checkItemExistsService = async (queryObj: object): Promise<boolean> => {
 	return await queryExistService(itemModel, queryObj);
 };
 
-export { getOneItemService, checkItemExistsService};
+const getAllItemService = async (objQuery: any, properties: string = ""): Promise<Item[]> => {
+	objQuery = removeUndefinedOfObj(objQuery);
+	const item: Item[] = await itemModel
+		.find(objQuery, properties)
+		.lean()
+		.populate({ path: "collectionInfo" })
+		.populate({ path: "ownerInfo", select: "userAddress avatar username" })
+		.populate({ path: "creatorInfo", select: "userAddress avatar username" });
+	return item;
+};
+
+export { getOneItemService, getAllItemService };

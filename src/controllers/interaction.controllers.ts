@@ -1,45 +1,48 @@
 import { Request, Response } from "express";
-import { MongooseObjectId } from "../interfaces/responseData.interfaces";
-import { ItemInteraction } from "../interfaces/item.interfaces";
+import { Collection } from "../interfaces/collection.interfaces";
+import collectionModel from "../models/collection.model";
+import itemModel from "../models/item.model";
+import interactionModel from "../models/interaction.model";
+import historyModel from "../models/history.model";
+import { History } from "../interfaces/history.interfaces";
+import { ERROR_RESPONSE } from "../constant/response.constants";
 import {
-	checkUserIsLikeItemService,
-	createInteractionService,
-	getInteractionByUserService,
-} from "../services/interaction.services";
-// import { ERROR_RESPONSE } from "../constant/response.constants";
+	findOneService,
+	updateOneService,
+	createService,
+	queryExistService,
+	findManyService,
+} from "../services/model.services";
 
 const createInteractionController = async (req: Request, res: Response) => {
-	const { userAddress, itemId, state }: { userAddress: string, itemId: string, state: boolean } = req.body;
 	try {
-		const interaction: ItemInteraction = await createInteractionService(userAddress, itemId, state);
-		return res.status(200).json(interaction);
-	} catch (error: any) {
-		return res.status(500).json({ error: "Cannot create interaction" });
-	}
-};
-
-const getListInteractionsController = async (req: Request, res: Response) => {
-	try {
-		const userAddress = req.params.userAddress;
-		const listInteractions: MongooseObjectId[] = await getInteractionByUserService(userAddress);
-		if (listInteractions) {
-			return res.status(200).json({ data: listInteractions });
+		let { userAddress, chainId } = req.params;
+		let { itemId, state } = req.body;
+		userAddress = userAddress.toLowerCase();
+		let itemExist = await queryExistService(itemModel, { _id: itemId });
+		if (!itemExist) return res.status(404).json({ error: ERROR_RESPONSE[404] });
+		let interactionExist = await queryExistService(interactionModel, { itemId, userAddress });
+		if (interactionExist) {
+			await updateOneService(interactionModel, { itemId, userAddress }, { state });
 		} else {
-			return res.status(400).json({ error: "Not found list interactions" });
+			await createService(interactionModel, { itemId, userAddress, state });
 		}
+		return res.status(200).json("Like item success");
 	} catch (error: any) {
-		return res.status(500).json({ error: "Cannot get list interactions" });
+		console.log(error);
+		return res.status(500).json({ error: ERROR_RESPONSE[500] });
 	}
 };
 
-const checkUserIsLikeItemController = async (req: Request, res: Response) => {
-	const { itemId, userAddress } = req.params;
+const getListItemInteractionController = async (req: Request, res: Response) => {
 	try {
-		const result = await checkUserIsLikeItemService(userAddress, itemId);
-		return res.status(200).json({ data: result });
+		let { userAddress } = req.params;
+		let listInteract = await findManyService(interactionModel, { userAddress, state: true });
+		let listItem = listInteract.map((item: any) => item.itemId);
+		return res.status(200).json({ data: listItem });
 	} catch (error: any) {
-		return res.status(500).json({ error: "Cannot check user is like item" });
+		return res.status(500).json({ error: ERROR_RESPONSE[500] });
 	}
 };
 
-export { createInteractionController, getListInteractionsController, checkUserIsLikeItemController };
+export { createInteractionController, getListItemInteractionController };
