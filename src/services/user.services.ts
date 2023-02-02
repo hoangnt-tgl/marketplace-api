@@ -151,7 +151,7 @@ const getUserNameService = async (userAddress: string) => {
 
 export const topTraderService = async(request: Number, chainID: Number) => {
 		let trd = new Array<Object>
-		let data: {address: String, tradeUser: Number}[] = []; 
+		let data: {address: String, volumeTrade: Number}[] = []; 
 		const user = await getAllUsersService();
 		await Promise.all(
 			user.map(async (user, index) => {
@@ -168,7 +168,7 @@ export const topTraderService = async(request: Number, chainID: Number) => {
 				)
 				const tradeOne = {
 					address: user.userAddress,
-					tradeUser: sum
+					volumeTrade: sum
 				}
 				data.push(tradeOne);
 			})
