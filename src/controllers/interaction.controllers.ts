@@ -12,6 +12,7 @@ import {
 	createService,
 	queryExistService,
 	findManyService,
+	deleteOneService,
 } from "../services/model.services";
 
 const createInteractionController = async (req: Request, res: Response) => {
@@ -19,12 +20,11 @@ const createInteractionController = async (req: Request, res: Response) => {
 		let { userAddress, chainId } = req.params;
 		let { itemId, state } = req.body;
 		userAddress = userAddress.toLowerCase();
+
 		let itemExist = await queryExistService(itemModel, { _id: itemId });
 		if (!itemExist) return res.status(404).json({ error: ERROR_RESPONSE[404] });
-		let interactionExist = await queryExistService(interactionModel, { itemId, userAddress });
-		if (interactionExist) {
-			await updateOneService(interactionModel, { itemId, userAddress }, { state });
-		} else {
+		await deleteOneService(interactionModel, { itemId, userAddress });
+		if (state == true) {
 			await createService(interactionModel, { itemId, userAddress, state });
 		}
 		return res.status(200).json("Like item success");

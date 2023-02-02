@@ -23,6 +23,7 @@ import fs from "fs";
 const createUserController = async (req: Request, res: Response) => {
 	try {
 		let { userAddress, signature } = req.body;
+		console.log(req.body);
 		userAddress = userAddress.toLowerCase();
 		const user: User = await createUserIfNotExistService(userAddress, signature);
 		return res.status(200).json({ data: user });
