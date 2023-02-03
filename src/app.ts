@@ -43,6 +43,4 @@ export const runningApp = async () => {
 	server.listen(port, () => {
 		console.log(`Server is running on http://localhost:${port}`);
 	});
-
-	
 };

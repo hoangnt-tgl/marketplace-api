@@ -5,7 +5,10 @@ import {
 	getOneUserService,
 	getSearchUserByIdService,
 	updateUserService,
+	getAllUsersService,
+	topTraderService,
 } from "../services/user.services";
+import { getManyHistoryService } from "../services/history.services";
 import { findOneService, updateOneService } from "../services/model.services";
 import userModel from "../models/user.model";
 import { createService } from "../services/model.services";
@@ -41,7 +44,7 @@ const createUserController = async (req: Request, res: Response) => {
 			return res.status(200).json({ data: data });
 		}
 	} catch (error: any) {
-		return res.status(403).json({ error: ERROR_RESPONSE[403] });
+		return res.status(403).json({ error: "Cannot Create User" });
 	}
 };
 
@@ -51,7 +54,7 @@ const uploadUserImageController = async (req: Request, res: Response) => {
 		const result = await handlePromiseUpload(form, req, "users");
 		return res.status(200).json({ data: result });
 	} catch (error: any) {
-		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+		return res.status(500).json({ error: "Cannot Upload Image" });
 	}
 };
 
@@ -73,7 +76,7 @@ const updateUserController = async (req: Request, res: Response) => {
 		}
 		return res.status(200).json({ data: user });
 	} catch (error: any) {
-		return res.status(500).json({ error: ERROR_RESPONSE[403] });
+		return res.status(500).json({ error: "Cannot Update User" });
 	}
 };
 
@@ -83,7 +86,7 @@ const verificationEmailController = async (req: Request, res: Response) => {
 		userAddress = userAddress.toLowerCase();
 		token = decodeURIComponent(token);
 		const user = await findOneService(userModel, { userAddress });
-		if (!user) return res.status(403).json({ error: ERROR_RESPONSE[403] });
+		if (!user) return res.status(403).json({ error: "Not Found User" });
 		const decoded = jwt.verify(token, "secret");
 		if (decoded) {
 			await updateOneService(userModel, { userAddress }, { confirmEmail: true });
@@ -91,7 +94,7 @@ const verificationEmailController = async (req: Request, res: Response) => {
 		}
 		return res.status(403).json({ error: ERROR_RESPONSE[403] });
 	} catch (error: any) {
-		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+		return res.status(500).json({ error: "Cannot Verify Email" });
 	}
 };
 
@@ -133,10 +136,30 @@ const getSearchUserByIdController = async (req: Request, res: Response) => {
 	}
 };
 
+export const topTraderController = async (req: Request, res: Response) => {
+	try {
+		const request = req.query.request;
+		const chainId = req.params.chainId;
+		return res.status(200).json(await topTraderService(Number(request), Number(chainId)));
+	} catch (error: any) {
+		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+	}
+};
+
+const getUserProfileController = async (req: Request, res: Response) => {
+	try {
+		const { userAddress } = req.params;
+		const user = await findOneService(userModel, { userAddress });
+		return res.status(200).json({ data: user });
+	} catch (error: any) {
+		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+	}
+};
 export {
 	createUserController,
 	updateUserController,
 	uploadUserImageController,
 	verificationEmailController,
 	logoutUserController,
+	getUserProfileController,
 };

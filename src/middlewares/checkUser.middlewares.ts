@@ -6,18 +6,18 @@ import { checkUserExistsService, getOneUserService, verifySignUserService } from
 
 export const checkUserExist = async (req: Request, res: Response, next: NextFunction) => {
 	try {
-		let { userAddress } = req.params;
+		let userAddress = req.body.userAddress || req.params.userAddress || req.query.userAddress;
 		userAddress = userAddress.toLowerCase();
 		if (!userAddress) {
-			return res.status(400).json({ error: ERROR_RESPONSE[400] });
+			return res.status(400).json({ error: "Not found UserAddress" });
 		}
 		const exist = await queryExistService(UserModel, { userAddress });
 		if (!exist) {
-			return res.status(404).json({ error: ERROR_RESPONSE[404] });
+			return res.status(404).json({ error: "User not found" });
 		}
 		return next();
 	} catch (error: any) {
-		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+		return res.status(500).json({ error: "Cannot check User" });
 	}
 };
 

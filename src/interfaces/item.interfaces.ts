@@ -32,6 +32,7 @@ export interface Item {
 	creatorInfo: User;
 	isBox: boolean;
 	collectionInfo: Collection;
+	countFav?: number;
 }
 
 export interface LessItemInfo extends Item {

@@ -237,4 +237,23 @@ const getExtraInfoCollectionService = async (collectionId: Types.ObjectId): Prom
 	return extraCollection;
 };
 
-export { getTopCollectionService, writeTopCollectionService };
+export const getNewCollectionService = async () => {
+	const date = new Date(new Date().setDate(new Date().getDate() - Number(1)));
+	const collection = await findManyService(collectionModel, {createdAt: {$gte: date}});
+	return collection;
+};
+
+export const checkChainIdCollectionService = async (id: String, chainId: Number) => {
+	const collection: Collection = await findOneService(collectionModel, {_id: id})
+	if(Number(collection.chainId) === chainId){ 
+		return true
+	} else return false;
+};
+
+const getListCollectionService = async (query: object) => {
+	const collections = await collectionModel.find(query).lean().populate("ownerInfo");
+	return collections;
+};
+
+
+export { getTopCollectionService, writeTopCollectionService, getListCollectionService };

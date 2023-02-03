@@ -1,9 +1,19 @@
 import { Request, Response } from "express";
 import { Item } from "../interfaces/item.interfaces";
 import ItemModel from "../models/item.model";
+import interactionModel from "../models/interaction.model";
 import { ERROR_RESPONSE } from "../constant/response.constants";
 import historyModel from "../models/history.model";
-import { findOneService, updateOneService, createService, queryExistService } from "../services/model.services";
+import {
+	findOneService,
+	findManyService,
+	updateOneService,
+	createService,
+	queryExistService,
+	countByQueryService,
+} from "../services/model.services";
+
+import { getAllItemService, getOneItemService } from "../services/item.services";
 
 const createItem = async (req: Request, res: Response) => {
 	try {
@@ -11,6 +21,7 @@ const createItem = async (req: Request, res: Response) => {
 		let newItem: Item = req.body;
 		newItem.creator = userAddress;
 		newItem.chainId = chainId;
+		newItem.owner = [userAddress];
 		const existItem = await queryExistService(ItemModel, {
 			collectionId: newItem.collectionId,
 			itemName: newItem.itemName,
@@ -28,19 +39,39 @@ const createItem = async (req: Request, res: Response) => {
 		createService(historyModel, newHistory);
 		return res.status(200).json({ data: itemInfo });
 	} catch (error: any) {
-		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+		return res.status(500).json({ error: "Cannot Create Item" });
 	}
 };
 
 const getItemById = async (req: Request, res: Response) => {
 	try {
 		let { itemId } = req.params;
-		let itemInfo = await findOneService(ItemModel, { _id: itemId });
+		let itemInfo = await getOneItemService({ _id: itemId });
 		if (!itemInfo) return res.status(404).json({ error: ERROR_RESPONSE[404] });
 		return res.status(200).json({ data: itemInfo });
+	} catch (error: any) {
+		return res.status(500).json({ error: "Cannot get Item" });
+	}
+};
+
+const getAllItem = async (req: Request, res: Response) => {
+	try {
+		let { chainId } = req.params;
+		let listItem = await getAllItemService({ chainId });
+		return res.status(200).json({ data: listItem });
 	} catch (error: any) {
 		return res.status(500).json({ error: ERROR_RESPONSE[500] });
 	}
 };
 
-export { createItem, getItemById };
+const getItemForUser = async (req: Request, res: Response) => {
+	try {
+		let { chainId, userAddress } = req.params;
+		let listItem = await getAllItemService({ chainId, owner: { $in: userAddress } });
+		return res.status(200).json({ data: listItem });
+	} catch (error: any) {
+		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+	}
+};
+
+export { createItem, getItemById, getAllItem, getItemForUser };
