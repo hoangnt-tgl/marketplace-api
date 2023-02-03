@@ -1,4 +1,6 @@
 import userModel from "../models/user.model";
+import nacl from "tweetnacl";
+import sha256 from "sha256";
 import {
 	createService,
 	findOneService,
@@ -20,6 +22,8 @@ const createUserIfNotExistService = async (userAddress: string, nonce: string): 
 	let user: User = await findOneService(userModel, { userAddress });
 	if (!user) {
 		user = await createService(userModel, { userAddress, nonce });
+	} else {
+		await updateOneService(userModel, { userAddress }, { nonce });
 	}
 	return user;
 };
@@ -31,9 +35,6 @@ const checkUserExistsService = async (userAddress: string): Promise<boolean> => 
 
 const getOneUserService = async (userAddress: string): Promise<User> => {
 	let user: User = await findOneService(userModel, { userAddress: userAddress.toLowerCase() });
-	if (!user) {
-		user = await createService(userModel, { userAddress });
-	}
 	return user;
 };
 
@@ -58,12 +59,6 @@ const getManyUserService = async (
 	);
 
 	return returnUser;
-};
-const updateNonceUserService = async (userAddress: string, nonce: string) => {
-	let user: User = await findOneService(userModel, { userAddress: userAddress.toLowerCase() });
-	if (user) {
-		user = await updateOneService(userModel, { userAddress }, { nonce }, { new: true });
-	}
 };
 
 const updateUserService = async (
@@ -96,26 +91,6 @@ const updateUserService = async (
 	return user;
 };
 
-const addUserToBlacklistService = async (address: string): Promise<BlackUser> => {
-	const user: BlackUser = await createService(blacklistModel, { userAddress: address });
-	return user;
-};
-
-const removeUserFromBlacklistService = async (address: string): Promise<BlackUser> => {
-	const user: BlackUser = await deleteOneService(blacklistModel, { userAddress: address });
-	return user;
-};
-
-const getBlacklistService = async (): Promise<BlackUser[]> => {
-	const users: BlackUser[] = await findManyService(blacklistModel, {}, "userAddress");
-	return users;
-};
-
-const checkUserIsInBlacklistService = async (userAddress: string): Promise<boolean> => {
-	const user: BlackUser = await findOneService(blacklistModel, { userAddress });
-	return user ? true : false;
-};
-
 const getAllUsersService = async () => {
 	const usersInBlackList = await userModel.find().populate("userInBlackList").lean();
 	return usersInBlackList;
@@ -126,24 +101,15 @@ const getSearchUserByIdService = async (userId: string): Promise<User> => {
 	return user;
 };
 
-/*-----------Get Nonce Login using Cookie----------------*/
+const verifySignUserService = (publicKey: string, nonce: string, signature: string): Boolean => {
+	const fullMessage = `APTOS\nnonce: ${nonce}\nmessage: ${sha256(publicKey)}`;
+	const fullMessage1 = `APTOS\nmessage: ${sha256(publicKey)}\nnonce: ${nonce}`;
+	//console.log("fullMessage: ", fullMessage);
 
-const getNonceUserService = async (userAddress: string) => {
-	let user = await findOneService(userModel, { userAddress: userAddress.toLowerCase() });
-	if (!user) {
-		user = await createService(userModel, { userAddress });
-	}
-	return user;
-};
-/*-----------Get Avatar by User Address----------------*/
-const getAvatarService = async (userAddress: string) => {
-	const user: User = await findOneService(userModel, { userAddress: userAddress.toLowerCase() });
-	return user.avatar.toString();
-};
-/*-----------Get User Name by User Address----------------*/
-const getUserNameService = async (userAddress: string) => {
-	const user: User = await findOneService(userModel, { userAddress: userAddress.toLowerCase() });
-	return user.username.toString();
+	return (
+		nacl.sign.detached.verify(Buffer.from(fullMessage), Buffer.from(signature, "hex"), Buffer.from(publicKey, "hex")) ||
+		nacl.sign.detached.verify(Buffer.from(fullMessage1), Buffer.from(signature, "hex"), Buffer.from(publicKey, "hex"))
+	);
 };
 
 export const topTraderService = async (request: Number, chainID: Number) => {
@@ -185,16 +151,8 @@ export {
 	checkUserExistsService,
 	updateUserService,
 	getOneUserService,
-	addUserToBlacklistService,
-	removeUserFromBlacklistService,
-	checkUserIsInBlacklistService,
-	getBlacklistService,
 	getManyUserService,
 	getAllUsersService,
 	getSearchUserByIdService,
-	/*-----------Add Service----------------*/
-	updateNonceUserService,
-	getNonceUserService,
-	getAvatarService,
-	getUserNameService,
+	verifySignUserService,
 };

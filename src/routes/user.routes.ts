@@ -4,11 +4,11 @@ import {
 	updateUserController,
 	uploadUserImageController,
 	verificationEmailController,
+	logoutUserController,
 	topTraderController,
 	getUserProfileController,
 } from "../controllers/user.controllers";
-import { checkUserExist, checkUserAddressValid } from "../middlewares/checkUser.middlewares";
-import { refreshSignature } from "../middlewares/checkSignature.middlewares";
+import { checkUserExist, checkUserAddressValid, checkUserAuthen } from "../middlewares/checkUser.middlewares";
 
 const userRouter = express.Router();
 
@@ -17,9 +17,12 @@ const userRouter = express.Router();
  ********************************************/
 
 userRouter.post("/login", checkUserAddressValid, createUserController);
+userRouter.post("/logout", checkUserAddressValid, checkUserAuthen, logoutUserController);
 userRouter.post("/upload", uploadUserImageController);
 
-// userRouter.post("/query/pageSize/:pageSize/page/:pageId", getQueryUserController);
+userRouter.get("/userAddress", checkUserAuthen, async (req, res) => {
+	return res.send("oke");
+});
 
 /* ******************************************
  *				PUT ROUTE					                *
