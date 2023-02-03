@@ -1,12 +1,6 @@
 import express from "express";
-import { checkItemExistMiddleware } from "../middlewares/checkItem.middlewares";
 import { checkUserExist } from "../middlewares/checkUser.middlewares";
-import {
-	checkUserIsLikeItemController,
-	createInteractionController,
-	getListInteractionsController,
-} from "../controllers/interaction.controllers";
-import { checkSignatureValid } from "../middlewares/checkSignature.middlewares";
+import { createInteractionController, getListItemInteractionController } from "../controllers/interaction.controllers";
 const interactionRouter = express.Router();
 
 /* ******************************************
@@ -14,20 +8,12 @@ const interactionRouter = express.Router();
  ********************************************/
 
 interactionRouter.post(
-	"/create",
-	checkSignatureValid,
+	"/create/userAddress/:userAddress",
 	checkUserExist,
 	// checkSignLikeItemMiddleware,
-	checkItemExistMiddleware,
 	createInteractionController,
 );
 
-/* ******************************************
- *				GET ROUTE					*
- ********************************************/
-
-interactionRouter.get("/userAddress/:userAddress", checkUserExist, getListInteractionsController);
-
-interactionRouter.get("/check/itemId/:itemId/:userAddress", checkItemExistMiddleware, checkUserIsLikeItemController);
+interactionRouter.get("/userAddress/:userAddress", checkUserExist, getListItemInteractionController);
 
 export default interactionRouter;

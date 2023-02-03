@@ -7,7 +7,7 @@ import {
 	updateUserService,
 	updateNonceUserService,
 	getAllUsersService,
-	topTraderService
+	topTraderService,
 } from "../services/user.services";
 import { getManyHistoryService } from "../services/history.services";
 import { findOneService, updateOneService } from "../services/model.services";
@@ -27,6 +27,7 @@ import { async } from "@firebase/util";
 const createUserController = async (req: Request, res: Response) => {
 	try {
 		let { userAddress, signature } = req.body;
+		console.log(req.body);
 		userAddress = userAddress.toLowerCase();
 		const user: User = await createUserIfNotExistService(userAddress, signature);
 		return res.status(200).json({ data: user });
@@ -54,7 +55,7 @@ const updateUserController = async (req: Request, res: Response) => {
 		if (data.email && (!user.confirmEmail || user.email !== data.email)) {
 			let html = fs.readFileSync(`${STATIC_FOLDER}/views/verificationEmail.html`, { encoding: "utf8" });
 			let token = jwt.sign({ userAddress }, "secret", { expiresIn: "10m" });
-			token = encodeURIComponent(token)
+			token = encodeURIComponent(token);
 			let host = req.headers.host?.includes("localhost") ? "http://" : "https://";
 			host += req.headers.host;
 			let link = `${host}/users/verify-email/${userAddress}/${token}`;
@@ -125,18 +126,29 @@ const getSearchUserByIdController = async (req: Request, res: Response) => {
 	}
 };
 
-export const topTraderController = async(req: Request, res: Response) => {
+export const topTraderController = async (req: Request, res: Response) => {
 	try {
-		const request = 
-			req.params.request || 
-			req.query.request;
-		const chainId = 
-			req.params.chainId ||
-			req.query.chainId;
+		const request = req.query.request;
+		const chainId = req.params.chainId;
 		return res.status(200).json(await topTraderService(Number(request), Number(chainId)));
 	} catch (error: any) {
 		return res.status(500).json({ error: ERROR_RESPONSE[500] });
 	}
-} 
+};
 
-export { createUserController, updateUserController, uploadUserImageController, verificationEmailController,};
+const getUserProfileController = async (req: Request, res: Response) => {
+	try {
+		const { userAddress } = req.params;
+		const user = await findOneService(userModel, { userAddress });
+		return res.status(200).json({ data: user });
+	} catch (error: any) {
+		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+	}
+};
+export {
+	createUserController,
+	updateUserController,
+	uploadUserImageController,
+	verificationEmailController,
+	getUserProfileController,
+};

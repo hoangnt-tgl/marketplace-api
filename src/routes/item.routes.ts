@@ -4,7 +4,7 @@ import { checkUserExist } from "../middlewares/checkUser.middlewares";
 import { checkChainIdValid } from "../middlewares/checkOther.middlewares";
 import { checkOwnerCollection } from "../middlewares/checkCollection.middlewares";
 
-import { createItem, getItemById } from "../controllers/item.controllers";
+import { createItem, getItemById, getAllItem, getItemForUser } from "../controllers/item.controllers";
 const itemRouter = express.Router();
 
 itemRouter.post(
@@ -14,8 +14,13 @@ itemRouter.post(
 	checkOwnerCollection,
 	createItem,
 );
-
 itemRouter.get("/get-info/itemId/:itemId", getItemById);
-
+itemRouter.get("/get-all/chainId/:chainId", checkChainIdValid, getAllItem);
+itemRouter.get(
+	"/get-item-for-user/userAddress/:userAddress/chainId/:chainId",
+	checkUserExist,
+	checkChainIdValid,
+	getItemForUser,
+);
 
 export default itemRouter;

@@ -43,12 +43,10 @@ const getManyUserService = async (
 	pageSize: number,
 	pageId: number,
 ): Promise<ListResponseAPI<User>> => {
-	const userAddress:any = text ? { userAddress: { $regex: text, $options: "i" } } : undefined;
-	const username:any = text ? { username: { $regex: text, $options: "i" } } : undefined;
-	
-	const objQuery = (userAddress && username) ? { $or: [userAddress, username] } : {};
-	
-	
+	const userAddress: any = text ? { userAddress: { $regex: text, $options: "i" } } : undefined;
+	const username: any = text ? { username: { $regex: text, $options: "i" } } : undefined;
+
+	const objQuery = userAddress && username ? { $or: [userAddress, username] } : {};
 
 	let returnUser: ListResponseAPI<User> = await queryItemsOfModelInPageService(
 		userModel,
@@ -56,18 +54,17 @@ const getManyUserService = async (
 		pageId,
 		pageSize,
 		getSortObj(sort),
-		"userAddress"
-		
+		"userAddress",
 	);
 
 	return returnUser;
 };
-const updateNonceUserService = async(userAddress: string, nonce: string) => {
+const updateNonceUserService = async (userAddress: string, nonce: string) => {
 	let user: User = await findOneService(userModel, { userAddress: userAddress.toLowerCase() });
 	if (user) {
-		user = await updateOneService(userModel,{userAddress},{nonce},{new: true})	
+		user = await updateOneService(userModel, { userAddress }, { nonce }, { new: true });
 	}
-}
+};
 
 const updateUserService = async (
 	userAddress: string,
@@ -137,51 +134,51 @@ const getNonceUserService = async (userAddress: string) => {
 		user = await createService(userModel, { userAddress });
 	}
 	return user;
-}
+};
 /*-----------Get Avatar by User Address----------------*/
 const getAvatarService = async (userAddress: string) => {
 	const user: User = await findOneService(userModel, { userAddress: userAddress.toLowerCase() });
 	return user.avatar.toString();
-}
+};
 /*-----------Get User Name by User Address----------------*/
 const getUserNameService = async (userAddress: string) => {
 	const user: User = await findOneService(userModel, { userAddress: userAddress.toLowerCase() });
 	return user.username.toString();
-}
+};
 
-export const topTraderService = async(request: Number, chainID: Number) => {
-		let trd = new Array<Object>
-		let data: {address: String, tradeUser: Number}[] = []; 
-		const user = await getAllUsersService();
-		await Promise.all(
-			user.map(async (user, index) => {
-				const date = new Date(new Date().setDate(new Date().getDate() - Number(request)));
-				const trade = await getManyHistoryService({from: user.userAddress, createdAt: {$gte: date}});
-				let sum = 0;
-				await Promise.all(
-					trade.map(async (trader) => {
-						const check = await checkChainIdCollectionService(String(trader.collectionId), chainID);
-						if(check === true){
-							sum= sum + Number(trader.price);	
-						}
-					})
-				)
-				const tradeOne = {
-					address: user.userAddress,
-					tradeUser: sum
-				}
-				data.push(tradeOne);
-			})
-		);
-		data.sort((a: any, b: any) => parseFloat(b.tradeUser.toString()) - parseFloat(a.tradeUser.toString()));
-		console.log(data);
-		data.map((data,index) => {
-			// if(index<10){
-			trd.push(data);
-			// }
-		})
-		return trd;
-}
+export const topTraderService = async (request: Number, chainID: Number) => {
+	let trd = new Array<Object>();
+	let data: { address: User, volumeTrade: Number }[] = [];
+	const user = await getAllUsersService();
+	await Promise.all(
+		user.map(async (user, index) => {
+			const date = new Date(new Date().setDate(new Date().getDate() - Number(request)));
+			const trade = await getManyHistoryService({ from: user.userAddress, createdAt: { $gte: date } });
+			let sum = 0;
+			await Promise.all(
+				trade.map(async trader => {
+					const check = await checkChainIdCollectionService(String(trader.collectionId), chainID);
+					if (check === true) {
+						sum = sum + Number(trader.price);
+					}
+				}),
+			);
+			const tradeOne: any = {
+				address: user,
+				volumeTrade: sum,
+			};
+			data.push(tradeOne);
+		}),
+	);
+	data.sort((a: any, b: any) => parseFloat(b.volumeTrade.toString()) - parseFloat(a.volumeTrade.toString()));
+	console.log(data);
+	data.map((data, index) => {
+		// if(index<10){
+		trd.push(data);
+		// }
+	});
+	return trd;
+};
 
 export {
 	createUserIfNotExistService,
@@ -195,7 +192,7 @@ export {
 	getManyUserService,
 	getAllUsersService,
 	getSearchUserByIdService,
-/*-----------Add Service----------------*/
+	/*-----------Add Service----------------*/
 	updateNonceUserService,
 	getNonceUserService,
 	getAvatarService,

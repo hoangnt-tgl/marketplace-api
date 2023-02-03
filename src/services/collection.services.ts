@@ -250,5 +250,10 @@ export const checkChainIdCollectionService = async (id: String, chainId: Number)
 	} else return false;
 };
 
-export { getTopCollectionService, writeTopCollectionService };
+const getListCollectionService = async (query: object) => {
+	const collections = await collectionModel.find(query).lean().populate("ownerInfo");
+	return collections;
+};
 
+
+export { getTopCollectionService, writeTopCollectionService, getListCollectionService };
