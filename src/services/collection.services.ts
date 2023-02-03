@@ -251,3 +251,4 @@ export const checkChainIdCollectionService = async (id: String, chainId: Number)
 };
 
 export { getTopCollectionService, writeTopCollectionService };
+
