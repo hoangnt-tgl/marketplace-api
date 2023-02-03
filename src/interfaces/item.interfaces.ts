@@ -20,6 +20,7 @@ export interface Item {
 	properties: object;
 	owner: Array<string>;
 	creator: string;
+	amount?: number;
 	status: number;
 	offer_status: number;
 	price: string;

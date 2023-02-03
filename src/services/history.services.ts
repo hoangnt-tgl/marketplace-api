@@ -42,4 +42,14 @@ const getHistoryTradeByDayService = async (fromDate: number, toDate: number, obj
 	return tradeHistories;
 };
 
-export { getHistoryTradeByDayService };
+const getHistoryByItemService = async (itemId: string, objectQuery: any): Promise<History[]> => {
+	const histories: any = historyModel
+		.find({ itemId })
+		.lean()
+		.populate({ path: "itemInfo" })
+		.populate({ path: "fromUserInfo" })
+		.sort({ createdAt: -1 });
+	return histories;
+};
+
+export { getHistoryTradeByDayService, getHistoryByItemService };
