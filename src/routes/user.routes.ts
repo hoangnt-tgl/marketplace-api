@@ -18,15 +18,10 @@ userRouter.post("/login", checkUserAddressValid, checkUserAuthen, createUserCont
 userRouter.post("/logout", checkUserAddressValid, checkUserAuthen, logoutUserController);
 userRouter.post("/upload", uploadUserImageController);
 
-userRouter.get("/userAddress", async (req, res) => {
-	res.cookie("signature", "hello", {
-		httpOnly: true,
-		domain: undefined,
-		maxAge: 86400 * 1000,
-		secure: true,
-	});
+userRouter.get("/userAddress", checkUserAuthen, async (req, res) => {
 	return res.send("oke");
 });
+
 // userRouter.post("/query/pageSize/:pageSize/page/:pageId", getQueryUserController);
 
 /* ******************************************

@@ -19,6 +19,7 @@ import { sendMailService } from "../services/mail.services";
 import { STATIC_FOLDER } from "../constant/default.constant";
 import jwt from "jsonwebtoken";
 import fs from "fs";
+
 const createUserController = async (req: Request, res: Response) => {
 	try {
 		let { userAddress, signature, publicKey, nonce, isFirst } = req.body;
@@ -28,16 +29,11 @@ const createUserController = async (req: Request, res: Response) => {
 			const user: User = await createUserIfNotExistService(userAddress, nonce);
 			const { nonce: _, ...data } = user;
 
-			res.cookie("signature", signature, {
-				httpOnly: true,
-				domain: undefined,
-				maxAge: 86400 * 1000,
-			});
-			res.cookie("publicKey", publicKey, {
-				httpOnly: true,
-				domain: undefined,
-				maxAge: 86400 * 1000,
-			});
+			req.session.user = {
+				signature,
+				publicKey,
+			};
+
 			return res.status(200).json({ data: data });
 		} else {
 			const user: User = await getOneUserService(userAddress);
@@ -103,10 +99,9 @@ const logoutUserController = async (req: Request, res: Response) => {
 	try {
 		const { userAddress } = req.body;
 		await updateOneService(userModel, { userAddress }, { nonce: null });
-		res.clearCookie("signature").clearCookie("publicKey");
+		req.session.destroy(() => {});
 		return res.status(200).json({ message: "Logout successfully" });
 	} catch (error: any) {
-		console.log("error: ", error);
 		return res.status(500).json({ error: ERROR_RESPONSE[500] });
 	}
 };
