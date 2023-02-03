@@ -22,6 +22,7 @@ import { getHistoryTradeByDayService } from "../services/history.services";
 
 import { getSortObj, multiProcessService, paginateArrayService, removeUndefinedOfObj } from "./other.services";
 import fs from "fs";
+
 const getTopCollectionService = async (
 	sortBy:
 		| "volumeTrade"
@@ -32,7 +33,7 @@ const getTopCollectionService = async (
 		| "percent24Hour"
 		| "percent7Days"
 		| "percent30Days" = "volumeTrade",
-	sortFrom: "desc" | "asc" = "desc",
+	sortFrom: "desc" | "asc",
 	objectQuery: any = {},
 	pageSize: number,
 	pageId: number,
@@ -60,6 +61,7 @@ const getTopCollectionService = async (
 		returnValue = sortable
 			.sort(([, value1]: any, [, value2]: any) => value2[sortBy] - value1[sortBy])
 			.reduce((r, [k, v]) => ({ ...r, [k]: v }), {});
+		console.log("1")
 	} else {
 		returnValue = sortable
 			.sort(([, value1]: any, [, value2]: any) => value1[sortBy] - value2[sortBy])
@@ -251,7 +253,7 @@ export const checkChainIdCollectionService = async (id: String, chainId: Number)
 };
 
 const getListCollectionService = async (query: object) => {
-	const collections = await collectionModel.find(query).lean().populate("ownerInfo");
+	const collections: Collection[] = await collectionModel.find(query).lean().populate("ownerInfo");
 	return collections;
 };
 

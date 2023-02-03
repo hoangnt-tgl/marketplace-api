@@ -87,7 +87,7 @@ const getCollectionByUserAddress = async (req: Request, res: Response) => {
 const getCollectionByCategory = async (req: Request, res: Response) => {
 	try {
 		let { category, chainId } = req.params;
-		let collections = await findManyService(collectionModel, { category, chainId });
+		let collections: Collection[] = await getListCollectionService({ category, chainId });
 		await Promise.all(
 			collections.map(async (collection: any, index: number) => {
 				let items = await findManyService(itemModel, { collectionId: collection._id });
@@ -103,7 +103,7 @@ const getCollectionByCategory = async (req: Request, res: Response) => {
 const getAllCollection = async (req: Request, res: Response) => {
 	try {
 		let { chainId } = req.params;
-		let collections: any = await getListCollectionService({ chainId });
+		let collections: Collection[] = await getListCollectionService({ chainId });
 		await Promise.all(
 			collections.map(async (collection: any, index: number) => {
 				let items = await findManyService(itemModel, { collectionId: collection._id });
@@ -127,7 +127,7 @@ const getTopCollection = async (req: Request, res: Response) => {
 			| "percent24Hour"
 			| "percent7Days"
 			| "percent30Days" = req.body.sortBy;
-		const sortFrom: "asc" | "desc" = req.body.sortFrom;
+		const sortFrom: "desc" | "asc" = req.body.sortFrom;
 		const { pageSize, pageId, chainId } = req.params;
 		const { userAddress, collectionName, collectionStandard, category }: Collection = req.body;
 		const objectQuery = {
@@ -136,18 +136,11 @@ const getTopCollection = async (req: Request, res: Response) => {
 			collectionStandard,
 			category,
 		};
-		const collections = await getTopCollectionService(
-			sortBy,
-			sortFrom,
-			objectQuery,
-			Number(pageSize),
-			Number(pageId),
-			chainId,
-		);
+		const collections = await getTopCollectionService(sortBy, sortFrom, objectQuery, Number(pageSize), Number(pageId), chainId);
 
 		return res.status(200).json(collections);
 	} catch (error: any) {
-		return res.status(500).json({ error: "Cannot get top Collection" });
+		return res.status(500).json({ error: "Cannot get top collection" });
 	}
 };
 

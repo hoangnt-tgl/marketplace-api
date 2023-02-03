@@ -32,7 +32,7 @@ userRouter.get("/userAddress/:userAddress", checkUserExist, getUserProfileContro
  *				GET ROUTE					                *
  ********************************************/
 userRouter.get("/verify-email/:userAddress/:token", verificationEmailController);
-userRouter.get("/toptrader", topTraderController);
+userRouter.get("/toptrader/:chainId", topTraderController);
 // userRouter.get("/search/userId/:userId", getSearchUserByIdController);
 
 export default userRouter;
