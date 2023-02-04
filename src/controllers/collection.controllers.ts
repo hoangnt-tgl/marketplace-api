@@ -12,6 +12,7 @@ import {
 	queryExistService,
 	findManyService,
 } from "../services/model.services";
+import { getAllItemService } from "../services/item.services";
 import userModel from "../models/user.model";
 
 import formidable from "formidable";
@@ -21,8 +22,11 @@ import { ResponseAPI } from "../interfaces/responseData.interfaces";
 import { ERROR_RESPONSE } from "../constant/response.constants";
 import { promises } from "fs";
 import { async } from "@firebase/util";
-import { getTopCollectionService, getNewCollectionService } from "../services/collection.services";
-import { getListCollectionService } from "../services/collection.services";
+import {
+	getTopCollectionService,
+	getNewCollectionService,
+	getListCollectionService,
+} from "../services/collection.services";
 const createCollection = async (req: Request, res: Response) => {
 	try {
 		let { userAddress, chainId } = req.params;
@@ -59,7 +63,7 @@ const getCollectionById = async (req: Request, res: Response) => {
 		let { collectionId } = req.params;
 		let collectionInfo = await findOneService(collectionModel, { _id: collectionId });
 		if (!collectionInfo) return res.status(404).json({ error: ERROR_RESPONSE[404] });
-		let items = await findManyService(itemModel, { collectionId: collectionInfo._id });
+		let items = await getAllItemService({ collectionId: collectionInfo._id });
 		collectionInfo.listItem = items;
 		return res.status(200).json({ data: collectionInfo });
 	} catch (error: any) {
@@ -146,12 +150,12 @@ const getTopCollection = async (req: Request, res: Response) => {
 
 export const getNewCollectionController = async (req: Request, res: Response) => {
 	try {
-		const collection = await getNewCollectionService()
+		const collection = await getNewCollectionService();
 		return res.status(200).json(collection);
 	} catch (error: any) {
 		return res.status(500).json({ error: "Cannot get new Collection" });
 	}
-}
+};
 
 export const getAllCollectionC = async() => {
 

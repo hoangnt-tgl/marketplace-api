@@ -5,9 +5,8 @@ import {
 	getOneUserService,
 	getSearchUserByIdService,
 	updateUserService,
-	updateNonceUserService,
 	getAllUsersService,
-	topTraderService
+	topTraderService,
 } from "../services/user.services";
 import { getManyHistoryService } from "../services/history.services";
 import { findOneService, updateOneService } from "../services/model.services";
@@ -23,13 +22,27 @@ import { sendMailService } from "../services/mail.services";
 import { STATIC_FOLDER } from "../constant/default.constant";
 import jwt from "jsonwebtoken";
 import fs from "fs";
-import { async } from "@firebase/util";
+
 const createUserController = async (req: Request, res: Response) => {
 	try {
-		let { userAddress, signature } = req.body;
+		let { userAddress, signature, publicKey, nonce, isFirst } = req.body;
 		userAddress = userAddress.toLowerCase();
-		const user: User = await createUserIfNotExistService(userAddress, signature);
-		return res.status(200).json({ data: user });
+
+		if (isFirst) {
+			const user: User = await createUserIfNotExistService(userAddress, nonce);
+			const { nonce: _, ...data } = user;
+
+			req.session.user = {
+				signature,
+				publicKey,
+			};
+
+			return res.status(200).json({ data: data });
+		} else {
+			const user: User = await getOneUserService(userAddress);
+			const { nonce: _, ...data } = user;
+			return res.status(200).json({ data: data });
+		}
 	} catch (error: any) {
 		return res.status(403).json({ error: "Cannot Create User" });
 	}
@@ -85,18 +98,16 @@ const verificationEmailController = async (req: Request, res: Response) => {
 	}
 };
 
-// const logoutController = async (req: Request, res: Response) => {
-// 	try {
-// 		const { userAddress } = req.body;
-// 		const user = await findOneService(userModel, { userAddress });
-// 		if (user.signature) {
-// 			await updateOneService(userModel, { userAddress }, { signature: "" });
-// 		}
-// 		return res.status(200).json({ message: "Logout successfully" });
-// 	} catch (error: any) {
-// 		return res.status(500).json({ error: ERROR_RESPONSE[500] });
-// 	}
-// };
+const logoutUserController = async (req: Request, res: Response) => {
+	try {
+		const { userAddress } = req.body;
+		await updateOneService(userModel, { userAddress }, { nonce: null });
+		req.session.destroy(() => {});
+		return res.status(200).json({ message: "Logout successfully" });
+	} catch (error: any) {
+		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+	}
+};
 
 const getQueryUserController = async (req: Request, res: Response) => {
 	const { pageSize, pageId } = req.params;
@@ -125,19 +136,15 @@ const getSearchUserByIdController = async (req: Request, res: Response) => {
 	}
 };
 
-export const topTraderController = async(req: Request, res: Response) => {
+export const topTraderController = async (req: Request, res: Response) => {
 	try {
-		const request = 
-			req.params.request || 
-			req.query.request;
-		const chainId = 
-			req.params.chainId ||
-			req.query.chainId;
+		const request = req.query.request;
+		const chainId = req.params.chainId;
 		return res.status(200).json(await topTraderService(Number(request), Number(chainId)));
 	} catch (error: any) {
 		return res.status(500).json({ error: ERROR_RESPONSE[500] });
 	}
-} 
+};
 
 const getUserProfileController = async (req: Request, res: Response) => {
 	try {
@@ -153,5 +160,6 @@ export {
 	updateUserController,
 	uploadUserImageController,
 	verificationEmailController,
+	logoutUserController,
 	getUserProfileController,
 };

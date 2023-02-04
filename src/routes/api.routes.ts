@@ -8,7 +8,6 @@ import orderRouter from "./order.routes";
 import historyRouter from "./history.routes";
 import interactionRouter from "./interaction.routes";
 import testRouter from "./test.routes";
-// import interactionRouter from "./interaction.routes";
 
 const APIRouter = express.Router();
 
