@@ -42,4 +42,25 @@ const getHistoryTradeByDayService = async (fromDate: number, toDate: number, obj
 	return tradeHistories;
 };
 
+export const getHistoryTraderByDayService = async (fromDate: number, toDate: number, objectQuery: any) => {
+	const startDay: Date = new Date(fromDate);
+	const endDay: Date = new Date(toDate);
+	const histories: History[] = await getManyHistoryService({
+		...objectQuery,
+		createdAt: { $gte: startDay, $lte: endDay },
+	});
+	const traderHistories: HistoryTrade[] = [];
+	const runTask = histories.map(async (history: History) => {
+		const item: Item | null = await getOneItemService({ itemId: history.itemId }, "chainId");
+		const historyTrade: HistoryTrade = {
+			...history,
+			usdPrice: Number(history.price),
+			chainId: item?.chainId || DEFAULT_CHAINID,
+		};
+		traderHistories.push(historyTrade);
+	});
+	await Promise.all(runTask);
+	return traderHistories;
+}
+
 export { getHistoryTradeByDayService };

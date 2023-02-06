@@ -92,3 +92,8 @@ export interface Item1 {
 	isINO: boolean;
 	external_url: string;
 }
+
+export interface SelectItem{
+	itemId: Types.ObjectId;
+	chainId: string;
+}

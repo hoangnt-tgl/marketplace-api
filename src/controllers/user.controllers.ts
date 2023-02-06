@@ -155,6 +155,8 @@ const getUserProfileController = async (req: Request, res: Response) => {
 		return res.status(500).json({ error: ERROR_RESPONSE[500] });
 	}
 };
+
+
 export {
 	createUserController,
 	updateUserController,
