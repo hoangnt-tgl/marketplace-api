@@ -13,11 +13,11 @@ import {
 	countByQueryService,
 } from "../services/model.services";
 
-import { 
-	getAllItemService, 
-	getOneItemService, 
-	getListSelectItemService, 
-	getListRandomItemService 
+import {
+	getAllItemService,
+	getOneItemService,
+	getListSelectItemService,
+	getListRandomItemService,
 } from "../services/item.services";
 
 const createItem = async (req: Request, res: Response) => {
@@ -73,30 +73,30 @@ const getAllItem = async (req: Request, res: Response) => {
 const getItemForUser = async (req: Request, res: Response) => {
 	try {
 		let { chainId, userAddress } = req.params;
-		let listItem = await getAllItemService({ chainId, owner: { $in: userAddress } });
+		let listItem = await getAllItemService({ chainId, owner: { $all: userAddress } });
 		return res.status(200).json({ data: listItem });
 	} catch (error: any) {
 		return res.status(500).json({ error: ERROR_RESPONSE[500] });
 	}
 };
 
-export const showSelectItemController = async(req: Request, res: Response) => {
+export const showSelectItemController = async (req: Request, res: Response) => {
 	try {
 		const list = req.body.listitem;
-		const listItem = await getListSelectItemService(list)
+		const listItem = await getListSelectItemService(list);
 		return res.status(200).json({ data: listItem });
 	} catch (error: any) {
-		return res.status(500).json({error: ERROR_RESPONSE[500] });
+		return res.status(500).json({ error: ERROR_RESPONSE[500] });
 	}
 };
 
-export const showRandomListItemController= async(req: Request, res: Response) => {
+export const showRandomListItemController = async (req: Request, res: Response) => {
 	try {
 		const listItem: Item[] = await getListRandomItemService();
 		return res.status(200).json({ data: listItem });
 	} catch (error: any) {
-		return res.status(500).json({error: ERROR_RESPONSE[500] });
+		return res.status(500).json({ error: ERROR_RESPONSE[500] });
 	}
-}
+};
 
 export { createItem, getItemById, getAllItem, getItemForUser };
