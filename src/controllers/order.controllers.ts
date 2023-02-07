@@ -33,9 +33,10 @@ const sellItem = async (req: Request, res: Response) => {
 		let itemInfo = await findOneService(itemModel, { itemName, collectionId: collectionInfo._id });
 		if (!itemInfo) return res.status(404).json({ error: ERROR_RESPONSE[404] });
 		let balanceOwner = await getBalanceTokenForAccount(userAddress, creator, collectionName, itemName, chainId);
+		console.log(balanceOwner);
 		let owners = itemInfo.owner;
-		if (balanceOwner === 0) {
-			owners = itemInfo.owner.filter((item: any) => item !== userAddress);
+		if (balanceOwner.toString() === "0") {
+			owners = owners.filter((item: any) => item !== userAddress);
 		}
 		await updateOneService(itemModel, { _id: itemInfo._id }, { price: price, status: 1, owner: owners });
 		let newOrder = {
@@ -75,10 +76,9 @@ const buyItem = async (req: Request, res: Response) => {
 		let itemInfo = await findOneService(itemModel, { itemName, collectionId: collectionInfo._id });
 		if (!itemInfo) return res.status(404).json({ error: ERROR_RESPONSE[404] });
 		updateOneService(collectionModel, { _id: collectionInfo._id }, { volumeTrade: collectionInfo.volumeTrade + price });
-		let balanceOwner = await getBalanceTokenForAccount(owner, creator, collectionName, itemName, chainId);
 		let owners = itemInfo.owner;
-		if (balanceOwner === 0) {
-			owners = itemInfo.owner.filter((item: any) => item !== owner);
+		if (!owners.includes(userAddress)) {
+			owners.push(userAddress);
 		}
 		owners.push(userAddress);
 		await updateOneService(itemModel, { _id: itemInfo._id }, { owner: owners, status: 0 });
@@ -110,7 +110,11 @@ const cancelOrder = async (req: Request, res: Response) => {
 		if (!collectionInfo) return res.status(404).json({ error: ERROR_RESPONSE[404] });
 		let itemInfo = await findOneService(itemModel, { itemName, collectionId: collectionInfo._id });
 		if (!itemInfo) return res.status(404).json({ error: ERROR_RESPONSE[404] });
-		await updateOneService(itemModel, { _id: itemInfo._id }, { price: 0, status: 0 });
+		let owners = itemInfo.owner;
+		if (!owners.includes(userAddress)) {
+			owners.push(userAddress);
+		}
+		await updateOneService(itemModel, { _id: itemInfo._id }, { price: 0, status: 0, owner: owners });
 		deleteOneService(orderModel, { itemId: itemInfo._id });
 		let newHistory = {
 			collectionId: collectionInfo._id,
