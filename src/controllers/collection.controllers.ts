@@ -26,7 +26,9 @@ import {
 	getTopCollectionService,
 	getNewCollectionService,
 	getListCollectionService,
+	getListCollectionByCategory,
 } from "../services/collection.services";
+import { CATEGORY } from "../constant/collection.constant";
 const createCollection = async (req: Request, res: Response) => {
 	try {
 		let { userAddress, chainId } = req.params;
@@ -157,9 +159,29 @@ export const getNewCollectionController = async (req: Request, res: Response) =>
 	}
 };
 
-export const getAllCollectionC = async() => {
-
-}
+export const getAllCollectionByCategory = async (req: Request, res: Response) => {
+	try {
+		let chainId = Number(req.params.chainId);
+		// let categoryCollection: {category: String, collection: Collection[]}[] = [];
+		let categoryCollection: any = {};
+		for( let i = 0; i < 9; i++ ){
+			let category = Number(CATEGORY[i].key);
+			let collections: Collection[] = await getListCollectionByCategory({ category, chainId });
+			await Promise.all(
+				collections.map(async (collection: any, index: number) => {
+					let items = await findManyService(itemModel, { collectionId: collection._id });
+					collections[index].listItem = items;
+				}),
+			);
+			if(collections.length > 0){
+				categoryCollection[CATEGORY[i].type] = collections;
+			}	
+		}
+		return res.status(200).json({data: categoryCollection});
+	} catch (error: any) {
+		return res.status(500).json({ error: "Cannot get all Collection" });
+	}
+};
 
 export {
 	createCollection,
