@@ -43,6 +43,16 @@ const getHistoryTradeByDayService = async (fromDate: number, toDate: number, obj
 	return tradeHistories;
 };
 
+const getHistoryByItemService = async (itemId: string, objectQuery: any): Promise<History[]> => {
+	const histories: any = historyModel
+		.find({ itemId })
+		.lean()
+		.populate({ path: "itemInfo" })
+		.populate({ path: "fromUserInfo" })
+		.sort({ createdAt: -1 });
+	return histories;
+};
+
 export const getHistoryTraderByDayService = async (fromDate: number, toDate: number, objectQuery: any) => {
 	const startDay: Date = new Date(fromDate);
 	const endDay: Date = new Date(toDate);
@@ -62,6 +72,6 @@ export const getHistoryTraderByDayService = async (fromDate: number, toDate: num
 	});
 	await Promise.all(runTask);
 	return traderHistories;
-}
+};
 
-export { getHistoryTradeByDayService };
+export { getHistoryTradeByDayService, getHistoryByItemService };
