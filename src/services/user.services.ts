@@ -178,7 +178,9 @@ export const topTraderService = async (request: Number, chainID: number) => {
 	await Promise.all(
 		user.map(async (user, index) => {
 			const date = new Date(new Date().setDate(new Date().getDate() - Number(request)));
-			const trade = await getManyHistoryService({ from: user.userAddress, createdAt: { $gte: date } });
+			let from = user.userAddress.toString();
+			console.log(date)
+			const trade = await getManyHistoryService({ from, createdAt: { $gte: date } });
 			let sum = 0;
 			await Promise.all(
 				trade.map(async trader => {
@@ -198,7 +200,7 @@ export const topTraderService = async (request: Number, chainID: number) => {
 					break;
 				default:
 					percentTrade = await getTradeByDay(user.userAddress, chainID);
-			}	
+			}
 			const tradeOne: any = {
 				user,
 				volumeTrade: sum,
@@ -228,3 +230,4 @@ export {
 	getSearchUserByIdService,
 	verifySignUserService,
 };
+

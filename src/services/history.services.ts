@@ -12,6 +12,7 @@ import {
 import { Item } from "../interfaces/item.interfaces";
 import { ExtraHistory, History, HistoryTrade } from "../interfaces/history.interfaces";
 import { getOneItemService } from "./item.services";
+
 export const getManyHistoryService = async (objQuery: any): Promise<History[]> => {
 	const histories: History[] = await findManyService(historyModel, objQuery);
 	return histories;
