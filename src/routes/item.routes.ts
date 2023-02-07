@@ -4,7 +4,14 @@ import { checkUserExist } from "../middlewares/checkUser.middlewares";
 import { checkChainIdValid } from "../middlewares/checkOther.middlewares";
 import { checkOwnerCollection } from "../middlewares/checkCollection.middlewares";
 
-import { createItem, getItemById, getAllItem, getItemForUser } from "../controllers/item.controllers";
+import { 
+	createItem, 
+	getItemById, 
+	getAllItem, 
+	getItemForUser, 
+	showSelectItemController, 
+	showRandomListItemController 
+} from "../controllers/item.controllers";
 const itemRouter = express.Router();
 
 itemRouter.post(
@@ -22,5 +29,8 @@ itemRouter.get(
 	checkChainIdValid,
 	getItemForUser,
 );
+
+itemRouter.post("/show-list-item", showSelectItemController);
+itemRouter.get("/show-random-list-item", showRandomListItemController);
 
 export default itemRouter;

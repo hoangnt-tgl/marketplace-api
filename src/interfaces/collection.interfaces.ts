@@ -18,6 +18,7 @@ export interface Collection {
 	isConfirm: boolean;
 	ownerInfo: User;
 	isINO: Number;
+	listItem?: Item[];
 }
 export interface LessInfoCollection extends Collection {
 	listItem: Item[];

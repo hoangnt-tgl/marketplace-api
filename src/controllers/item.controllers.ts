@@ -13,7 +13,12 @@ import {
 	countByQueryService,
 } from "../services/model.services";
 
-import { getAllItemService, getOneItemService } from "../services/item.services";
+import { 
+	getAllItemService, 
+	getOneItemService, 
+	getListSelectItemService, 
+	getListRandomItemService 
+} from "../services/item.services";
 
 const createItem = async (req: Request, res: Response) => {
 	try {
@@ -74,5 +79,24 @@ const getItemForUser = async (req: Request, res: Response) => {
 		return res.status(500).json({ error: ERROR_RESPONSE[500] });
 	}
 };
+
+export const showSelectItemController = async(req: Request, res: Response) => {
+	try {
+		const list = req.body.listitem;
+		const listItem = await getListSelectItemService(list)
+		return res.status(200).json({ data: listItem });
+	} catch (error: any) {
+		return res.status(500).json({error: ERROR_RESPONSE[500] });
+	}
+};
+
+export const showRandomListItemController= async(req: Request, res: Response) => {
+	try {
+		const listItem: Item[] = await getListRandomItemService();
+		return res.status(200).json({ data: listItem });
+	} catch (error: any) {
+		return res.status(500).json({error: ERROR_RESPONSE[500] });
+	}
+}
 
 export { createItem, getItemById, getAllItem, getItemForUser };
