@@ -9,6 +9,7 @@ import {
 	getAllCollection,
 	getTopCollection,
 	getNewCollectionController,
+	getAllCollectionByCategory,
 } from "../controllers/collection.controllers";
 import { checkChainIdValid } from "../middlewares/checkOther.middlewares";
 
@@ -29,7 +30,11 @@ collectionRouter.get(
 	getCollectionByUserAddress,
 );
 
+
+
 collectionRouter.get("/category/:category/chainId/:chainId", getCollectionByCategory);
+
+collectionRouter.get("/category/chainId/:chainId", getAllCollectionByCategory);
 
 collectionRouter.get("/get-all/chainId/:chainId", getAllCollection);
 
@@ -38,4 +43,5 @@ collectionRouter.get("/get-info/collectionId/:collectionId", getCollectionById);
 collectionRouter.get("/get-new-created-collection", getNewCollectionController);
 
 collectionRouter.post("/top/chainId/:chainId/pageSize/:pageSize/page/:pageId", getTopCollection);
+
 export default collectionRouter;
