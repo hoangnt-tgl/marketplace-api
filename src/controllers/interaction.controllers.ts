@@ -13,6 +13,7 @@ import {
 	queryExistService,
 	findManyService,
 	deleteOneService,
+	deleteManyService,
 } from "../services/model.services";
 
 const createInteractionController = async (req: Request, res: Response) => {
@@ -23,7 +24,7 @@ const createInteractionController = async (req: Request, res: Response) => {
 
 		let itemExist = await queryExistService(itemModel, { _id: itemId });
 		if (!itemExist) return res.status(404).json({ error: ERROR_RESPONSE[404] });
-		await findManyService(interactionModel, { itemId, userAddress });
+		await deleteManyService(interactionModel, { itemId, userAddress });
 		if (state == true) {
 			await createService(interactionModel, { itemId, userAddress, state });
 		}
