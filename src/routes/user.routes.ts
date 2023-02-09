@@ -38,5 +38,4 @@ userRouter.get("/verify-email/:userAddress/:token", verificationEmailController)
 userRouter.get("/top-trader/chainId/:chainId", topTraderController);
 // userRouter.get("/search/userId/:userId", getSearchUserByIdController);
 
-
 export default userRouter;

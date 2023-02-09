@@ -93,7 +93,7 @@ const getCollectionByUserAddress = async (req: Request, res: Response) => {
 const getCollectionByCategory = async (req: Request, res: Response) => {
 	try {
 		let { category, chainId } = req.params;
-		let collections: Collection[] = await getListCollectionService({ category, chainId });
+		let collections: any = await getListCollectionService({ category, chainId });
 		await Promise.all(
 			collections.map(async (collection: any, index: number) => {
 				let items = await findManyService(itemModel, { collectionId: collection._id });
@@ -142,7 +142,14 @@ const getTopCollection = async (req: Request, res: Response) => {
 			collectionStandard,
 			category,
 		};
-		const collections = await getTopCollectionService(sortBy, sortFrom, objectQuery, Number(pageSize), Number(pageId), chainId);
+		const collections = await getTopCollectionService(
+			sortBy,
+			sortFrom,
+			objectQuery,
+			Number(pageSize),
+			Number(pageId),
+			chainId,
+		);
 
 		return res.status(200).json(collections);
 	} catch (error: any) {
@@ -164,7 +171,7 @@ export const getAllCollectionByCategory = async (req: Request, res: Response) =>
 		let chainId = Number(req.params.chainId);
 		// let categoryCollection: {category: String, collection: Collection[]}[] = [];
 		let categoryCollection: any = {};
-		for( let i = 0; i < 9; i++ ){
+		for (let i = 0; i < 9; i++) {
 			let category = Number(CATEGORY[i].key);
 			let collections: Collection[] = await getListCollectionByCategory({ category, chainId });
 			await Promise.all(
@@ -173,11 +180,11 @@ export const getAllCollectionByCategory = async (req: Request, res: Response) =>
 					collections[index].listItem = items;
 				}),
 			);
-			if(collections.length > 0){
+			if (collections.length > 0) {
 				categoryCollection[CATEGORY[i].type] = collections;
-			}	
+			}
 		}
-		return res.status(200).json({data: categoryCollection});
+		return res.status(200).json({ data: categoryCollection });
 	} catch (error: any) {
 		return res.status(500).json({ error: "Cannot get all Collection" });
 	}

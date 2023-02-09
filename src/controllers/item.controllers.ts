@@ -38,6 +38,7 @@ const createItem = async (req: Request, res: Response) => {
 			itemId: itemInfo._id,
 			from: userAddress,
 			to: req.body.to,
+			quantity: newItem.amount,
 			type: 1,
 			txHash: req.body.txHash,
 		};

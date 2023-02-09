@@ -28,7 +28,7 @@ const createUserController = async (req: Request, res: Response) => {
 		let { userAddress, signature, publicKey, nonce, isFirst } = req.body;
 		userAddress = userAddress.toLowerCase();
 
-		if (isFirst) {
+		if (true) {
 			const user: User = await createUserIfNotExistService(userAddress, nonce);
 			const { nonce: _, ...data } = user;
 
@@ -155,7 +155,6 @@ const getUserProfileController = async (req: Request, res: Response) => {
 		return res.status(500).json({ error: ERROR_RESPONSE[500] });
 	}
 };
-
 
 export {
 	createUserController,
