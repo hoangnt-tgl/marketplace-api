@@ -139,7 +139,7 @@ const getSearchUserByIdController = async (req: Request, res: Response) => {
 export const topTraderController = async (req: Request, res: Response) => {
 	try {
 		const request = req.query.request;
-		const chainId = req.params.chainId;
+		const chainId = Number(req.params.chainId);
 		return res.status(200).json(await topTraderService(Number(request), Number(chainId)));
 	} catch (error: any) {
 		return res.status(500).json({ error: ERROR_RESPONSE[500] });

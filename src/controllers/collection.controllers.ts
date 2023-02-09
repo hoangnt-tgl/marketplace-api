@@ -171,9 +171,10 @@ export const getAllCollectionByCategory = async (req: Request, res: Response) =>
 		let chainId = Number(req.params.chainId);
 		// let categoryCollection: {category: String, collection: Collection[]}[] = [];
 		let categoryCollection: any = {};
-		for (let i = 0; i < 9; i++) {
+		categoryCollection["All"] = [];
+		for (let i = 1; i < 9; i++) {
 			let category = Number(CATEGORY[i].key);
-			let collections: Collection[] = await getListCollectionByCategory({ category, chainId });
+			let collections: Collection[] = await getListCollectionService({ category, chainId });
 			await Promise.all(
 				collections.map(async (collection: any, index: number) => {
 					let items = await findManyService(itemModel, { collectionId: collection._id });
@@ -181,6 +182,7 @@ export const getAllCollectionByCategory = async (req: Request, res: Response) =>
 				}),
 			);
 			if (collections.length > 0) {
+				categoryCollection["All"] = categoryCollection["All"].concat(collections);
 				categoryCollection[CATEGORY[i].type] = collections;
 			}
 		}

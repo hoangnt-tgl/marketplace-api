@@ -12,6 +12,7 @@ import {
 import { Item } from "../interfaces/item.interfaces";
 import { ExtraHistory, History, HistoryTrade } from "../interfaces/history.interfaces";
 import { getOneItemService } from "./item.services";
+
 export const getManyHistoryService = async (objQuery: any): Promise<History[]> => {
 	const histories: History[] = await findManyService(historyModel, objQuery);
 	return histories;
@@ -42,6 +43,16 @@ const getHistoryTradeByDayService = async (fromDate: number, toDate: number, obj
 	return tradeHistories;
 };
 
+const getHistoryByItemService = async (itemId: string, objectQuery: any): Promise<History[]> => {
+	const histories: any = historyModel
+		.find({ itemId })
+		.lean()
+		.populate({ path: "itemInfo" })
+		.populate({ path: "fromUserInfo" })
+		.sort({ createdAt: -1 });
+	return histories;
+};
+
 export const getHistoryTraderByDayService = async (fromDate: number, toDate: number, objectQuery: any) => {
 	const startDay: Date = new Date(fromDate);
 	const endDay: Date = new Date(toDate);
@@ -61,16 +72,6 @@ export const getHistoryTraderByDayService = async (fromDate: number, toDate: num
 	});
 	await Promise.all(runTask);
 	return traderHistories;
-};
-
-const getHistoryByItemService = async (itemId: string, objectQuery: any): Promise<History[]> => {
-	const histories: any = historyModel
-		.find({ itemId })
-		.lean()
-		.populate({ path: "itemInfo" })
-		.populate({ path: "fromUserInfo" })
-		.sort({ createdAt: -1 });
-	return histories;
 };
 
 export const getHistoryByUserService = async (from: string, objectQuery: any): Promise<History[]> => {

@@ -18,7 +18,7 @@ import { BlackUser, User } from "../interfaces/user.interfaces";
 import { ListResponseAPI } from "../interfaces/responseData.interfaces";
 import { checkChainIdCollectionService } from "./collection.services";
 import { checkChainIdItemService } from "./item.services";
-import { HistoryTrade } from "../interfaces/history.interfaces"
+import { HistoryTrade } from "../interfaces/history.interfaces";
 
 const createUserIfNotExistService = async (userAddress: string, nonce: string): Promise<User> => {
 	let user: User = await findOneService(userModel, { userAddress });
@@ -124,23 +124,22 @@ const getTraderByDayService = async (
 		from: address,
 	});
 	let result: number = 0;
-	
 	await Promise.all(
-	histories.map(async (history: HistoryTrade) => {
-		const check = await checkChainIdCollectionService(history.collectionId.toString(), Number(chainId));
-		if(check === true){
-			result = result + history.usdPrice;
-		}
-	})
-	)
+		histories.map(async (history: HistoryTrade) => {
+			const check = await checkChainIdCollectionService(history.collectionId.toString(), Number(chainId));
+			if (check === true) {
+				result = result + history.usdPrice;
+			}
+		}),
+	);
 	return result;
 };
 
-export const topTraderService = async (request: Number, chainID: number) => {
+export const topTraderService = async (request: number, chainID: number) => {
 	let trd = new Array<Object>();
 	let data: { user: User, volumeTrade: Number, percent: Number }[] = [];
 	const user = await getAllUsersService();
-	
+
 	const getTradeByDay = async (address: String, chainId: number) => {
 		const now = Date.now();
 		const curDay = now - 24 * 3600 * 1000;
@@ -148,9 +147,9 @@ export const topTraderService = async (request: Number, chainID: number) => {
 
 		const newVolume = await getTraderByDayService(address, curDay, now, chainId);
 		const oldVolume = await getTraderByDayService(address, lastDay, curDay, chainId);
-		
-		const percent = oldVolume > 0 ? ((newVolume - oldVolume) / oldVolume) * 100 : 0
-		return percent
+
+		const percent = oldVolume > 0 ? ((newVolume - oldVolume) / oldVolume) * 100 : 0;
+		return percent;
 	};
 
 	const getTradeByWeek = async (address: String, chainId: number) => {
@@ -160,8 +159,8 @@ export const topTraderService = async (request: Number, chainID: number) => {
 		const newVolume = await getTraderByDayService(address, curWeek, now, chainId);
 		const oldVolume = await getTraderByDayService(address, lastWeek, curWeek, chainId);
 
-		const percent = oldVolume > 0 ? ((newVolume - oldVolume) / oldVolume) * 100 : 0
-		return percent
+		const percent = oldVolume > 0 ? ((newVolume - oldVolume) / oldVolume) * 100 : 0;
+		return percent;
 	};
 
 	const getTradeByMonth = async (address: String, chainId: number) => {
@@ -172,13 +171,15 @@ export const topTraderService = async (request: Number, chainID: number) => {
 		const newVolume = await getTraderByDayService(address, curMonth, now, chainId);
 		const oldVolume = await getTraderByDayService(address, lastMonth, curMonth, chainId);
 
-		const percent = oldVolume > 0 ? ((newVolume - oldVolume) / oldVolume) * 100 : 0
+		const percent = oldVolume > 0 ? ((newVolume - oldVolume) / oldVolume) * 100 : 0;
 		return percent;
 	};
+	console.log(request);
 	await Promise.all(
 		user.map(async (user, index) => {
 			const date = new Date(new Date().setDate(new Date().getDate() - Number(request)));
-			const trade = await getManyHistoryService({ from: user.userAddress, createdAt: { $gte: date } });
+			let from = user.userAddress.toString();
+			const trade = await getManyHistoryService({ from, createdAt: { $gte: date } });
 			let sum = 0;
 			await Promise.all(
 				trade.map(async trader => {
@@ -189,7 +190,7 @@ export const topTraderService = async (request: Number, chainID: number) => {
 				}),
 			);
 			let percentTrade = 0;
-			switch(request){
+			switch (request) {
 				case 7:
 					percentTrade = await getTradeByWeek(user.userAddress, chainID);
 					break;
@@ -198,22 +199,21 @@ export const topTraderService = async (request: Number, chainID: number) => {
 					break;
 				default:
 					percentTrade = await getTradeByDay(user.userAddress, chainID);
-			}	
+			}
 			const tradeOne: any = {
 				user,
 				volumeTrade: sum,
-				percentTrade
+				percentTrade,
 			};
 			data.push(tradeOne);
-		})
+		}),
 	);
 	data.sort((a: any, b: any) => parseFloat(b.volumeTrade.toString()) - parseFloat(a.volumeTrade.toString()));
 	data.map((data, index) => {
 		// Volume Trade > 0
-		if(data.volumeTrade){
+		if (data.volumeTrade) {
 			trd.push(data);
 		}
-		
 	});
 	return trd;
 };
@@ -228,3 +228,4 @@ export {
 	getSearchUserByIdService,
 	verifySignUserService,
 };
+
