@@ -20,22 +20,20 @@ userRouter.post("/login", checkUserAddressValid, createUserController);
 userRouter.post("/logout", checkUserAddressValid, checkUserAuthen, logoutUserController);
 userRouter.post("/upload", uploadUserImageController);
 
-userRouter.get("/userAddress", checkUserAuthen, async (req, res) => {
-	return res.send("oke");
-});
+userRouter.get("/userAddress", checkUserAuthen, async (req, res) => {  return res.send("oke");});
 
 /* ******************************************
  *				PUT ROUTE					                *
  ********************************************/
 
 userRouter.put("/userAddress/:userAddress", checkUserExist, updateUserController);
-userRouter.get("/userAddress/:userAddress", checkUserExist, getUserProfileController);
 
 /* ******************************************
  *				GET ROUTE					                *
  ********************************************/
 userRouter.get("/verify-email/:userAddress/:token", verificationEmailController);
 userRouter.get("/top-trader/chainId/:chainId", topTraderController);
+userRouter.get("/userAddress/:userAddress", checkUserExist, getUserProfileController);
 // userRouter.get("/search/userId/:userId", getSearchUserByIdController);
 
 
