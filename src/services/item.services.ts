@@ -60,62 +60,59 @@ const getAllItemService = async (objQuery: any, properties: string = ""): Promis
 	return itemList;
 };
 
-export const checkChainIdItemService = async(id: String, chainId: Number) => {
-	const items: Item = await findOneService(itemModel, {_id: id})
-	if(Number(items.chainId) === chainId){ 
-		return true
+export const checkChainIdItemService = async (id: String, chainId: Number) => {
+	const items: Item = await findOneService(itemModel, { _id: id });
+	if (Number(items.chainId) === chainId) {
+		return true;
 	} else return false;
 };
 
-export const getListSelectItemService = async(listItem: SelectItem[]) => {
-	let item: Item[]= [];
+export const getListSelectItemService = async (listItem: SelectItem[]) => {
+	let item: Item[] = [];
 	await Promise.all(
 		listItem.map(async (items: SelectItem) => {
-			const getItem: Item = await findOneService(itemModel,{_id: items.itemId});
+			const getItem: Item = await findOneService(itemModel, { _id: items.itemId });
 			item.push(getItem);
-		})
+		}),
 	);
 	return item;
 };
 
-const randomListItem = async(arr: Item[], n: number) => {
+const randomListItem = async (arr: Item[], n: number) => {
 	let result: Item[] = [];
 	let randomIndex;
 	let length = arr.length;
-	for(let i = 0; i < n; i++ ){
+	for (let i = 0; i < n; i++) {
 		randomIndex = Math.floor(Math.random() * length);
 		result.push(arr.splice(randomIndex, 1)[0]);
 		length--;
 	}
 	return result;
-}
+};
 
-export const getListRandomItemService = async() => {
+export const getListRandomItemService = async () => {
 	const allItem = await findManyService(itemModel, {});
 	const result: Item[] = await randomListItem(allItem, 10);
 	return result;
 };
 
-export const getListItemByCreatedService = async(userAddress: String) => {
-	const item: Item[] = await findManyService(itemModel, {created: userAddress});
+export const getListItemByCreatedService = async (userAddress: String) => {
+	const item: Item[] = await findManyService(itemModel, { creator: userAddress });
 	return item;
 };
 
-export const getListItemByOwnerService = async(userAddress: String) => {
+export const getListItemByOwnerService = async (userAddress: String) => {
 	const itemAll: Item[] = await findManyService(itemModel, {});
 	const item: Item[] = [];
 	Promise.all(
 		itemAll.map(async (items: Item) => {
-			if(items.creator !== userAddress){
+			if (items.creator !== userAddress) {
 				const owner: String[] = items.owner;
-				owner.map(async (owners: String) => {
-					if(owners === userAddress){
-						item.push(items);
-						return;
-					}
-				}) 
+				if (owner.includes(userAddress)) {
+					item.push(items);
+				}
 			}
-		})
+		}),
 	);
 	return item;
 };
