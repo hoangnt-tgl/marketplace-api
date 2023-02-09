@@ -23,6 +23,7 @@ import {
 } from "./other.services";
 
 import interactionModel from "../models/interaction.model";
+import { async } from "@firebase/util";
 
 const getOneItemService = async (objQuery: any, properties: string = ""): Promise<Item | null> => {
 	objQuery = removeUndefinedOfObj(objQuery);
@@ -93,6 +94,30 @@ export const getListRandomItemService = async() => {
 	const allItem = await findManyService(itemModel, {});
 	const result: Item[] = await randomListItem(allItem, 10);
 	return result;
-}
+};
+
+export const getListItemByCreatedService = async(userAddress: String) => {
+	const item: Item[] = await findManyService(itemModel, {created: userAddress});
+	return item;
+};
+
+export const getListItemByOwnerService = async(userAddress: String) => {
+	const itemAll: Item[] = await findManyService(itemModel, {});
+	const item: Item[] = [];
+	Promise.all(
+		itemAll.map(async (items: Item) => {
+			if(items.creator !== userAddress){
+				const owner: String[] = items.owner;
+				owner.map(async (owners: String) => {
+					if(owners === userAddress){
+						item.push(items);
+						return;
+					}
+				}) 
+			}
+		})
+	);
+	return item;
+};
 
 export { getOneItemService, getAllItemService };

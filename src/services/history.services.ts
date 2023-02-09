@@ -12,6 +12,7 @@ import {
 import { Item } from "../interfaces/item.interfaces";
 import { ExtraHistory, History, HistoryTrade } from "../interfaces/history.interfaces";
 import { getOneItemService } from "./item.services";
+
 export const getManyHistoryService = async (objQuery: any): Promise<History[]> => {
 	const histories: History[] = await findManyService(historyModel, objQuery);
 	return histories;
@@ -71,6 +72,16 @@ export const getHistoryTraderByDayService = async (fromDate: number, toDate: num
 	});
 	await Promise.all(runTask);
 	return traderHistories;
+};
+
+export const getHistoryByUserService = async (from: string, objectQuery: any): Promise<History[]> => {
+	const histories: any = historyModel
+		.find({ from })
+		.lean()
+		.populate({ path: "itemInfo" })
+		.populate({ path: "fromUserInfo" })
+		.sort({ createdAt: -1 });
+	return histories;
 };
 
 export { getHistoryTradeByDayService, getHistoryByItemService };

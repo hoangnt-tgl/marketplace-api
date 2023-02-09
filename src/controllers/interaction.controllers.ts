@@ -15,6 +15,8 @@ import {
 	deleteOneService,
 	deleteManyService,
 } from "../services/model.services";
+import { getOneItemService } from "../services/item.services";
+import { Item } from "../interfaces/item.interfaces";
 
 const createInteractionController = async (req: Request, res: Response) => {
 	try {
@@ -39,7 +41,15 @@ const getListItemInteractionController = async (req: Request, res: Response) => 
 	try {
 		let { userAddress } = req.params;
 		let listInteract = await findManyService(interactionModel, { userAddress, state: true });
-		let listItem = listInteract.map((item: any) => item.itemId);
+		let listItem: Item[] = [];
+		await Promise.all(
+			listInteract.map(async (item: any) => {
+				const items: Item | null = await getOneItemService({ _id: item.itemId });
+				if (items !== null) {
+					listItem.push(items);
+				}
+			}),
+		);
 		return res.status(200).json({ data: listItem });
 	} catch (error: any) {
 		return res.status(500).json({ error: ERROR_RESPONSE[500] });

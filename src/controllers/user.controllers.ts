@@ -28,7 +28,7 @@ const createUserController = async (req: Request, res: Response) => {
 		let { userAddress, signature, publicKey, nonce, isFirst } = req.body;
 		userAddress = userAddress.toLowerCase();
 
-		if (isFirst) {
+		if (true) {
 			const user: User = await createUserIfNotExistService(userAddress, nonce);
 			const { nonce: _, ...data } = user;
 
@@ -139,7 +139,7 @@ const getSearchUserByIdController = async (req: Request, res: Response) => {
 export const topTraderController = async (req: Request, res: Response) => {
 	try {
 		const request = req.query.request;
-		const chainId = req.params.chainId;
+		const chainId = Number(req.params.chainId);
 		return res.status(200).json(await topTraderService(Number(request), Number(chainId)));
 	} catch (error: any) {
 		return res.status(500).json({ error: ERROR_RESPONSE[500] });
@@ -155,7 +155,6 @@ const getUserProfileController = async (req: Request, res: Response) => {
 		return res.status(500).json({ error: ERROR_RESPONSE[500] });
 	}
 };
-
 
 export {
 	createUserController,
