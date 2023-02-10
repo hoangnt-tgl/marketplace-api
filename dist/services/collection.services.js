@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.writeTopCollectionService = exports.getTopCollectionService = void 0;
+exports.getListCollectionService = exports.writeTopCollectionService = exports.getTopCollectionService = exports.getListCollectionByCategory = exports.getAllCollectionService = exports.checkChainIdCollectionService = exports.getNewCollectionService = void 0;
 const collection_model_1 = __importDefault(require("../models/collection.model"));
 const item_model_1 = __importDefault(require("../models/item.model"));
 const history_model_1 = __importDefault(require("../models/history.model"));
@@ -20,7 +20,7 @@ const model_services_1 = require("./model.services");
 const history_services_1 = require("../services/history.services");
 const other_services_1 = require("./other.services");
 const fs_1 = __importDefault(require("fs"));
-const getTopCollectionService = (sortBy = "volumeTrade", sortFrom = "desc", objectQuery = {}, pageSize, pageId, chainId) => __awaiter(void 0, void 0, void 0, function* () {
+const getTopCollectionService = (sortBy = "volumeTrade", sortFrom, objectQuery = {}, pageSize, pageId, chainId) => __awaiter(void 0, void 0, void 0, function* () {
     objectQuery = (0, other_services_1.removeUndefinedOfObj)(objectQuery);
     const folder = fs_1.default.readdirSync("./public");
     if (!folder.includes("topCollection.json")) {
@@ -43,6 +43,7 @@ const getTopCollectionService = (sortBy = "volumeTrade", sortFrom = "desc", obje
         returnValue = sortable
             .sort(([, value1], [, value2]) => value2[sortBy] - value1[sortBy])
             .reduce((r, [k, v]) => (Object.assign(Object.assign({}, r), { [k]: v })), {});
+        console.log("1");
     }
     else {
         returnValue = sortable
@@ -181,3 +182,33 @@ const getExtraInfoCollectionService = (collectionId) => __awaiter(void 0, void 0
         listItem: obj.itemInfo.items.slice(0, totalItem), items: obj.itemInfo.items.length, owners: obj.itemInfo.owners, floorPrice: obj.floorPrice, volume24Hour: obj.day.volumeTradeByDay, volume7Days: obj.week.volumeTradeByWeek, volume30Days: obj.month.volumeTradeByMonth, percent24Hour: obj.day.percentByDay, percent7Days: obj.week.percentByWeek, percent30Days: obj.month.percentByMonth });
     return extraCollection;
 });
+const getNewCollectionService = () => __awaiter(void 0, void 0, void 0, function* () {
+    const date = new Date(new Date().setDate(new Date().getDate() - Number(1)));
+    const collection = yield (0, model_services_1.findManyService)(collection_model_1.default, { createdAt: { $gte: date } });
+    return collection;
+});
+exports.getNewCollectionService = getNewCollectionService;
+const checkChainIdCollectionService = (id, chainId) => __awaiter(void 0, void 0, void 0, function* () {
+    const collection = yield (0, model_services_1.findOneService)(collection_model_1.default, { _id: id });
+    if (Number(collection.chainId) === chainId) {
+        return true;
+    }
+    else
+        return false;
+});
+exports.checkChainIdCollectionService = checkChainIdCollectionService;
+const getListCollectionService = (query) => __awaiter(void 0, void 0, void 0, function* () {
+    const collections = yield collection_model_1.default.find(query).lean().populate("ownerInfo");
+    return collections;
+});
+exports.getListCollectionService = getListCollectionService;
+const getAllCollectionService = () => __awaiter(void 0, void 0, void 0, function* () {
+    const collection = yield (0, model_services_1.findManyService)(collection_model_1.default, {});
+    return collection;
+});
+exports.getAllCollectionService = getAllCollectionService;
+const getListCollectionByCategory = (query) => __awaiter(void 0, void 0, void 0, function* () {
+    const collections = yield (0, model_services_1.findManyService)(collection_model_1.default, query);
+    return collections;
+});
+exports.getListCollectionByCategory = getListCollectionByCategory;

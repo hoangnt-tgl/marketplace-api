@@ -16,11 +16,13 @@ const userRouter = express.Router();
  *				POST ROUTE					                *
  ********************************************/
 
-userRouter.post("/login", checkUserAddressValid, createUserController);
+userRouter.post("/login", checkUserAddressValid, checkUserAuthen, createUserController);
 userRouter.post("/logout", checkUserAddressValid, checkUserAuthen, logoutUserController);
 userRouter.post("/upload", uploadUserImageController);
 
-userRouter.get("/userAddress", checkUserAuthen, async (req, res) => {  return res.send("oke");});
+userRouter.get("/userAddress", checkUserAuthen, async (req, res) => {
+	return res.send("oke");
+});
 
 /* ******************************************
  *				PUT ROUTE					                *

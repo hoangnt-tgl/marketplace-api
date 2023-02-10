@@ -25,24 +25,11 @@ import fs from "fs";
 
 const createUserController = async (req: Request, res: Response) => {
 	try {
-		let { userAddress, signature, publicKey, nonce, isFirst } = req.body;
+		let { userAddress } = req.body;
 		userAddress = userAddress.toLowerCase();
-
-		if (true) {
-			const user: User = await createUserIfNotExistService(userAddress, nonce);
-			const { nonce: _, ...data } = user;
-
-			req.session.user = {
-				signature,
-				publicKey,
-			};
-
-			return res.status(200).json({ data: data });
-		} else {
-			const user: User = await getOneUserService(userAddress);
-			const { nonce: _, ...data } = user;
-			return res.status(200).json({ data: data });
-		}
+		const user: User = await createUserIfNotExistService(userAddress, "123");
+		const token = req.body.token;
+		return res.status(200).json({ token, data: user });
 	} catch (error: any) {
 		return res.status(403).json({ error: "Cannot Create User" });
 	}

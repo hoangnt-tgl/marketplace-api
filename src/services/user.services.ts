@@ -228,4 +228,3 @@ export {
 	getSearchUserByIdService,
 	verifySignUserService,
 };
-

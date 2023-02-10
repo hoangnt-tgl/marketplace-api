@@ -9,7 +9,7 @@ const transporter = nodemailer_1.default.createTransport({
     secure: false,
     auth: {
         user: process.env.EMAIL_ADDRESS || "space.tronghoang@gmail.com",
-        pass: process.env.EMAIL_PASSWORD || "hoangnt197",
+        pass: process.env.EMAIL_PASSWORD || "rdrgqlgvykhrbblv",
     },
 });
 transporter.verify((error, success) => {

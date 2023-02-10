@@ -71,8 +71,8 @@ export const getListSelectItemService = async (listItem: SelectItem[]) => {
 	let item: Item[] = [];
 	await Promise.all(
 		listItem.map(async (items: SelectItem) => {
-			const getItem: Item = await findOneService(itemModel, { _id: items.itemId });
-			item.push(getItem);
+			const getItem: Item | null = await getOneItemService( { _id: items.itemId });
+			item.push(getItem!);
 		}),
 	);
 	return item;
@@ -117,4 +117,4 @@ export const getListItemByOwnerService = async (userAddress: String) => {
 	return item;
 };
 
-export { getOneItemService, getAllItemService };
+export { getOneItemService, getAllItemService, checkItemExistsService };

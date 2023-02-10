@@ -2,7 +2,9 @@ import { BigNumber } from "ethers";
 import axios from "axios";
 import { GET_SORT_DIRECTION } from "../constant/condition.constant";
 import { SortObjOutput } from "../interfaces/other.interfaces";
+import jwt from "jsonwebtoken";
 
+const SESSION_SECRET = process.env.SESSION_SECRET || "secret";
 //Remove undefine query obj
 const removeUndefinedOfObj = (obj: any) => {
 	Object.keys(obj).forEach(key => (obj[key] === undefined ? delete obj[key] : {}));
@@ -75,6 +77,21 @@ const multiProcessService = async (functionArr: Array<any>) => {
 	return object;
 };
 
+const encodeJwt = (payload: any, time: string) => {
+	const token = jwt.sign(payload, SESSION_SECRET, {
+		expiresIn: time,
+	});
+	return token;
+};
+
+const decodeJwt = (token: string): any => {
+	try {
+		const decoded = jwt.verify(token, SESSION_SECRET);
+		return decoded;
+	} catch (err) {
+		return null;
+	}
+};
 export {
 	removeUndefinedOfObj,
 	createTokenIdService,
@@ -83,4 +100,6 @@ export {
 	paginateArrayService,
 	multiProcessService,
 	postDataToURL,
+	encodeJwt,
+	decodeJwt,
 };

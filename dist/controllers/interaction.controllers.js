@@ -8,45 +8,51 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkUserIsLikeItemController = exports.getListInteractionsController = exports.createInteractionController = void 0;
-const interactions_services_1 = require("../services/interactions.services");
+exports.getListItemInteractionController = exports.createInteractionController = void 0;
+const item_model_1 = __importDefault(require("../models/item.model"));
+const interaction_model_1 = __importDefault(require("../models/interaction.model"));
 const response_constants_1 = require("../constant/response.constants");
+const model_services_1 = require("../services/model.services");
+const item_services_1 = require("../services/item.services");
 const createInteractionController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { userAddress, itemId, state } = req.body;
     try {
-        const interaction = yield (0, interactions_services_1.createInteractionService)(userAddress, itemId, state);
-        return res.status(200).json(interaction);
+        let { userAddress, chainId } = req.params;
+        let { itemId, state } = req.body;
+        userAddress = userAddress.toLowerCase();
+        let itemExist = yield (0, model_services_1.queryExistService)(item_model_1.default, { _id: itemId });
+        if (!itemExist)
+            return res.status(404).json({ error: response_constants_1.ERROR_RESPONSE[404] });
+        yield (0, model_services_1.deleteManyService)(interaction_model_1.default, { itemId, userAddress });
+        if (state == true) {
+            yield (0, model_services_1.createService)(interaction_model_1.default, { itemId, userAddress, state });
+        }
+        return res.status(200).json("Like item success");
     }
     catch (error) {
+        console.log(error);
         return res.status(500).json({ error: response_constants_1.ERROR_RESPONSE[500] });
     }
 });
 exports.createInteractionController = createInteractionController;
-const getListInteractionsController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getListItemInteractionController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const userAddress = req.params.userAddress;
-        const listInteractions = yield (0, interactions_services_1.getInteractionByUserService)(userAddress);
-        if (listInteractions) {
-            return res.status(200).json({ data: listInteractions });
-        }
-        else {
-            return res.status(400).json({ error: response_constants_1.ERROR_RESPONSE[500] });
-        }
+        let { userAddress } = req.params;
+        let listInteract = yield (0, model_services_1.findManyService)(interaction_model_1.default, { userAddress, state: true });
+        let listItem = [];
+        yield Promise.all(listInteract.map((item) => __awaiter(void 0, void 0, void 0, function* () {
+            const items = yield (0, item_services_1.getOneItemService)({ _id: item.itemId });
+            if (items !== null) {
+                listItem.push(items);
+            }
+        })));
+        return res.status(200).json({ data: listItem });
     }
     catch (error) {
         return res.status(500).json({ error: response_constants_1.ERROR_RESPONSE[500] });
     }
 });
-exports.getListInteractionsController = getListInteractionsController;
-const checkUserIsLikeItemController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const itemId = req.params.itemId;
-    const userAddress = req.params.userAddress;
-    try {
-        const result = yield (0, interactions_services_1.checkUserIsLikeItemService)(userAddress, itemId);
-        return res.status(200).json({ data: result });
-    }
-    catch (error) { }
-    return res.status(500).json({ error: response_constants_1.ERROR_RESPONSE[500] });
-});
-exports.checkUserIsLikeItemController = checkUserIsLikeItemController;
+exports.getListItemInteractionController = getListItemInteractionController;

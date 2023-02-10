@@ -13,24 +13,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.connectDB = void 0;
-const { USERNAME_DB, PASSWORD_DB, NAME_DB } = process.env;
 const mongoose_1 = __importDefault(require("mongoose"));
+require("dotenv").config();
 const connectDB = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const promise = () => __awaiter(void 0, void 0, void 0, function* () {
-            return new Promise((resolve, rejects) => {
-                mongoose_1.default.connect(`mongodb+srv://${USERNAME_DB}:${PASSWORD_DB}@cluster0.gzirr.mongodb.net/${NAME_DB}?retryWrites=true&w=majority`, error => {
-                    if (error) {
-                        rejects(error);
-                    }
-                    else {
-                        resolve("Connect successfully to database!");
-                    }
-                });
-            });
-        });
-        const resolve = yield promise();
-        console.log(resolve);
+        yield mongoose_1.default.connect(process.env.MONGO_URI || "");
+        console.log(`Mongo db connected`);
     }
     catch (error) {
         console.log(error.message);

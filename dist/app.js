@@ -48,6 +48,7 @@ const api_routes_1 = __importDefault(require("./routes/api.routes"));
 const os_1 = __importDefault(require("os"));
 const http_1 = __importDefault(require("http"));
 const socket_io_1 = require("socket.io");
+const session_config_1 = require("./config/session.config");
 process.env.UV_THREADPOOL_SIZE = os_1.default.cpus().length;
 const app = (0, express_1.default)();
 const port = process.env.PORT || 3000;
@@ -62,6 +63,7 @@ const runningApp = () => __awaiter(void 0, void 0, void 0, function* () {
     app.use(express_1.default.urlencoded({ limit: "5000mb", extended: true, parameterLimit: 500000 }));
     app.use(express_1.default.json({ limit: '5000mb' }));
     app.use((0, cors_1.default)(cors_config_1.corsOptions));
+    app.use(session_config_1.sessionConfig);
     app.use((0, morgan_1.default)("dev"));
     app.use("/", api_routes_1.default);
     server.listen(port, () => {
