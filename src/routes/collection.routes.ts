@@ -12,6 +12,8 @@ import {
 	getAllCollectionByCategory,
 } from "../controllers/collection.controllers";
 import { checkChainIdValid } from "../middlewares/checkOther.middlewares";
+import { checkCollectionName } from "../middlewares/checkCollection.middlewares";
+import { checkCollectionDescription } from "../middlewares/checkCollection.middlewares";
 
 const collectionRouter = express.Router();
 
@@ -19,6 +21,8 @@ collectionRouter.post(
 	"/create/userAddress/:userAddress/chainId/:chainId",
 	checkUserExist,
 	checkChainIdValid,
+	checkCollectionName,
+	checkCollectionDescription,
 	createCollection,
 );
 

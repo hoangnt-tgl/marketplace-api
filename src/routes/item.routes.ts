@@ -3,6 +3,7 @@ import express from "express";
 import { checkUserExist } from "../middlewares/checkUser.middlewares";
 import { checkChainIdValid } from "../middlewares/checkOther.middlewares";
 import { checkOwnerCollection } from "../middlewares/checkCollection.middlewares";
+import { checkItemName, checkItemDescription } from "../middlewares/checkItem.middlewares";
 
 import { 
 	createItem, 
@@ -22,6 +23,8 @@ itemRouter.post(
 	checkUserExist,
 	checkChainIdValid,
 	checkOwnerCollection,
+	checkItemName,
+	checkItemDescription,
 	createItem,
 );
 itemRouter.get("/get-info/itemId/:itemId", getItemById);

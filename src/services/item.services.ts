@@ -38,7 +38,7 @@ const getOneItemService = async (objQuery: any, properties: string = ""): Promis
 	item.countFav = await countByQueryService(interactionModel, { itemId: item._id, state: true });
 	return item;
 };
-const checkItemExistsService = async (queryObj: object): Promise<boolean> => {
+export const checkItemExistsService = async (queryObj: object): Promise<boolean> => {
 	return await queryExistService(itemModel, queryObj);
 };
 
@@ -122,14 +122,14 @@ export const getListItemByOwnerService = async(userAddress: String) => {
 };
 
 const getTransactions = async (address: any) => {
-	const response = await axios.get(`https://fullnode.devnet.aptoslabs.com/v1/accounts/${address}/transactions`);
-	console.log(response);
+	const response = await axios.get(`https://fullnode.testnet.aptoslabs.com/v1/accounts/${address}/transactions`);
+	console.log(response.data);
 	const transactions = response.data.data[address].transactions;
 	return transactions;
   }
 
 export const getTransactionService = async () => {
-	const address = '0x78fa292f0b069dad9956d3b4ddf36b6f0250277511588cf454dcfbb58038ec7b';
+	const address = '0xf595d64530b1ad932094cfb7833ed37c2a7c84907020253726b1e1606c154a23';
 	const transactions = await getTransactions(address);
 	console.log(transactions);
 	return 1;
