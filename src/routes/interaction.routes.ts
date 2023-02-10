@@ -1,5 +1,5 @@
 import express from "express";
-import { checkUserExist } from "../middlewares/checkUser.middlewares";
+import { checkUserAuthen, checkUserExist } from "../middlewares/checkUser.middlewares";
 import { createInteractionController, getListItemInteractionController } from "../controllers/interaction.controllers";
 const interactionRouter = express.Router();
 
@@ -11,6 +11,7 @@ interactionRouter.post(
 	"/create/userAddress/:userAddress",
 	checkUserExist,
 	// checkSignLikeItemMiddleware,
+	checkUserAuthen,
 	createInteractionController,
 );
 

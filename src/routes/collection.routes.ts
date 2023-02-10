@@ -1,6 +1,6 @@
 import express from "express";
 
-import { checkUserExist } from "../middlewares/checkUser.middlewares";
+import { checkUserAuthen, checkUserExist } from "../middlewares/checkUser.middlewares";
 import {
 	createCollection,
 	getCollectionById,
@@ -19,6 +19,7 @@ collectionRouter.post(
 	"/create/userAddress/:userAddress/chainId/:chainId",
 	checkUserExist,
 	checkChainIdValid,
+	checkUserAuthen,
 	createCollection,
 );
 
@@ -29,8 +30,6 @@ collectionRouter.get(
 	checkChainIdValid,
 	getCollectionByUserAddress,
 );
-
-
 
 collectionRouter.get("/category/:category/chainId/:chainId", getCollectionByCategory);
 

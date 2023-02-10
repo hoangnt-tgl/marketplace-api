@@ -1,6 +1,6 @@
 import express from "express";
 
-import { checkUserExist } from "../middlewares/checkUser.middlewares";
+import { checkUserAuthen, checkUserExist } from "../middlewares/checkUser.middlewares";
 import { checkChainIdValid } from "../middlewares/checkOther.middlewares";
 import { checkOwnerCollection } from "../middlewares/checkCollection.middlewares";
 
@@ -14,6 +14,7 @@ import {
 	getListItemByCreatedController,
 	getListItemByOwnerController,
 } from "../controllers/item.controllers";
+
 const itemRouter = express.Router();
 
 itemRouter.post(
@@ -21,6 +22,7 @@ itemRouter.post(
 	checkUserExist,
 	checkChainIdValid,
 	checkOwnerCollection,
+	checkUserAuthen,
 	createItem,
 );
 itemRouter.get("/get-info/itemId/:itemId", getItemById);

@@ -20,15 +20,15 @@ userRouter.post("/login", checkUserAddressValid, checkUserAuthen, createUserCont
 userRouter.post("/logout", checkUserAddressValid, checkUserAuthen, logoutUserController);
 userRouter.post("/upload", uploadUserImageController);
 
-userRouter.get("/userAddress", checkUserAuthen, async (req, res) => {
-	return res.send("oke");
-});
+// userRouter.get("/userAddress", checkUserAuthen, async (req, res) => {
+// 	return res.send("oke");
+// });
 
 /* ******************************************
  *				PUT ROUTE					                *
  ********************************************/
 
-userRouter.put("/userAddress/:userAddress", checkUserExist, updateUserController);
+userRouter.put("/userAddress/:userAddress", checkUserExist, checkUserAuthen, updateUserController);
 
 /* ******************************************
  *				GET ROUTE					                *

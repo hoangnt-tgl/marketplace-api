@@ -24,12 +24,12 @@ export const checkUserExist = async (req: Request, res: Response, next: NextFunc
 
 export const checkUserAuthen = async (req: Request, res: Response, next: NextFunction) => {
 	try {
-		const userAddress = req.body.userAddress;
+		const userAddress = req.body.userAddress || req.params.userAddress;
 		const { publicKey, nonce, signature } = req.body;
 		if (publicKey && nonce && signature) {
 			const isValid = verifySignUserService(publicKey, nonce, signature);
 			if (isValid) {
-				const token = encodeJwt({ publicKey, nonce, signature }, "10m");
+				const token = encodeJwt({ publicKey, nonce, signature, userAddress }, "1d");
 				req.body.token = token;
 				return next();
 			}
@@ -37,9 +37,8 @@ export const checkUserAuthen = async (req: Request, res: Response, next: NextFun
 			const userExist = await checkUserExistsService(userAddress);
 			if (!userExist) return res.status(401).json({ error: ERROR_RESPONSE[401] });
 			const token = req.headers.authorization.split(" ")[1];
-			console.log(token);
 			const decode = decodeJwt(token);
-			console.log(decode);
+			if (userAddress !== decode.userAddress) return res.status(401).json({ error: ERROR_RESPONSE[401] });
 			if (decode) {
 				const isValid = verifySignUserService(decode.publicKey, decode.nonce, decode.signature);
 				if (isValid) {
