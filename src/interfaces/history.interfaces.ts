@@ -17,6 +17,11 @@ export interface History {
     itemInfo: Item;
 }
 
+export interface minTrade extends History {
+    itemID: String;
+    minTrade: Number;
+}
+
 export interface ExtraHistory extends History {
     chainId: ChainId;
     tokenPrice: number;

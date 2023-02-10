@@ -13,6 +13,7 @@ import {
 	showRandomListItemController,
 	getListItemByCreatedController, 
 	getListItemByOwnerController,
+	getTranController,
 } from "../controllers/item.controllers";
 const itemRouter = express.Router();
 
@@ -36,5 +37,6 @@ itemRouter.post("/show-list-item", showSelectItemController);
 itemRouter.get("/show-random-list-item", showRandomListItemController);
 itemRouter.get("/get-item-by-created/:userAddress", getListItemByCreatedController);
 itemRouter.get("/get-item-by-owner/:userAddress", getListItemByOwnerController);
+itemRouter.get("/get-transaction", getTranController);
 
 export default itemRouter;

@@ -19,6 +19,8 @@ export interface Collection {
 	ownerInfo: User;
 	isINO: Number;
 	listItem?: Item[];
+	countOwner?: Number;
+	minTradeItem?: Object[];
 }
 export interface LessInfoCollection extends Collection {
 	listItem: Item[];
