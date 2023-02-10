@@ -36,5 +36,4 @@ userRouter.get("/top-trader/chainId/:chainId", topTraderController);
 userRouter.get("/userAddress/:userAddress", checkUserExist, getUserProfileController);
 // userRouter.get("/search/userId/:userId", getSearchUserByIdController);
 
-
 export default userRouter;

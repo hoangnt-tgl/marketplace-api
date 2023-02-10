@@ -101,5 +101,14 @@ export const getMinTradeItemService = async(collectionId: String) => {
 	);
 	return minTradeItem;
 };
+export const getHistoryByUserService = async (from: string, objectQuery: any): Promise<History[]> => {
+	const histories: any = historyModel
+		.find({ from })
+		.lean()
+		.populate({ path: "itemInfo" })
+		.populate({ path: "fromUserInfo" })
+		.sort({ createdAt: -1 });
+	return histories;
+};
 
 export { getHistoryTradeByDayService, getHistoryByItemService };
