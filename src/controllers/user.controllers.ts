@@ -55,8 +55,7 @@ const updateUserController = async (req: Request, res: Response) => {
 			let html = fs.readFileSync(`${STATIC_FOLDER}/views/verificationEmail.html`, { encoding: "utf8" });
 			let token = jwt.sign({ userAddress }, "secret", { expiresIn: "10m" });
 			token = encodeURIComponent(token);
-			let host = req.headers.host?.includes("localhost") ? "http://" : "https://";
-			host += req.headers.host;
+			let host = "https://api.nftspacex.io/aptos";
 			let link = `${host}/users/verify-email/${userAddress}/${token}`;
 			html = html.replace("{{link}}", link);
 			await sendMailService(data.email, "Verify your email", html);

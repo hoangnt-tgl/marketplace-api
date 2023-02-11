@@ -49,6 +49,7 @@ const getHistoryByItemService = async (itemId: string, objectQuery: any): Promis
 		.lean()
 		.populate({ path: "itemInfo" })
 		.populate({ path: "fromUserInfo" })
+		.populate({ path: "collectionInfo" })
 		.sort({ createdAt: -1 });
 	return histories;
 };
@@ -80,6 +81,7 @@ export const getHistoryByUserService = async (from: string, objectQuery: any): P
 		.lean()
 		.populate({ path: "itemInfo" })
 		.populate({ path: "fromUserInfo" })
+		.populate({ path: "collectionInfo" })
 		.sort({ createdAt: -1 });
 	return histories;
 };

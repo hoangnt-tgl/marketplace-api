@@ -97,12 +97,12 @@ export const getListRandomItemService = async () => {
 };
 
 export const getListItemByCreatedService = async (userAddress: String) => {
-	const item: Item[] = await findManyService(itemModel, { creator: userAddress });
+	const item: Item[] = await getAllItemService( { creator: userAddress });
 	return item;
 };
 
 export const getListItemByOwnerService = async (userAddress: String) => {
-	const itemAll: Item[] = await findManyService(itemModel, {});
+	const itemAll: Item[] = await getAllItemService({});
 	const item: Item[] = [];
 	Promise.all(
 		itemAll.map(async (items: Item) => {

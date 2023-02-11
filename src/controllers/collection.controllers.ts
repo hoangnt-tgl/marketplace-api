@@ -78,7 +78,7 @@ const getCollectionByUserAddress = async (req: Request, res: Response) => {
 	try {
 		let { userAddress, chainId } = req.params;
 		userAddress = userAddress.toLowerCase();
-		let collectionInfo = await findManyService(collectionModel, { userAddress, chainId });
+		let collectionInfo = await getListCollectionService({ userAddress, chainId });
 		await Promise.all(
 			collectionInfo.map(async (collection: any, index: number) => {
 				let items = await findManyService(itemModel, { collectionId: collection._id });
