@@ -15,6 +15,8 @@ export interface History {
     type: number;
     createdAt: Date;
     itemInfo: Item;
+    fromUserInfo: any;
+    collectionInfo: any;
 }
 
 export interface minTrade extends History {

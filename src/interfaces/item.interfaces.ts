@@ -92,9 +92,10 @@ export interface Item1 {
 	isFreeze: boolean;
 	isINO: boolean;
 	external_url: string;
+};
+export interface ItemInfoCreated extends Item {
+	createdInfo: User;
 }
-
 export interface SelectItem{
 	itemId: Types.ObjectId;
-	chainId: string;
 }
