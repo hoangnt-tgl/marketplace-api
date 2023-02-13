@@ -1,6 +1,6 @@
 import itemModel from "../models/item.model";
 
-import { Item, SelectItem } from "../interfaces/item.interfaces";
+import { Item, ItemInfoCreated } from "../interfaces/item.interfaces";
 
 import {
 	createObjIdService,
@@ -21,7 +21,7 @@ import {
 	paginateArrayService,
 	removeUndefinedOfObj,
 } from "./other.services";
-
+import { getOneUserService } from "./user.services";
 import interactionModel from "../models/interaction.model";
 import { async } from "@firebase/util";
 import { getHistoryByUserService } from "./history.services";
@@ -71,11 +71,12 @@ export const checkChainIdItemService = async(id: String, chainId: Number) => {
 };
 
 export const getListSelectItemService = async(listItem: []) => {
-	let item: Item[]= [];
+	let item: ItemInfoCreated[]= [];
 	await Promise.all(
 		listItem.map(async (items: String) => {
 			console.log(items)
-			const getItem: Item = await findOneService(itemModel,{_id: items});
+			const getItem: ItemInfoCreated = await findOneService(itemModel,{_id: items});
+			getItem.createdInfo = await getOneUserService(String(getItem.creator));
 			if(!getItem){
 				console.log('Item not found');
 			} else

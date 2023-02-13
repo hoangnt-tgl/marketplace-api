@@ -8,6 +8,7 @@ import orderRouter from "./order.routes";
 import historyRouter from "./history.routes";
 import interactionRouter from "./interaction.routes";
 import testRouter from "./test.routes";
+import tokenRouter from "./token.routes";
 
 const APIRouter = express.Router();
 
@@ -19,5 +20,6 @@ APIRouter.use("/order", orderRouter);
 APIRouter.use("/history", historyRouter);
 APIRouter.use("/interaction", interactionRouter);
 APIRouter.use("/test", testRouter);
+APIRouter.use("/token", tokenRouter);
 
 export default APIRouter;

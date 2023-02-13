@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { Item } from "../interfaces/item.interfaces";
+import { Item, ItemInfoCreated } from "../interfaces/item.interfaces";
 import ItemModel from "../models/item.model";
 import interactionModel from "../models/interaction.model";
 import { ERROR_RESPONSE } from "../constant/response.constants";

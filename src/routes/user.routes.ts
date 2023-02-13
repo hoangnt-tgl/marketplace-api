@@ -16,7 +16,7 @@ const userRouter = express.Router();
  *				POST ROUTE					                *
  ********************************************/
 
-userRouter.post("/login", checkUserAddressValid, createUserController);
+userRouter.post("/login", checkUserAddressValid, checkUserAddressValid, createUserController);
 userRouter.post("/logout", checkUserAddressValid, checkUserAuthen, logoutUserController);
 userRouter.post("/upload", uploadUserImageController);
 

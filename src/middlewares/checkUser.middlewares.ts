@@ -59,3 +59,13 @@ export const checkUserAddressValid = async (req: Request, res: Response, next: N
 		return res.status(500).json({ error: ERROR_RESPONSE[500] });
 	}
 };
+
+export const checkBioUser = async (req: Request, res: Response, next: NextFunction) => {
+	try {
+		const { bio } = req.body;
+		if (bio.length > 1500) return res.status(400).json({ error: ERROR_RESPONSE[400] });
+		next();
+	} catch (error: any) {
+		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+	}
+};

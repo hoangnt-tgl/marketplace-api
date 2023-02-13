@@ -245,7 +245,7 @@ export const getNewCollectionService = async () => {
 	return collection;
 };
 
-export const checkChainIdCollectionService = async (id: String, chainId: Number) => {
+export const checkChainIdCollectionService = async (id: String, chainId: Number): Promise<boolean> => {
 	const collection: Collection = await findOneService(collectionModel, {_id: id})
 	if(Number(collection.chainId) === chainId){ 
 		return true
