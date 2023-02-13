@@ -20,6 +20,7 @@ import {
 	getListRandomItemService,
 	getListItemByCreatedService,
 	getListItemByOwnerService,
+	getTransactionService,
 } from "../services/item.services";
 
 const createItem = async (req: Request, res: Response) => {
@@ -117,6 +118,15 @@ export const getListItemByOwnerController = async (req: Request, res: Response) 
 		const result: Item[] = await getListItemByOwnerService(userAddress);
 		return res.status(200).json({ data: result });
 	} catch (error: any) {
+		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+	}
+};
+
+export const getTranController = async (req: Request, res: Response) => {
+	try {
+		const result: any = await getTransactionService();
+		return res.status(200).json({ result });
+	} catch (error) {
 		return res.status(500).json({ error: ERROR_RESPONSE[500] });
 	}
 };

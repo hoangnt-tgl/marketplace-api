@@ -3,6 +3,7 @@ import express from "express";
 import { checkUserAuthen, checkUserExist } from "../middlewares/checkUser.middlewares";
 import { checkChainIdValid } from "../middlewares/checkOther.middlewares";
 import { checkOwnerCollection } from "../middlewares/checkCollection.middlewares";
+import { checkItemName, checkItemDescription } from "../middlewares/checkItem.middlewares";
 
 import {
 	createItem,
@@ -13,6 +14,7 @@ import {
 	showRandomListItemController,
 	getListItemByCreatedController,
 	getListItemByOwnerController,
+	getTranController,
 } from "../controllers/item.controllers";
 
 const itemRouter = express.Router();
@@ -23,6 +25,8 @@ itemRouter.post(
 	checkChainIdValid,
 	checkOwnerCollection,
 	checkUserAuthen,
+	checkItemName,
+	checkItemDescription,
 	createItem,
 );
 itemRouter.get("/get-info/itemId/:itemId", getItemById);
@@ -38,5 +42,6 @@ itemRouter.post("/show-list-item", showSelectItemController);
 itemRouter.get("/show-random-list-item", showRandomListItemController);
 itemRouter.get("/get-item-by-created/:userAddress", getListItemByCreatedController);
 itemRouter.get("/get-item-by-collected/:userAddress", getListItemByOwnerController);
+itemRouter.get("/get-transaction", getTranController);
 
 export default itemRouter;

@@ -24,6 +24,7 @@ import {
 
 import interactionModel from "../models/interaction.model";
 import { async } from "@firebase/util";
+import axios from "axios";
 
 const getOneItemService = async (objQuery: any, properties: string = ""): Promise<Item | null> => {
 	objQuery = removeUndefinedOfObj(objQuery);
@@ -116,5 +117,19 @@ export const getListItemByOwnerService = async (userAddress: String) => {
 	);
 	return item;
 };
+
+const getTransactions = async (address: any) => {
+	const response = await axios.get(`https://fullnode.testnet.aptoslabs.com/v1/accounts/${address}/transactions`);
+	console.log(response.data);
+	const transactions = response.data.data[address].transactions;
+	return transactions;
+  }
+
+export const getTransactionService = async () => {
+	const address = '0xf595d64530b1ad932094cfb7833ed37c2a7c84907020253726b1e1606c154a23';
+	const transactions = await getTransactions(address);
+	console.log(transactions);
+	return 1;
+}
 
 export { getOneItemService, getAllItemService, checkItemExistsService };

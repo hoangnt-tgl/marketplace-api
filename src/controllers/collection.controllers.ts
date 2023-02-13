@@ -26,10 +26,9 @@ import {
 	getTopCollectionService,
 	getNewCollectionService,
 	getListCollectionService,
-	getListCollectionByCategory,
 } from "../services/collection.services";
 import { CATEGORY } from "../constant/collection.constant";
-import console from "console";
+import { getHistoryTradeByCollectionIdService, getMinTradeItemService } from "../services/history.services";
 const createCollection = async (req: Request, res: Response) => {
 	try {
 		let { userAddress, chainId } = req.params;
@@ -64,10 +63,22 @@ const createCollection = async (req: Request, res: Response) => {
 const getCollectionById = async (req: Request, res: Response) => {
 	try {
 		let { collectionId } = req.params;
-		let collectionInfo = await findOneService(collectionModel, { _id: collectionId });
+		let ownerFull: Array<String> = [];
+		let ownerFill: Array<String> = [];
+		let collectionInfo: Collection = await findOneService(collectionModel, { _id: collectionId });
+		collectionInfo.countOwner = 0;
 		if (!collectionInfo) return res.status(404).json({ error: ERROR_RESPONSE[404] });
 		let items = await getAllItemService({ collectionId: collectionInfo._id });
+		await Promise.all(
+			items.map(async item => {
+				ownerFull.push(String(item.owner));
+			}),
+		);
+		ownerFill = Array.from(new Set(ownerFull));
+		collectionInfo.volumeTrade = Number(await getHistoryTradeByCollectionIdService(collectionId));
+		collectionInfo.countOwner = Number(ownerFill.length);
 		collectionInfo.listItem = items;
+		collectionInfo.minTradeItem = await getMinTradeItemService(String(collectionInfo._id));
 		return res.status(200).json({ data: collectionInfo });
 	} catch (error: any) {
 		return res.status(500).json({ error: "Cannot get Collection" });

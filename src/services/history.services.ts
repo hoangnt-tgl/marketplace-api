@@ -10,8 +10,9 @@ import {
 	createObjIdService,
 } from "./model.services";
 import { Item } from "../interfaces/item.interfaces";
-import { ExtraHistory, History, HistoryTrade } from "../interfaces/history.interfaces";
+import { ExtraHistory, History, HistoryTrade, minTrade } from "../interfaces/history.interfaces";
 import { getOneItemService } from "./item.services";
+import { ObjectId } from "mongoose";
 
 export const getManyHistoryService = async (objQuery: any): Promise<History[]> => {
 	const histories: History[] = await findManyService(historyModel, objQuery);
@@ -75,6 +76,32 @@ export const getHistoryTraderByDayService = async (fromDate: number, toDate: num
 	return traderHistories;
 };
 
+export const getHistoryTradeByCollectionIdService = async(collectionId: String): Promise<Number>=> {
+	const history: History[] = await findManyService(historyModel, {collectionId, type: 7})
+	let sum = 0;
+	await Promise.all(
+		history.map(async (historys: History) => {
+			sum = sum + Number(historys.price);
+		})
+	);
+	return sum;
+};
+
+export const getMinTradeItemService = async(collectionId: String) => {
+	let minTradeItem: Array<Object> = [];
+	const history: History[] = await findManyService(historyModel, {collectionId, type: 6});
+	let minTrade = Math.min(...history.map((historys: History) => Number(historys.price)));
+	let result: History[] = history.filter(history => Number(history.price) === Number(minTrade));
+	// await Promise.all(
+		result.map( (historys: History) => {
+			const itemIdMinTrade: String = historys.itemId.toString();
+			const minValueTradeItem: any = Number(historys.price);
+			minTradeItem.push({itemIdMinTrade: itemIdMinTrade, minTradeItem: minValueTradeItem});
+			console.log(minTradeItem);
+		}
+	);
+	return minTradeItem;
+};
 export const getHistoryByUserService = async (from: string, objectQuery: any): Promise<History[]> => {
 	const histories: any = historyModel
 		.find({ from })
