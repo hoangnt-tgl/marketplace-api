@@ -96,5 +96,4 @@ export interface Item1 {
 
 export interface SelectItem{
 	itemId: Types.ObjectId;
-	chainId: string;
 }

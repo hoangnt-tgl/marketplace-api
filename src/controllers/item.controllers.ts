@@ -22,6 +22,7 @@ import {
 	getListItemByOwnerService,
 	getTransactionService,
 } from "../services/item.services";
+import fs from "fs";
 
 const createItem = async (req: Request, res: Response) => {
 	try {
@@ -130,5 +131,28 @@ export const getTranController = async (req: Request, res: Response) => {
 		return res.status(500).json({ error: ERROR_RESPONSE[500] });
 	}
 };
+
+export const setItemController = async (req: Request, res: Response) => {
+	try {
+		const listItemId = req.body.listItemId;
+		// fs.writeFileSync("./public/listItemId.json", JSON.stringify(listItemId));
+		fs.writeFile("./public/listItemId.json", JSON.stringify(listItemId), "utf8", () => {
+			console.log(`Update lits item successfully at ${new Date(Date.now())}`);
+		});
+		return res.status(200).json({ result: "success" });
+	} catch (error) {
+		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+	}
+};
+
+export const getItemController = async (req: Request, res: Response) => {
+	try {
+		const listItemId = JSON.parse(fs.readFileSync("./public/listItemId.json", "utf8"));
+		const listItem = await getListSelectItemService(listItemId);
+		return res.status(200).json({ data: listItem });
+	} catch (error) {
+		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+	}
+}
 
 export { createItem, getItemById, getAllItem, getItemForUser };

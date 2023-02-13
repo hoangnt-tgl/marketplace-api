@@ -24,7 +24,9 @@ import {
 
 import interactionModel from "../models/interaction.model";
 import { async } from "@firebase/util";
+import { getHistoryByUserService } from "./history.services";
 import axios from "axios";
+import { History } from "../interfaces/history.interfaces";
 
 const getOneItemService = async (objQuery: any, properties: string = ""): Promise<Item | null> => {
 	objQuery = removeUndefinedOfObj(objQuery);
@@ -68,11 +70,15 @@ export const checkChainIdItemService = async(id: String, chainId: Number) => {
 	} else return false;
 };
 
-export const getListSelectItemService = async(listItem: SelectItem[]) => {
+export const getListSelectItemService = async(listItem: []) => {
 	let item: Item[]= [];
 	await Promise.all(
-		listItem.map(async (items: SelectItem) => {
-			const getItem: Item = await findOneService(itemModel,{_id: items.itemId});
+		listItem.map(async (items: String) => {
+			console.log(items)
+			const getItem: Item = await findOneService(itemModel,{_id: items});
+			if(!getItem){
+				console.log('Item not found');
+			} else
 			item.push(getItem);
 		})
 	);
@@ -123,16 +129,32 @@ export const getListItemByOwnerService = async(userAddress: String) => {
 
 const getTransactions = async (address: any) => {
 	const response = await axios.get(`https://fullnode.testnet.aptoslabs.com/v1/accounts/${address}/transactions`);
-	console.log(response.data);
-	const transactions = response.data.data[address].transactions;
+	const result: String[] = [];
+	const data: [] = response.data;
+	await Promise.all(
+		data.map(async (dataM: any) => {
+			const history: History[] = await getHistoryByUserService(address, {});
+			const hash: String[] = history.map((hash: History) => hash.txHash);
+			// console.log(hash);
+			await Promise.all(
+				hash.map(async (txhash: String) => {
+					if(String(dataM.hash) !== String(txhash)){
+						result.push(String(dataM.hash));
+						console.log(String(dataM.hash));
+					}
+				})
+			)
+		})
+	);
+	const transactions = result;
 	return transactions;
   }
 
 export const getTransactionService = async () => {
-	const address = '0xf595d64530b1ad932094cfb7833ed37c2a7c84907020253726b1e1606c154a23';
+	const address = '0xf72cd5aa323a3e36ba73807f588885e047a5d1446dbccde3d4a4e8d6f6d8259f';
 	const transactions = await getTransactions(address);
-	console.log(transactions);
-	return 1;
+	// console.log(transactions);
+	return transactions;
 }
 
-export { getOneItemService, getAllItemService };
+export { getOneItemService, getAllItemService }; 
