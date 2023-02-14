@@ -129,14 +129,14 @@ const getTraderByDayService = async (
 		if (check === true) {
 			result = result + history.usdPrice;
 		}
-	})
+	});
 	return result;
 };
 
 const getTradeByDay = async (request: Number, address: String, chainId: number) => {
 	const now = Date.now();
-	const curDay = now - Number(request)*24 * 3600 * 1000;
-	const lastDay = curDay - Number(request)*24 * 3600 * 1000;
+	const curDay = now - Number(request) * 24 * 3600 * 1000;
+	const lastDay = curDay - Number(request) * 24 * 3600 * 1000;
 	const newVolume = await getTraderByDayService(address, curDay, now, chainId);
 	const oldVolume = await getTraderByDayService(address, lastDay, curDay, chainId);
 	const percent = oldVolume > 0 ? ((newVolume - oldVolume) / oldVolume) * 100 : 0;
@@ -146,24 +146,26 @@ const getTradeByDay = async (request: Number, address: String, chainId: number) 
 export const topTraderService = async (request: number, chainID: number) => {
 	let trd = new Array<Object>();
 	const user = await getAllUsersService();
-	const userTrades = await Promise.all(user.map(async (user) => {
-		const date = new Date(new Date().setDate(new Date().getDate() - Number(request)));
-		let from = user.userAddress.toString();
-		const trade = await getManyHistoryService({ from, createdAt: { $gte: date } });
-		let sum = 0;
-		trade.forEach(async (trader) => {
-			const check = await checkChainIdCollectionService(String(trader.collectionId), chainID);
-			if (check) {
-				sum += Number(trader.price);
-			}
-		});
-		let percentTrade = await getTradeByDay(request,user.userAddress, chainID);
-		return {
-			user,
-			volumeTrade: sum,
-			percentTrade,
-		};
-	}));
+	const userTrades = await Promise.all(
+		user.map(async user => {
+			const date = new Date(new Date().setDate(new Date().getDate() - Number(request)));
+			let from = user.userAddress.toString();
+			const trade = await getManyHistoryService({ from, createdAt: { $gte: date } });
+			let sum = 0;
+			trade.forEach(async trader => {
+				const check = await checkChainIdCollectionService(String(trader.collectionId), chainID);
+				if (check) {
+					sum += Number(trader.price);
+				}
+			});
+			let percentTrade = await getTradeByDay(request, user.userAddress, chainID);
+			return {
+				user,
+				volumeTrade: sum,
+				percentTrade,
+			};
+		}),
+	);
 	userTrades.sort((a, b) => b.volumeTrade - a.volumeTrade);
 	trd = userTrades.filter(data => data.volumeTrade);
 	return trd;
