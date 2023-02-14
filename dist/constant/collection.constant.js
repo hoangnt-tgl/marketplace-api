@@ -7,7 +7,7 @@ exports.CATEGORY = [
     { key: 2, type: "Music" },
     { key: 3, type: "Photography" },
     { key: 4, type: "Games" },
-    { key: 5, type: "Space" },
+    { key: 5, type: "Sport" },
     { key: 6, type: "Metaverse" },
     { key: 7, type: "Box" },
     { key: 8, type: "Card" },

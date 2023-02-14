@@ -12,29 +12,34 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.refreshSignature = void 0;
+exports.checkSignatureValid = exports.refreshSignature = void 0;
 const model_services_1 = require("../services/model.services");
 const user_model_1 = __importDefault(require("../models/user.model"));
-const response_constants_1 = require("../constant/response.constants");
-// import { removeFileCloundinary } from "../services/uploadFile.service"
-// const checkSignatureValid = async (req: Request, res: Response, next: NextFunction) => {
-// 	try {
-// 		const userAddress = req.params.userAddress || req.body.userAddress;
-// 		const user = await findOneService(userModel, { userAddress: userAddress.toLowerCase() });
-// 		if (user && user.signature.length > 0) {
-// 			const isSignatureExpired = checkSignatureExpired(user);
-// 			if (isSignatureExpired) return res.status(401).json({ error: ERROR_RESPONSE[401] });
-// 			else return next();
-// 		} else return next();
-// 	} catch (error: any) {
-// 		if(req.body.fileBackgroundName){
-// 			removeFileCloundinary(req.body.fileBackgroundName.toString())
-// 			removeFileCloundinary(req.body.fileLogoName.toString())
-// 		}	
-// 		console.log(error);
-// 		return res.status(500).json({ error: ERROR_RESPONSE[500] });
-// 	}
-// };
+const uploadFile_service_1 = require("../services/uploadFile.service");
+const checkSignatureValid = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const userAddress = req.params.userAddress || req.body.userAddress;
+        const user = yield (0, model_services_1.findOneService)(user_model_1.default, { userAddress: userAddress.toLowerCase() });
+        if (user && user.signature.length > 0) {
+            const isSignatureExpired = checkSignatureExpired(user);
+            if (isSignatureExpired)
+                return res.status(401).json({ error: "Signature expired" });
+            else
+                return next();
+        }
+        else
+            return next();
+    }
+    catch (error) {
+        if (req.body.fileBackgroundName) {
+            (0, uploadFile_service_1.removeFileCloundinary)(req.body.fileBackgroundName.toString());
+            (0, uploadFile_service_1.removeFileCloundinary)(req.body.fileLogoName.toString());
+        }
+        console.log(error);
+        return res.status(500).json({ error: "Cannot check signature" });
+    }
+});
+exports.checkSignatureValid = checkSignatureValid;
 const checkSignatureExpired = (user) => {
     const dateToMS = 86400;
     const expired_signature = Number(user.signature_expired_time);
@@ -57,7 +62,7 @@ const refreshSignature = (req, res, next) => __awaiter(void 0, void 0, void 0, f
     }
     catch (error) {
         console.log(error);
-        return res.status(500).json({ error: response_constants_1.ERROR_RESPONSE[500] });
+        return res.status(500).json({ error: "Cannot Refresh Signature" });
     }
 });
 exports.refreshSignature = refreshSignature;

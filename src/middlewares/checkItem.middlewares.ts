@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { ERROR_RESPONSE } from "../constant/response.constants";
+<<<<<<< HEAD
 import {
     createObjIdService
 } from "../services/model.services";
@@ -9,13 +10,14 @@ import {
 import fetch from "node-fetch";
 import axios from "axios";
 
+=======
+import { createObjIdService } from "../services/model.services";
+import { checkItemExistsService } from "../services/item.services";
+>>>>>>> 6bf0c45f0723e21111f0df1be944499fef2105c8
 
 const checkItemExistMiddleware = async (req: Request, res: Response, next: NextFunction) => {
 	try {
-		const itemId = 
-			req.params.itemId || 
-			req.body.itemId || 
-			req.body.boxId;
+		const itemId = req.params.itemId || req.body.itemId || req.body.boxId;
 		if (!itemId) {
 			return res.status(400).json({ error: "Not found Item ID" });
 		}
@@ -39,7 +41,6 @@ export const checkItemName = async (req: Request, res: Response, next: NextFunct
 	} catch (error: any) {
 		res.status(500).json({ error: "Cannot not check collection name" });
 	}
-
 };
 //check desscription not over 1500 character
 export const checkItemDescription = async (req: Request, res: Response, next: NextFunction) => {
@@ -58,14 +59,18 @@ export const checkItemMedia = async (req: Request, res: Response, next: NextFunc
 	const { itemMedia } = req.body.itemMedia;
 	await axios(itemMedia)
 		.then(res => {
+<<<<<<< HEAD
 			if(res.status === 200){
+=======
+			if (res.ok) {
+>>>>>>> 6bf0c45f0723e21111f0df1be944499fef2105c8
 				next();
 			}
 		})
 		.catch(err => {
 			return res.status(400).json({ error: "Item media is not valid" });
-		})
+		});
 	res.status(500).json({ error: "Item media is not valid" });
-}
+};
 
-export { checkItemExistMiddleware }
+export { checkItemExistMiddleware };

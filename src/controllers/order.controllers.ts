@@ -80,7 +80,6 @@ const buyItem = async (req: Request, res: Response) => {
 		if (!owners.includes(userAddress)) {
 			owners.push(userAddress);
 		}
-		owners.push(userAddress);
 		await updateOneService(itemModel, { _id: itemInfo._id }, { owner: owners, status: 0 });
 		deleteOneService(orderModel, { itemId: itemInfo._id });
 		let newHistory = {

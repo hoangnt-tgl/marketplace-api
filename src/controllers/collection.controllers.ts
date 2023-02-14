@@ -26,7 +26,6 @@ import {
 	getTopCollectionService,
 	getNewCollectionService,
 	getListCollectionService,
-	getListCollectionByCategory,
 } from "../services/collection.services";
 import { CATEGORY } from "../constant/collection.constant";
 import { getHistoryTradeByCollectionIdService, getMinTradeItemService } from "../services/history.services";
@@ -71,9 +70,9 @@ const getCollectionById = async (req: Request, res: Response) => {
 		if (!collectionInfo) return res.status(404).json({ error: ERROR_RESPONSE[404] });
 		let items = await getAllItemService({ collectionId: collectionInfo._id });
 		await Promise.all(
-			items.map(async (item) => {
+			items.map(async item => {
 				ownerFull.push(String(item.owner));
-			})
+			}),
 		);
 		ownerFill = Array.from(new Set(ownerFull));
 		collectionInfo.volumeTrade = Number(await getHistoryTradeByCollectionIdService(collectionId));
@@ -90,7 +89,7 @@ const getCollectionByUserAddress = async (req: Request, res: Response) => {
 	try {
 		let { userAddress, chainId } = req.params;
 		userAddress = userAddress.toLowerCase();
-		let collectionInfo = await findManyService(collectionModel, { userAddress, chainId });
+		let collectionInfo = await getListCollectionService({ userAddress, chainId });
 		await Promise.all(
 			collectionInfo.map(async (collection: any, index: number) => {
 				let items = await findManyService(itemModel, { collectionId: collection._id });
@@ -163,7 +162,7 @@ const getTopCollection = async (req: Request, res: Response) => {
 			Number(pageId),
 			chainId,
 		);
-
+		console.log(collections);
 		return res.status(200).json(collections);
 	} catch (error: any) {
 		return res.status(500).json({ error: "Cannot get top collection" });

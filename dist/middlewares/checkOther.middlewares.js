@@ -16,12 +16,12 @@ const checkPageIdMiddleware = (req, res, next) => {
     const pageId = req.params.pageId || req.body.pageId;
     try {
         if (pageId === undefined || Math.max(0, parseInt(pageId)) === 0) {
-            return res.status(404).json({ error: response_constants_1.ERROR_RESPONSE[404] });
+            return res.status(404).json({ error: "Not found page ID" });
         }
         return next();
     }
     catch (error) {
-        return res.status(500).json({ error: response_constants_1.ERROR_RESPONSE[500] });
+        return res.status(500).json({ error: "Cannot check page ID" });
     }
 };
 exports.checkPageIdMiddleware = checkPageIdMiddleware;
@@ -29,7 +29,7 @@ const checkChainIdValid = (req, res, next) => __awaiter(void 0, void 0, void 0, 
     try {
         const chainId = req.params.chainId;
         if (!chainId) {
-            return res.status(400).json({ error: response_constants_1.ERROR_RESPONSE[400] });
+            return res.status(400).json({ error: "Chain ID not found" });
         }
         if (!Object.keys(apiAptos_constant_1.BASE_URL).includes(chainId)) {
             return res.status(404).json({ error: response_constants_1.ERROR_RESPONSE[404] });
@@ -37,7 +37,7 @@ const checkChainIdValid = (req, res, next) => __awaiter(void 0, void 0, void 0, 
         next();
     }
     catch (error) {
-        return res.status(500).json({ error: response_constants_1.ERROR_RESPONSE[500] });
+        return res.status(500).json({ error: "Cannot check chain ID" });
     }
 });
 exports.checkChainIdValid = checkChainIdValid;

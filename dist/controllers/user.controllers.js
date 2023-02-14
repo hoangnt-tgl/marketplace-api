@@ -8,11 +8,22 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.verificationEmailController = exports.uploadUserImageController = exports.updateUserController = exports.createUserController = void 0;
+exports.getUserProfileController = exports.logoutUserController = exports.verificationEmailController = exports.uploadUserImageController = exports.updateUserController = exports.createUserController = exports.topTraderController = void 0;
 const user_services_1 = require("../services/user.services");
 const model_services_1 = require("../services/model.services");
 const user_model_1 = __importDefault(require("../models/user.model"));
@@ -26,13 +37,25 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const fs_1 = __importDefault(require("fs"));
 const createUserController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let { userAddress, signature } = req.body;
+        let { userAddress, signature, publicKey, nonce, isFirst } = req.body;
         userAddress = userAddress.toLowerCase();
-        const user = yield (0, user_services_1.createUserIfNotExistService)(userAddress, signature);
-        return res.status(200).json({ data: user });
+        if (true) {
+            const user = yield (0, user_services_1.createUserIfNotExistService)(userAddress, nonce);
+            const { nonce: _ } = user, data = __rest(user, ["nonce"]);
+            req.session.user = {
+                signature,
+                publicKey,
+            };
+            return res.status(200).json({ data: data });
+        }
+        else {
+            const user = yield (0, user_services_1.getOneUserService)(userAddress);
+            const { nonce: _ } = user, data = __rest(user, ["nonce"]);
+            return res.status(200).json({ data: data });
+        }
     }
     catch (error) {
-        return res.status(403).json({ error: response_constants_1.ERROR_RESPONSE[403] });
+        return res.status(403).json({ error: "Cannot Create User" });
     }
 });
 exports.createUserController = createUserController;
@@ -43,7 +66,7 @@ const uploadUserImageController = (req, res) => __awaiter(void 0, void 0, void 0
         return res.status(200).json({ data: result });
     }
     catch (error) {
-        return res.status(500).json({ error: response_constants_1.ERROR_RESPONSE[500] });
+        return res.status(500).json({ error: "Cannot Upload Image" });
     }
 });
 exports.uploadUserImageController = uploadUserImageController;
@@ -67,7 +90,7 @@ const updateUserController = (req, res) => __awaiter(void 0, void 0, void 0, fun
         return res.status(200).json({ data: user });
     }
     catch (error) {
-        return res.status(500).json({ error: response_constants_1.ERROR_RESPONSE[403] });
+        return res.status(500).json({ error: "Cannot Update User" });
     }
 });
 exports.updateUserController = updateUserController;
@@ -78,7 +101,7 @@ const verificationEmailController = (req, res) => __awaiter(void 0, void 0, void
         token = decodeURIComponent(token);
         const user = yield (0, model_services_1.findOneService)(user_model_1.default, { userAddress });
         if (!user)
-            return res.status(403).json({ error: response_constants_1.ERROR_RESPONSE[403] });
+            return res.status(403).json({ error: "Not Found User" });
         const decoded = jsonwebtoken_1.default.verify(token, "secret");
         if (decoded) {
             yield (0, model_services_1.updateOneService)(user_model_1.default, { userAddress }, { confirmEmail: true });
@@ -87,22 +110,22 @@ const verificationEmailController = (req, res) => __awaiter(void 0, void 0, void
         return res.status(403).json({ error: response_constants_1.ERROR_RESPONSE[403] });
     }
     catch (error) {
-        return res.status(500).json({ error: response_constants_1.ERROR_RESPONSE[500] });
+        return res.status(500).json({ error: "Cannot Verify Email" });
     }
 });
 exports.verificationEmailController = verificationEmailController;
-// const logoutController = async (req: Request, res: Response) => {
-// 	try {
-// 		const { userAddress } = req.body;
-// 		const user = await findOneService(userModel, { userAddress });
-// 		if (user.signature) {
-// 			await updateOneService(userModel, { userAddress }, { signature: "" });
-// 		}
-// 		return res.status(200).json({ message: "Logout successfully" });
-// 	} catch (error: any) {
-// 		return res.status(500).json({ error: ERROR_RESPONSE[500] });
-// 	}
-// };
+const logoutUserController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { userAddress } = req.body;
+        yield (0, model_services_1.updateOneService)(user_model_1.default, { userAddress }, { nonce: null });
+        req.session.destroy(() => { });
+        return res.status(200).json({ message: "Logout successfully" });
+    }
+    catch (error) {
+        return res.status(500).json({ error: response_constants_1.ERROR_RESPONSE[500] });
+    }
+});
+exports.logoutUserController = logoutUserController;
 const getQueryUserController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { pageSize, pageId } = req.params;
     try {
@@ -132,3 +155,25 @@ const getSearchUserByIdController = (req, res) => __awaiter(void 0, void 0, void
         return res.status(500).json({ error: response_constants_1.ERROR_RESPONSE[500] });
     }
 });
+const topTraderController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const request = req.query.request;
+        const chainId = Number(req.params.chainId);
+        return res.status(200).json(yield (0, user_services_1.topTraderService)(Number(request), Number(chainId)));
+    }
+    catch (error) {
+        return res.status(500).json({ error: response_constants_1.ERROR_RESPONSE[500] });
+    }
+});
+exports.topTraderController = topTraderController;
+const getUserProfileController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { userAddress } = req.params;
+        const user = yield (0, model_services_1.findOneService)(user_model_1.default, { userAddress });
+        return res.status(200).json({ data: user });
+    }
+    catch (error) {
+        return res.status(500).json({ error: response_constants_1.ERROR_RESPONSE[500] });
+    }
+});
+exports.getUserProfileController = getUserProfileController;

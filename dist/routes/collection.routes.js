@@ -12,7 +12,9 @@ collectionRouter.post("/create/userAddress/:userAddress/chainId/:chainId", check
 // get collection of one user
 collectionRouter.get("/userAddress/:userAddress/chainId/:chainId", checkUser_middlewares_1.checkUserExist, checkOther_middlewares_1.checkChainIdValid, collection_controllers_1.getCollectionByUserAddress);
 collectionRouter.get("/category/:category/chainId/:chainId", collection_controllers_1.getCollectionByCategory);
+collectionRouter.get("/category/chainId/:chainId", collection_controllers_1.getAllCollectionByCategory);
 collectionRouter.get("/get-all/chainId/:chainId", collection_controllers_1.getAllCollection);
 collectionRouter.get("/get-info/collectionId/:collectionId", collection_controllers_1.getCollectionById);
-collectionRouter.get("/top/chainId/:chainId/pageSize/:pageSize/page/:pageId", collection_controllers_1.getTopCollection);
+collectionRouter.get("/get-new-created-collection", collection_controllers_1.getNewCollectionController);
+collectionRouter.post("/top/chainId/:chainId/pageSize/:pageSize/page/:pageId", collection_controllers_1.getTopCollection);
 exports.default = collectionRouter;

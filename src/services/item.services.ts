@@ -40,7 +40,7 @@ const getOneItemService = async (objQuery: any, properties: string = ""): Promis
 	item.countFav = await countByQueryService(interactionModel, { itemId: item._id, state: true });
 	return item;
 };
-export const checkItemExistsService = async (queryObj: object): Promise<boolean> => {
+const checkItemExistsService = async (queryObj: object): Promise<boolean> => {
 	return await queryExistService(itemModel, queryObj);
 };
 
@@ -63,67 +63,61 @@ const getAllItemService = async (objQuery: any, properties: string = ""): Promis
 	return itemList;
 };
 
-export const checkChainIdItemService = async(id: String, chainId: Number) => {
-	const items: Item = await findOneService(itemModel, {_id: id})
-	if(Number(items.chainId) === chainId){ 
-		return true
+export const checkChainIdItemService = async (id: String, chainId: Number) => {
+	const items: Item = await findOneService(itemModel, { _id: id });
+	if (Number(items.chainId) === chainId) {
+		return true;
 	} else return false;
 };
 
-export const getListSelectItemService = async(listItem: []) => {
-	let item: ItemInfoCreated[]= [];
+export const getListSelectItemService = async (listItem: []) => {
+	let items: Item[] = [];
 	await Promise.all(
-		listItem.map(async (items: String) => {
-			console.log(items)
-			const getItem: ItemInfoCreated = await findOneService(itemModel,{_id: items});
-			getItem.createdInfo = await getOneUserService(String(getItem.creator));
-			if(!getItem){
-				console.log('Item not found');
-			} else
-			item.push(getItem);
-		})
+		listItem.map(async (id: String) => {
+			const item: Item | null = await getOneItemService({ _id: id });
+			if (item) {
+				items.push(item);
+			}
+		}),
 	);
-	return item;
+	return items;
 };
 
-const randomListItem = async(arr: Item[], n: number) => {
+const randomListItem = async (arr: Item[], n: number) => {
 	let result: Item[] = [];
 	let randomIndex;
 	let length = arr.length;
-	for(let i = 0; i < n; i++ ){
+	for (let i = 0; i < n; i++) {
 		randomIndex = Math.floor(Math.random() * length);
 		result.push(arr.splice(randomIndex, 1)[0]);
 		length--;
 	}
 	return result;
-}
+};
 
-export const getListRandomItemService = async() => {
+export const getListRandomItemService = async () => {
 	const allItem = await findManyService(itemModel, {});
 	const result: Item[] = await randomListItem(allItem, 10);
 	return result;
 };
 
-export const getListItemByCreatedService = async(userAddress: String) => {
-	const item: Item[] = await findManyService(itemModel, {created: userAddress});
+export const getListItemByCreatedService = async (userAddress: String) => {
+	const item: Item[] = await getAllItemService({ creator: userAddress });
 	return item;
 };
 
-export const getListItemByOwnerService = async(userAddress: String) => {
-	const itemAll: Item[] = await findManyService(itemModel, {});
+export const getListItemByOwnerService = async (userAddress: String) => {
+	const itemAll: Item[] = await getAllItemService({});
 	const item: Item[] = [];
 	Promise.all(
 		itemAll.map(async (items: Item) => {
-			if(items.creator !== userAddress){
+			if (items.creator !== userAddress) {
 				const owner: String[] = items.owner;
-				owner.map(async (owners: String) => {
-					if(owners === userAddress){
-						item.push(items);
-						return;
-					}
-				}) 
+				if (owner.includes(userAddress)) {
+					item.push(items);
+				}
 			}
-		})
+		}),
 	);
 	return item;
 };
@@ -139,23 +133,23 @@ const getTransactions = async (address: any) => {
 			// console.log(hash);
 			await Promise.all(
 				hash.map(async (txhash: String) => {
-					if(String(dataM.hash) !== String(txhash)){
+					if (String(dataM.hash) !== String(txhash)) {
 						result.push(String(dataM.hash));
 						console.log(String(dataM.hash));
 					}
-				})
-			)
-		})
+				}),
+			);
+		}),
 	);
 	const transactions = result;
 	return transactions;
-  }
+};
 
 export const getTransactionService = async () => {
-	const address = '0xf72cd5aa323a3e36ba73807f588885e047a5d1446dbccde3d4a4e8d6f6d8259f';
+	const address = "0xf72cd5aa323a3e36ba73807f588885e047a5d1446dbccde3d4a4e8d6f6d8259f";
 	const transactions = await getTransactions(address);
 	// console.log(transactions);
 	return transactions;
-}
+};
 
-export { getOneItemService, getAllItemService }; 
+export { getOneItemService, getAllItemService, checkItemExistsService };

@@ -13,24 +13,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.checkOwnerCollection = void 0;
-const response_constants_1 = require("../constant/response.constants");
 const collection_model_1 = __importDefault(require("../models/collection.model"));
 const model_services_1 = require("../services/model.services");
 const checkOwnerCollection = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let { userAddress } = req.params;
-        let { collectionId } = req.body || req.params;
+        let collectionId = req.body.collectionId || req.params.collectionId;
         if (!userAddress || !collectionId) {
-            return res.status(400).json({ error: response_constants_1.ERROR_RESPONSE[400] });
+            return res.status(400).json({ error: "UserAddress or Collection ID not found" });
         }
         let existCollection = yield (0, model_services_1.findOneService)(collection_model_1.default, { _id: collectionId, userAddress });
         if (!existCollection) {
-            return res.status(403).json({ error: response_constants_1.ERROR_RESPONSE[403] });
+            return res.status(403).json({ error: "Not found Collection" });
         }
         next();
     }
     catch (error) {
-        res.status(500).json({ error: response_constants_1.ERROR_RESPONSE[500] });
+        res.status(500).json({ error: "Cannot not check owner" });
     }
 });
 exports.checkOwnerCollection = checkOwnerCollection;

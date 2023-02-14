@@ -3,6 +3,7 @@ import { queryExistService } from "../services/model.services";
 import UserModel from "../models/user.model";
 import { ERROR_RESPONSE } from "../constant/response.constants";
 import { checkUserExistsService, getOneUserService, verifySignUserService } from "../services/user.services";
+import { encodeJwt, decodeJwt } from "../services/other.services";
 
 export const checkUserExist = async (req: Request, res: Response, next: NextFunction) => {
 	try {
@@ -25,23 +26,24 @@ export const checkUserAuthen = async (req: Request, res: Response, next: NextFun
 	try {
 		const userAddress = req.body.userAddress || req.params.userAddress;
 		const { publicKey, nonce, signature } = req.body;
-		const session = req.session;
-		if (session.user?.signature && session.user?.publicKey) {
-			const userExist = await checkUserExistsService(userAddress);
-			if (userExist) {
-				const user = await getOneUserService(userAddress);
-				const isValid = verifySignUserService(session.user?.publicKey, user.nonce, session.user?.signature);
-				if (isValid) {
-					req.body.isFirst = false;
-					return next();
-				}
-			}
-		} else {
-			// console.log("body:", req.body);
+		if (publicKey && nonce && signature) {
 			const isValid = verifySignUserService(publicKey, nonce, signature);
 			if (isValid) {
-				req.body.isFirst = true;
+				const token = encodeJwt({ publicKey, nonce, signature, userAddress }, "1d");
+				req.body.token = token;
 				return next();
+			}
+		} else if (req.headers.authorization && req.headers.authorization.split(" ")[0] === "Bearer") {
+			const userExist = await checkUserExistsService(userAddress);
+			if (!userExist) return res.status(401).json({ error: ERROR_RESPONSE[401] });
+			const token = req.headers.authorization.split(" ")[1];
+			const decode = decodeJwt(token);
+			if (userAddress !== decode.userAddress) return res.status(401).json({ error: ERROR_RESPONSE[401] });
+			if (decode) {
+				const isValid = verifySignUserService(decode.publicKey, decode.nonce, decode.signature);
+				if (isValid) {
+					return next();
+				}
 			}
 		}
 		return res.status(401).json({ error: ERROR_RESPONSE[401] });

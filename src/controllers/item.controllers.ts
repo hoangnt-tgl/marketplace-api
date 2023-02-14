@@ -107,17 +107,17 @@ export const getListItemByCreatedController = async (req: Request, res: Response
 	try {
 		const userAddress: String = req.params.userAddress;
 		const result: Item[] = await getListItemByCreatedService(userAddress);
-		return res.status(200).json({ result });
+		return res.status(200).json({ data: result });
 	} catch (error: any) {
 		return res.status(500).json({ error: ERROR_RESPONSE[500] });
 	}
 };
 
-export const getListItemByOwnerController = async(req: Request, res: Response) => {
+export const getListItemByOwnerController = async (req: Request, res: Response) => {
 	try {
 		const userAddress: String = req.params.userAddress;
 		const result: Item[] = await getListItemByOwnerService(userAddress);
-		return res.status(200).json({ result });	
+		return res.status(200).json({ data: result });
 	} catch (error: any) {
 		return res.status(500).json({ error: ERROR_RESPONSE[500] });
 	}

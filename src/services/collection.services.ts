@@ -257,15 +257,6 @@ const getListCollectionService = async (query: object) => {
 	return collections;
 };
 
-export const getAllCollectionService = async() => {
-	const collection: Collection[] = await findManyService(collectionModel, {});
-	return collection;
-}
-
-export const getListCollectionByCategory = async(query: object) => {
-	const collections: Collection[] = await findManyService(collectionModel, query);
-	return collections;
-};
 
 
 export { getTopCollectionService, writeTopCollectionService, getListCollectionService };

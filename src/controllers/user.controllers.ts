@@ -25,24 +25,11 @@ import fs from "fs";
 
 const createUserController = async (req: Request, res: Response) => {
 	try {
-		let { userAddress, signature, publicKey, nonce, isFirst } = req.body;
+		let { userAddress } = req.body;
 		userAddress = userAddress.toLowerCase();
-
-		if (true) {
-			const user: User = await createUserIfNotExistService(userAddress, nonce);
-			const { nonce: _, ...data } = user;
-
-			req.session.user = {
-				signature,
-				publicKey,
-			};
-
-			return res.status(200).json({ data: data });
-		} else {
-			const user: User = await getOneUserService(userAddress);
-			const { nonce: _, ...data } = user;
-			return res.status(200).json({ data: data });
-		}
+		const user: User = await createUserIfNotExistService(userAddress, "123");
+		const token = req.body.token;
+		return res.status(200).json({ token, data: user });
 	} catch (error: any) {
 		return res.status(403).json({ error: "Cannot Create User" });
 	}
@@ -68,8 +55,7 @@ const updateUserController = async (req: Request, res: Response) => {
 			let html = fs.readFileSync(`${STATIC_FOLDER}/views/verificationEmail.html`, { encoding: "utf8" });
 			let token = jwt.sign({ userAddress }, "secret", { expiresIn: "10m" });
 			token = encodeURIComponent(token);
-			let host = req.headers.host?.includes("localhost") ? "http://" : "https://";
-			host += req.headers.host;
+			let host = "https://api.nftspacex.io/aptos";
 			let link = `${host}/users/verify-email/${userAddress}/${token}`;
 			html = html.replace("{{link}}", link);
 			await sendMailService(data.email, "Verify your email", html);

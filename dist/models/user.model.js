@@ -16,8 +16,7 @@ const users = new Schema({
     social: { type: String, default: "" },
     bio: { type: String, default: "Introduce yourself to everyone" },
     confirmEmail: { type: Boolean, default: false },
-    // signature: { type: String, default: "" },
-    // signature_expired_time: { type: String, default: "" },
+    nonce: { type: String, require: true },
 }, {
     timestamps: true,
     toObject: { virtuals: true },

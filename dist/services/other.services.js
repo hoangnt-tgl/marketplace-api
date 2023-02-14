@@ -16,6 +16,7 @@ exports.postDataToURL = exports.multiProcessService = exports.paginateArrayServi
 const ethers_1 = require("ethers");
 const axios_1 = __importDefault(require("axios"));
 const condition_constant_1 = require("../constant/condition.constant");
+const SESSION_SECRET = process.env.SESSION_SECRET;
 //Remove undefine query obj
 const removeUndefinedOfObj = (obj) => {
     Object.keys(obj).forEach(key => (obj[key] === undefined ? delete obj[key] : {}));
