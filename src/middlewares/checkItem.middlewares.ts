@@ -21,8 +21,8 @@ const checkItemExistMiddleware = async (req: Request, res: Response, next: NextF
 
 export const checkItemName = async (req: Request, res: Response, next: NextFunction) => {
 	try {
-		let { collectionName } = req.body;
-		if (collectionName.length > 128) {
+		let { itemName } = req.body;
+		if (itemName.length > 128) {
 			return res.status(400).json({ error: "Collection name is too long" });
 		}
 		next();
@@ -33,14 +33,28 @@ export const checkItemName = async (req: Request, res: Response, next: NextFunct
 //check desscription not over 1500 character
 export const checkItemDescription = async (req: Request, res: Response, next: NextFunction) => {
 	try {
-		let { collectionDescription } = req.body;
-		if (collectionDescription.length > 1500) {
+		let { description } = req.body;
+		if (description.length > 1500) {
 			return res.status(400).json({ error: "Collection description is too long" });
 		}
 		next();
 	} catch (error: any) {
 		res.status(500).json({ error: "Cannot not check collection description" });
 	}
+};
+
+export const checkItemMedia = async (req: Request, res: Response, next: NextFunction) => {
+	const { itemMedia } = req.body.itemMedia;
+	fetch(itemMedia)
+		.then(res => {
+			if (res.ok) {
+				next();
+			}
+		})
+		.catch(err => {
+			return res.status(400).json({ error: "Item media is not valid" });
+		});
+	res.status(500).json({ error: "Item media is not valid" });
 };
 
 export { checkItemExistMiddleware };
