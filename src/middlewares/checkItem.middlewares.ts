@@ -44,17 +44,18 @@ export const checkItemDescription = async (req: Request, res: Response, next: Ne
 };
 
 export const checkItemMedia = async (req: Request, res: Response, next: NextFunction) => {
-	const { itemMedia } = req.body.itemMedia;
-	fetch(itemMedia)
-		.then(res => {
-			if (res.ok) {
-				next();
-			}
-		})
-		.catch(err => {
-			return res.status(400).json({ error: "Item media is not valid" });
-		});
-	res.status(500).json({ error: "Item media is not valid" });
+	next();
+	// const { itemMedia } = req.body.itemMedia;
+	// fetch(itemMedia)
+	// 	.then(res => {
+	// 		if (res.ok) {
+	// 			next();
+	// 		}
+	// 	})
+	// 	.catch(err => {
+	// 		return res.status(400).json({ error: "Item media is not valid" });
+	// 	});
+	// res.status(500).json({ error: "Item media is not valid" });
 };
 
 export { checkItemExistMiddleware };
