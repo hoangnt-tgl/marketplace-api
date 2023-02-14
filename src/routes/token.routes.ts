@@ -1,12 +1,12 @@
 import express from "express";
-import { createTokenController } from "../controllers/token.controllers";
+import { createTokenController, getAllTokenController } from "../controllers/token.controllers";
 const tokenRouter = express.Router();
 
 /* ******************************************
  *				POST ROUTE					                *
  ********************************************/
 
-tokenRouter.post("/create" , createTokenController);
+tokenRouter.post("/create", createTokenController);
 
 /* ******************************************
  *				PUT ROUTE					                *
@@ -16,6 +16,8 @@ tokenRouter.post("/create" , createTokenController);
 /* ******************************************
  *				GET ROUTE					                *
  ********************************************/
-
+tokenRouter.get("/get", getAllTokenController);
 
 export default tokenRouter;
+
+

@@ -6,6 +6,8 @@ import {
 import {
     checkItemExistsService
 } from "../services/item.services";
+import fetch from "node-fetch";
+import axios from "axios";
 
 
 const checkItemExistMiddleware = async (req: Request, res: Response, next: NextFunction) => {
@@ -54,9 +56,9 @@ export const checkItemDescription = async (req: Request, res: Response, next: Ne
 
 export const checkItemMedia = async (req: Request, res: Response, next: NextFunction) => {
 	const { itemMedia } = req.body.itemMedia;
-	fetch(itemMedia)
+	await axios(itemMedia)
 		.then(res => {
-			if(res.ok){
+			if(res.status === 200){
 				next();
 			}
 		})
