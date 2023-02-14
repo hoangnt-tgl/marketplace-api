@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from "express";
 import { ERROR_RESPONSE } from "../constant/response.constants";
-<<<<<<< HEAD
 import {
     createObjIdService
 } from "../services/model.services";
@@ -10,10 +9,6 @@ import {
 import fetch from "node-fetch";
 import axios from "axios";
 
-=======
-import { createObjIdService } from "../services/model.services";
-import { checkItemExistsService } from "../services/item.services";
->>>>>>> 6bf0c45f0723e21111f0df1be944499fef2105c8
 
 const checkItemExistMiddleware = async (req: Request, res: Response, next: NextFunction) => {
 	try {
@@ -57,13 +52,9 @@ export const checkItemDescription = async (req: Request, res: Response, next: Ne
 
 export const checkItemMedia = async (req: Request, res: Response, next: NextFunction) => {
 	const { itemMedia } = req.body.itemMedia;
-	await axios(itemMedia)
+	fetch(itemMedia)
 		.then(res => {
-<<<<<<< HEAD
-			if(res.status === 200){
-=======
 			if (res.ok) {
->>>>>>> 6bf0c45f0723e21111f0df1be944499fef2105c8
 				next();
 			}
 		})
