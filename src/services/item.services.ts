@@ -146,7 +146,7 @@ const getTransactions = async (address: any) => {
 };
 
 export const getTransactionService = async () => {
-	const address = "0xf72cd5aa323a3e36ba73807f588885e047a5d1446dbccde3d4a4e8d6f6d8259f";
+	const address = "0xfe72e4ba98b4052434f7313c9c93aea1a0ee6f0c54892e6435fb92ea53cfda0a";
 	const transactions = await getTransactions(address);
 	// console.log(transactions);
 	return transactions;

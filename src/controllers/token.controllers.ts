@@ -1,7 +1,9 @@
 import { Request, Response } from "express";
-import { createTokenService } from "../services/price.services";
+import { createTokenService, createToken } from "../services/price.services";
+import { getAllTokenService} from "../services/token.services";
+import { Token } from "../interfaces/token.interfaces";
 
-const createTokenController = async (req: Request, res: Response) => {
+export const createTokenController = async (req: Request, res: Response) => {
 	try {
         const token: [] = req.body;
         await Promise.all(
@@ -12,8 +14,11 @@ const createTokenController = async (req: Request, res: Response) => {
                 const tokenSymbol = tokens.symbol;
                 const decimal = tokens.decimals;
                 const logoURI = tokens.logo_url;
-                const isNative = true;
-                await createTokenService(chainId,tokenName, tokenSymbol, tokenAddress, decimal, logoURI, isNative);
+                const officialSymbol = tokens.official_symbol;
+                const coingeckoId = tokens.coingecko_id;
+                const projectUrl = tokens.project_url;
+                const tokenType = tokens.token_type.type;
+                await createToken(chainId, tokenName, tokenSymbol, officialSymbol, coingeckoId, decimal, logoURI, projectUrl, tokenAddress, tokenType);
             })
         );
 		// let { chainId, tokenName, tokenAddress, tokenSymbol, decimal, logoURI, isNative } = req.body;
@@ -25,4 +30,14 @@ const createTokenController = async (req: Request, res: Response) => {
 	}
 };
 
-export { createTokenController };
+export const getAllTokenController = async (req: Request, res: Response) => {
+    try{
+        let result: Token[] = await getAllTokenService();
+        return res.status(200).json(result);
+    }catch(error: any){
+        return res.status(500).json(error); 
+    }
+
+}
+
+
