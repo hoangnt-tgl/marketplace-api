@@ -7,6 +7,7 @@ import {
 	updateUserService,
 	getAllUsersService,
 	topTraderService,
+	gettopTraderAutoService,
 } from "../services/user.services";
 import { getManyHistoryService } from "../services/history.services";
 import { findOneService, updateOneService } from "../services/model.services";
@@ -141,6 +142,14 @@ const getUserProfileController = async (req: Request, res: Response) => {
 		return res.status(500).json({ error: ERROR_RESPONSE[500] });
 	}
 };
+
+export const gettopTraderAutoController = async (req: Request, res: Response) => {
+	try {
+		return res.status(200).json(await gettopTraderAutoService());
+	} catch (error: any) {
+		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+	}
+}; 
 
 export {
 	createUserController,

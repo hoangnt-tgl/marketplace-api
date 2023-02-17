@@ -1,5 +1,5 @@
 import itemModel from "../models/item.model";
-
+import historyModel from "../models/history.model";
 import { Item, ItemInfoCreated } from "../interfaces/item.interfaces";
 
 import {
@@ -148,8 +148,40 @@ const getTransactions = async (address: any) => {
 export const getTransactionService = async () => {
 	const address = "0xfe72e4ba98b4052434f7313c9c93aea1a0ee6f0c54892e6435fb92ea53cfda0a";
 	const transactions = await getTransactions(address);
-	// console.log(transactions);
 	return transactions;
+};
+
+export const updateItemService = async (id: String, send: String, receive: String, quantity: Number, txHash: String) => {
+	const item: Item | null = await getOneItemService({ _id: id });
+	if(item){
+		const owner: String[] = item.owner;
+		let check = false;
+		owner.map((address: String, index) => {
+			if(send === address){
+				owner.splice(index, 1);
+			}
+			if(receive === address){
+				check = true;
+			}
+		});
+		if(!check){
+			owner.push(receive);
+		}
+		const historyModel = {
+			collectionId: createObjIdService(String(item.collectionId)),
+			itemId: createObjIdService(String(item._id)),
+			from: String(send),
+			to: String(receive),
+			price: String(Number(item.price)*Number(quantity)),
+			priceType: String(item.priceType),
+			quantity: Number(quantity),
+			txHash: String(txHash),
+			type: 4,
+		};
+		await createService(historyModel, historyModel);
+		const itemUpdate: Item = await updateOneService(itemModel, { _id: id }, { owner});
+		return itemUpdate;
+	} else return null;
 };
 
 export { getOneItemService, getAllItemService, checkItemExistsService };

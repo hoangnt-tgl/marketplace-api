@@ -21,6 +21,7 @@ import {
 	getListItemByCreatedService,
 	getListItemByOwnerService,
 	getTransactionService,
+	updateItemService,
 } from "../services/item.services";
 import fs from "fs";
 
@@ -153,6 +154,16 @@ export const getItemController = async (req: Request, res: Response) => {
 	} catch (error) {
 		return res.status(500).json({ error: ERROR_RESPONSE[500] });
 	}
-}
+};
+
+export const updateOwnerController = async (req: Request, res: Response) => {
+	try{
+		const { itemId, send, receive, quantity, txHash } = req.body;
+		const result = await updateItemService(itemId, send, receive, quantity, txHash);
+		return res.status(200).json({ data: result });
+	} catch(error: any){
+		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+	}
+};
 
 export { createItem, getItemById, getAllItem, getItemForUser };

@@ -19,6 +19,7 @@ import { ListResponseAPI } from "../interfaces/responseData.interfaces";
 import { checkChainIdCollectionService } from "./collection.services";
 import { checkChainIdItemService } from "./item.services";
 import { HistoryTrade } from "../interfaces/history.interfaces";
+import fs from "fs";
 
 const createUserIfNotExistService = async (userAddress: string, nonce: string): Promise<User> => {
 	let user: User = await findOneService(userModel, { userAddress });
@@ -45,7 +46,7 @@ const getManyUserService = async (
 	sort: string[],
 	pageSize: number,
 	pageId: number,
-): Promise<ListResponseAPI<User>> => {
+): Promise<any> => {
 	const userAddress: any = text ? { userAddress: { $regex: text, $options: "i" } } : undefined;
 	const username: any = text ? { username: { $regex: text, $options: "i" } } : undefined;
 
@@ -171,6 +172,78 @@ export const topTraderService = async (request: number, chainID: number) => {
 	return trd;
 };
 
+
+export const topTraderAutoService = async () => {
+	let chainID = 2;
+	let trd = new Array<Object>();
+	const user = await getAllUsersService();
+	const userTrades = 
+	await Promise.all(
+		user.map(async user => {
+			//24 Hours
+			let from = user.userAddress.toString();
+			const date1 = new Date(new Date().setDate(new Date().getDate() - 1));
+			const trade1 = await getManyHistoryService({ from, createdAt: { $gte: date1 } });
+			let sum1 = 0;
+			await Promise.all(
+				trade1.map(async trader => {
+					const check = await checkChainIdCollectionService(String(trader.collectionId), chainID);
+					if (check) {
+						sum1 += Number(trader.price);
+					}
+				}),
+			);
+			let percentTrade1 = await getTradeByDay(1, user.userAddress, chainID);
+			//7 Days
+			const date7 = new Date(new Date().setDate(new Date().getDate() - 7));
+			const trade7 = await getManyHistoryService({ from, createdAt: { $gte: date7 } });
+			let sum7 = 0;
+			await Promise.all(
+				trade7.map(async trader => {
+					const check = await checkChainIdCollectionService(String(trader.collectionId), chainID);
+					if (check) {
+						sum7 += Number(trader.price);
+					}
+				})
+			);
+			let percentTrade7 = await getTradeByDay(7, user.userAddress, chainID);
+			//30 Days
+			const date30 = new Date(new Date().setDate(new Date().getDate() - 30));
+			const trade30 = await getManyHistoryService({ from, createdAt: { $gte: date30 } });
+			let sum30 = 0;
+			await Promise.all(
+				trade30.map(async trader => {
+					const check = await checkChainIdCollectionService(String(trader.collectionId), chainID);
+					if (check) {
+						sum30 += Number(trader.price);
+					}
+				})
+			);
+			let percentTrade30 = await getTradeByDay(30, user.userAddress, chainID);
+			return {
+				user,
+				volume24Hours: sum1,
+				volume7Days: sum7,
+				volume30Days: sum30,
+				percent24Hour: percentTrade1,
+				percent7Days: percentTrade7,
+				percent30Days: percentTrade30,
+			};
+		}),
+	);
+	// userTrades.sort((a, b) => b.volumeTrade - a.volumeTrade);
+	trd = userTrades.filter(data => data.volume30Days);
+	fs.writeFile("./public/topTrader.json", JSON.stringify(trd), "utf8", () => {
+		console.log(`Update top trader successfully at ${new Date(Date.now())}`);
+	});
+};
+
+export const gettopTraderAutoService = async () => {
+	const data = fs.readFileSync("./public/topTrader.json", "utf8");
+	return JSON.parse(data);
+}
+
+
 export {
 	createUserIfNotExistService,
 	checkUserExistsService,
@@ -181,3 +254,7 @@ export {
 	getSearchUserByIdService,
 	verifySignUserService,
 };
+
+
+
+

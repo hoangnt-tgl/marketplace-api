@@ -9,7 +9,15 @@ import {
 	getAllCollection,
 } from "../controllers/collection.controllers";
 import { checkChainIdValid } from "../middlewares/checkOther.middlewares";
-import { sellItem, buyItem, cancelOrder, getOrderSellItem } from "../controllers/order.controllers";
+import { 
+	sellItem, 
+	buyItem, 
+	cancelOrder, 
+	getOrderSellItem, 
+	createOrderController, 
+	getOrderByIdController,
+	deleteOrderController,
+} from "../controllers/order.controllers";
 const orderRouter = express.Router();
 
 orderRouter.post(
@@ -35,5 +43,8 @@ orderRouter.post(
 );
 
 orderRouter.get("/get-order-sell", getOrderSellItem);
+orderRouter.post("/create-order", createOrderController);
+orderRouter.get("/get-order-by-id/:orderId", getOrderByIdController);
+orderRouter.delete("/delete-order/:orderId", deleteOrderController);
 
 export default orderRouter;

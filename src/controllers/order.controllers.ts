@@ -15,13 +15,14 @@ import {
 	deleteOneService,
 } from "../services/model.services";
 import userModel from "../models/user.model";
-
+import { createOrderService, getCreationNumService, getOrderByIdService, deleteOrderService } from "../services/order.services";
 import formidable from "formidable";
 import { handlePromiseUpload } from "../services/uploadFile.service";
 import { LoginUser, User } from "../interfaces/user.interfaces";
 import { ResponseAPI } from "../interfaces/responseData.interfaces";
 import { ERROR_RESPONSE } from "../constant/response.constants";
 import { getBalanceTokenForAccount } from "../services/aptos.services";
+import { async } from "@firebase/util";
 
 const sellItem = async (req: Request, res: Response) => {
 	try {
@@ -143,6 +144,60 @@ const getOrderSellItem = async (req: Request, res: Response) => {
 	} catch (error: any) {
 		console.log(error);
 		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+	}
+};
+
+export const createOrderController = async(req: Request, res: Response) => {
+	try{
+		const {
+			chainId, 
+			maker, 
+			itemId, 
+			minPrice, 
+			coinType, 
+			amount, 
+			startTime, 
+			expirationTime, 
+			instantSale, 
+			auctionId } = req.body;
+		const txHash = String(req.body.txHash);
+		const creation_number: Number = await getCreationNumService(txHash);
+		const order: any = await createOrderService(
+			chainId, 
+			maker, 
+			itemId, 
+			minPrice, 
+			coinType,
+			creation_number,
+			amount, 
+			startTime, 
+			expirationTime, 
+			instantSale, 
+			auctionId
+		);
+		res.status(200).json({data: order});
+	} catch(error: any){
+		return res.status(500).json({error: ERROR_RESPONSE[500]});
+	}
+};
+
+export const getOrderByIdController = async(req: Request, res: Response) => {
+	try{
+		const { orderId } = req.params;
+		const order: Order = await getOrderByIdService(orderId);
+		res.status(200).json({data: order});
+	} catch(error: any){
+		return res.status(500).json({ messsage: "Get order fail" });
+	}
+};
+
+export const deleteOrderController = async(req: Request, res: Response) => {
+	try{
+		const { orderId } = req.params;
+		await deleteOrderService(orderId);
+		res.status(200).json({message: "Delete order success"});
+	} catch(error: any){
+		return res.status(500).json({ message: "Delete order fail" });
 	}
 };
 export { buyItem, sellItem, cancelOrder, getOrderSellItem };
