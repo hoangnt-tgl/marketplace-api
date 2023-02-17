@@ -27,6 +27,7 @@ import { async } from "@firebase/util";
 import { getHistoryByUserService } from "./history.services";
 import axios from "axios";
 import { History } from "../interfaces/history.interfaces";
+import { getBalanceTokenForAccount } from "./aptos.services";
 
 const getOneItemService = async (objQuery: any, properties: string = ""): Promise<Item | null> => {
 	objQuery = removeUndefinedOfObj(objQuery);
@@ -151,35 +152,43 @@ export const getTransactionService = async () => {
 	return transactions;
 };
 
-export const updateItemService = async (id: String, send: String, receive: String, quantity: Number, txHash: String) => {
+export const updateItemService = async (id: String, send: string, receive: String, quantity: Number, txHash: String) => {
 	const item: Item | null = await getOneItemService({ _id: id });
-	if(item){
-		const owner: String[] = item.owner;
-		let check = false;
-		owner.map((address: String, index) => {
-			if(send === address){
-				owner.splice(index, 1);
-			}
-			if(receive === address){
-				check = true;
-			}
-		});
-		if(!check){
+	if (item) {
+		let owner: String[] = item.owner;
+		const quantitySend = await getBalanceTokenForAccount(send, item?.creator!, item?.collectionInfo.collectionName!, item?.itemName!, item?.chainId!);
+		if (quantitySend === "0") {
+			owner = owner.filter((address: String) => address !== send);
+		};
+		if (!owner.includes(receive)) {
 			owner.push(receive);
-		}
+		};
+		// const owner: String[] = item.owner;
+		// let check = false;
+		// owner.map((address: String, index) => {
+		// 	if(send === address){
+		// 		owner.splice(index, 1);
+		// 	}
+		// 	if(receive === address){
+		// 		check = true;
+		// 	}
+		// });
+		// if(!check){
+		// 	owner.push(receive);
+		// }
 		const historyModel = {
 			collectionId: createObjIdService(String(item.collectionId)),
 			itemId: createObjIdService(String(item._id)),
 			from: String(send),
 			to: String(receive),
-			price: String(Number(item.price)*Number(quantity)),
+			price: String(Number(item.price) * Number(quantity)),
 			priceType: String(item.priceType),
 			quantity: Number(quantity),
 			txHash: String(txHash),
 			type: 4,
 		};
 		await createService(historyModel, historyModel);
-		const itemUpdate: Item = await updateOneService(itemModel, { _id: id }, { owner});
+		const itemUpdate: Item = await updateOneService(itemModel, { _id: id }, { owner });
 		return itemUpdate;
 	} else return null;
 };
