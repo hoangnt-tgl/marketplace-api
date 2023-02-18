@@ -47,6 +47,11 @@ const getTopCollectionService = async (
 		});
 	}
 	const file: any = fs.readFileSync("./public/topCollection.json");
+	if (Buffer.byteLength(file) === 0) {return { data: [],pagination: {totalPages: 0,
+		currentPage: 0,
+		pageSize: 0,
+		totalItems: 0}};
+	}
 	const topCollection: ExtraInfoCollection = JSON.parse(file)[chainId];
 	const sortable = Object.entries(topCollection).filter(([, value]: any) => {
 		let result: boolean = true;
@@ -61,7 +66,6 @@ const getTopCollectionService = async (
 		returnValue = sortable
 			.sort(([, value1]: any, [, value2]: any) => value2[sortBy] - value1[sortBy])
 			.reduce((r, [k, v]) => ({ ...r, [k]: v }), {});
-		console.log("1")
 	} else {
 		returnValue = sortable
 			.sort(([, value1]: any, [, value2]: any) => value1[sortBy] - value2[sortBy])
@@ -72,6 +76,7 @@ const getTopCollectionService = async (
 		pageSize,
 		pageId,
 	);
+	
 	return result;
 };
 

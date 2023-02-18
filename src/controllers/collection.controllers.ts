@@ -162,7 +162,6 @@ const getTopCollection = async (req: Request, res: Response) => {
 			Number(pageId),
 			chainId,
 		);
-		console.log(collections);
 		return res.status(200).json(collections);
 	} catch (error: any) {
 		return res.status(500).json({ error: "Cannot get top collection" });

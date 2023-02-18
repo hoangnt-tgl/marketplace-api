@@ -7,4 +7,4 @@ const UPDATE_TOP_COLLECTION_TIME = Number(<any>process.env.UPDATE_TOP_COLLECTION
 
 setInterval(async () => {
 	await writeTopCollectionService();
-}, Number(<any>process.env.UPDATE_TOP_COLLECTION_TIME));
+}, Number(<any>UPDATE_TOP_COLLECTION_TIME));
