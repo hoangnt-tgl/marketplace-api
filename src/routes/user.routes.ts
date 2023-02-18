@@ -7,6 +7,7 @@ import {
 	logoutUserController,
 	topTraderController,
 	getUserProfileController,
+	gettopTraderAutoController,
 } from "../controllers/user.controllers";
 import { checkUserExist, checkUserAddressValid, checkUserAuthen } from "../middlewares/checkUser.middlewares";
 
@@ -35,6 +36,7 @@ userRouter.put("/userAddress/:userAddress", checkUserExist, checkUserAuthen, upd
  ********************************************/
 userRouter.get("/verify-email/:userAddress/:token", verificationEmailController);
 userRouter.get("/top-trader/chainId/:chainId", topTraderController);
+userRouter.get("/get-top-trader", gettopTraderAutoController);
 userRouter.get("/userAddress/:userAddress", checkUserExist, getUserProfileController);
 // userRouter.get("/search/userId/:userId", getSearchUserByIdController);
 

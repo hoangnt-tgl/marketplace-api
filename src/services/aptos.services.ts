@@ -46,4 +46,5 @@ const getToken = async (creator: string, collectionName: string, name: string, c
 	return tokenClient.getToken(creator, collectionName, name);
 };
 
+
 export { getBalanceTokenForAccount, getCollectionData, getTokenData, getToken };

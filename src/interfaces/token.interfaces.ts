@@ -9,7 +9,10 @@ export interface Token {
 	tokenSymbol: string;
 	decimal: number;
 	logoURI: string;
-	isNative: boolean;
+	officialSymbol: string;
+	coingeckoId: string;
+	projectUrl: string;
+	tokenType: string;
 }
 
 export interface ReturnToken {

@@ -17,6 +17,7 @@ import {
 	getTranController,
 	setItemController,
 	getItemController,
+	updateOwnerController
 } from "../controllers/item.controllers";
 
 const itemRouter = express.Router();
@@ -48,5 +49,7 @@ itemRouter.get("/get-item-by-collected/:userAddress", getListItemByOwnerControll
 itemRouter.get("/get-transaction", getTranController);
 itemRouter.post("/setItem", setItemController);
 itemRouter.get("/getItem",	getItemController);
+
+itemRouter.put("/transfer", updateOwnerController);
 
 export default itemRouter;

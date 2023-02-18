@@ -1,5 +1,5 @@
 import itemModel from "../models/item.model";
-
+import historyModel from "../models/history.model";
 import { Item, ItemInfoCreated } from "../interfaces/item.interfaces";
 
 import {
@@ -27,6 +27,7 @@ import { async } from "@firebase/util";
 import { getHistoryByUserService } from "./history.services";
 import axios from "axios";
 import { History } from "../interfaces/history.interfaces";
+import { getBalanceTokenForAccount } from "./aptos.services";
 
 const getOneItemService = async (objQuery: any, properties: string = ""): Promise<Item | null> => {
 	objQuery = removeUndefinedOfObj(objQuery);
@@ -146,10 +147,49 @@ const getTransactions = async (address: any) => {
 };
 
 export const getTransactionService = async () => {
-	const address = "0xf72cd5aa323a3e36ba73807f588885e047a5d1446dbccde3d4a4e8d6f6d8259f";
+	const address = "0xfe72e4ba98b4052434f7313c9c93aea1a0ee6f0c54892e6435fb92ea53cfda0a";
 	const transactions = await getTransactions(address);
-	// console.log(transactions);
 	return transactions;
+};
+
+export const updateItemService = async (id: String, send: string, receive: String, quantity: Number, txHash: String) => {
+	const item: Item | null = await getOneItemService({ _id: id });
+	if (item) {
+		let owner: String[] = item.owner;
+		const quantitySend = await getBalanceTokenForAccount(send, item?.creator!, item?.collectionInfo.collectionName!, item?.itemName!, item?.chainId!);
+		if (quantitySend === "0") {
+			owner = owner.filter((address: String) => address !== send);
+		};
+		if (!owner.includes(receive)) {
+			owner.push(receive);
+		};
+		// const owner: String[] = item.owner;
+		// let check = false;
+		// owner.map((address: String, index) => {
+		// 	if(send === address){
+		// 		owner.splice(index, 1);
+		// 	}
+		// 	if(receive === address){
+		// 		check = true;
+		// 	}
+		// });
+		// if(!check){
+		// 	owner.push(receive);
+		// }
+		const newHistory = {
+			collectionId: createObjIdService(String(item.collectionId)),
+			itemId: createObjIdService(String(item._id)),
+			from: String(send),
+			to: String(receive),
+			price: 0,
+			quantity: Number(quantity),
+			txHash: String(txHash),
+			type: 4,
+		};
+		await createService(historyModel, newHistory);
+		const itemUpdate: Item = await updateOneService(itemModel, { _id: id }, { owner });
+		return itemUpdate;
+	} else return null;
 };
 
 export { getOneItemService, getAllItemService, checkItemExistsService };
