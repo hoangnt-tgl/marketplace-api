@@ -3,7 +3,6 @@ import { createObjIdService, createService, findOneService, deleteOneService } f
 import { Order } from "../interfaces/order.interfaces";
 import axios from "axios";
 
-
 export const getCreationNumService = async (txn_hash: string) => {
     const response = await axios.get(`https://fullnode.testnet.aptoslabs.com/v1/transactions/by_hash/${txn_hash}`);
 	return response.data.events[0].data.id.creation_num;

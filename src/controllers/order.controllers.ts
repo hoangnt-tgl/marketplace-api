@@ -5,8 +5,9 @@ import historyModel from "../models/history.model";
 import collectionModel from "../models/collection.model";
 import itemModel from "../models/item.model";
 import { Order } from "../interfaces/order.interfaces";
-
+import auctionModel from "../models/auction.model";
 import {
+	createObjIdService,
 	findOneService,
 	updateOneService,
 	createService,
@@ -28,29 +29,63 @@ const sellItem = async (req: Request, res: Response) => {
 	try {
 		let { userAddress, chainId } = req.params;
 		userAddress = userAddress.toLowerCase();
-		let { price, quantity, itemId, to, txHash, collectionId, collectionName, itemName, creator } = req.body;
-		let collectionInfo = await findOneService(collectionModel, { collectionName, userAddress: creator, chainId });
-		if (!collectionInfo) return res.status(404).json({ error: ERROR_RESPONSE[404] });
-		let itemInfo = await findOneService(itemModel, { itemName, collectionId: collectionInfo._id });
+		let { price, quantity, itemId, to, txHash, coinType, startTime, expirationTime, instantSale, auctionId, endTime } = req.body;
+		//find id item
+		let itemInfo = await findOneService(itemModel, { _id: itemId });
 		if (!itemInfo) return res.status(404).json({ error: ERROR_RESPONSE[404] });
-		let balanceOwner = await getBalanceTokenForAccount(userAddress, creator, collectionName, itemName, chainId);
-		console.log(balanceOwner);
+		let collection: Collection = await findOneService(collectionModel, { _id: itemInfo.collectionId });
+		let balanceOwner = await getBalanceTokenForAccount(userAddress, itemInfo.creator, collection.collectionName, itemInfo.itemName, chainId);
 		let owners = itemInfo.owner;
 		if (balanceOwner.toString() === "0") {
 			owners = owners.filter((item: any) => item !== userAddress);
 		}
 		await updateOneService(itemModel, { _id: itemInfo._id }, { price: price, status: 1, owner: owners });
-		let newOrder = {
-			maker: userAddress,
-			chainId: chainId,
-			quantity: quantity,
-			itemId: itemInfo._id,
-			basePrice: price,
-			type: 6,
-		};
+		let newOrder = {};
+		if(instantSale === false) {
+			newOrder = {
+				chainId: 2,
+				maker: userAddress,
+				itemId: createObjIdService(itemId), 
+				minPrice: price,
+				coinType: coinType,
+				creationNumber: await getCreationNumService(txHash),
+				amount: quantity,
+				startTime: new Date(startTime),
+				expirationTime: new Date(expirationTime),
+				instantSale,
+				type: 6,
+				auctionId,
+			};
+			let newAuction = {
+				chainId: 2,
+				itemId: itemId,
+				collectionId: createObjIdService(itemInfo.collectionId),
+				paymentToken: coinType,
+				minPrice: price,
+				seller: userAddress,
+				startTime,
+				endTime,
+				isLive: true,
+			};
+			await createService(auctionModel, newAuction);
+		} else{ 
+			newOrder = {
+				chainId: 2,
+				maker: userAddress,
+				itemId: createObjIdService(itemId), 
+				minPrice: price,
+				coinType: coinType,
+				creationNumber: await getCreationNumService(txHash),
+				amount: quantity,
+				startTime: new Date(startTime),
+				expirationTime: new Date(expirationTime),
+				instantSale,
+				type: 6,
+			};
+		}
 		let orderInfo = await createService(orderModel, newOrder);
 		let newHistory = {
-			collectionId: collectionInfo._id,
+			collectionId: itemInfo.collectionId,
 			itemId: itemInfo._id,
 			from: userAddress,
 			to: to,
