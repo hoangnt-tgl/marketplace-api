@@ -52,5 +52,5 @@ itemRouter.post("/setItem", setItemController);
 itemRouter.get("/getItem",	getItemController);
 
 itemRouter.put("/update-item", updateOwnerController);
-itemRouter.get("/get-volume-all-item/:id", getVolumeAllItemController);
+itemRouter.get("/get-volume-item/:id", getVolumeAllItemController);
 export default itemRouter;

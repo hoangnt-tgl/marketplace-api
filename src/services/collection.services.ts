@@ -18,8 +18,9 @@ import {
 	queryItemsOfModelInPageService,
 	updateOneService,
 } from "./model.services";
-import { getHistoryTradeByDayService, getHistoryTradeByCollectionIdService } from "../services/history.services";
-
+import { History } from "../interfaces/history.interfaces";
+import { getHistoryTradeByDayService, getHistoryTradeByCollectionIdService, getHistoryByCollectionService } from "../services/history.services";
+import { getHistoryByItemService } from "./history.services";
 import { getSortObj, multiProcessService, paginateArrayService, removeUndefinedOfObj } from "./other.services";
 import fs from "fs";
 
@@ -257,6 +258,30 @@ const getListCollectionService = async (query: object) => {
 	return collections;
 };
 
-
+export const getVolumeCollectionService = async (id: string) => {
+	let result: any[] = [];
+	let volume: { avgPrice: Number, date: Date, days: Number, month: Number, year: Number } = { avgPrice: 0, date: new Date(), days: 0, month: 0, year: 0 };
+	const history: History[] = await getHistoryByCollectionService(id, { type: 7 });
+	console.log(id);
+	history.forEach((history: History) => {
+		let index = result.findIndex((volume: any) => volume.days == history.createdAt.getDate() && volume.month == history.createdAt.getMonth() && volume.year == history.createdAt.getFullYear());
+		console.log(index)
+		if (index !== -1) {
+			let newVolume = result[index];
+			newVolume.avgPrice = Number(newVolume.avgPrice) + Number(history.price);
+			result[index] = newVolume;
+		} else {
+			volume = { avgPrice: 0, date: new Date(), days: 0, month: 0, year: 0};
+			volume.avgPrice = Number(history.price);
+			volume.date = history.createdAt;
+			volume.days = Number(history.createdAt.getDate());
+			volume.month = Number(history.createdAt.getMonth());
+			volume.year = Number(history.createdAt.getFullYear());
+			console.log("Volume: ",volume)
+			result.push(volume);
+		}
+	})
+	return result;
+};
 
 export { getTopCollectionService, writeTopCollectionService, getListCollectionService };

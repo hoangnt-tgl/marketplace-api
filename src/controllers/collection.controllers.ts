@@ -26,9 +26,12 @@ import {
 	getTopCollectionService,
 	getNewCollectionService,
 	getListCollectionService,
+	getVolumeCollectionService,
 } from "../services/collection.services";
 import { CATEGORY } from "../constant/collection.constant";
 import { getHistoryTradeByCollectionIdService, getMinTradeItemService } from "../services/history.services";
+
+
 const createCollection = async (req: Request, res: Response) => {
 	try {
 		let { userAddress, chainId } = req.params;
@@ -203,6 +206,16 @@ export const getAllCollectionByCategory = async (req: Request, res: Response) =>
 		return res.status(500).json({ error: "Cannot get all Collection" });
 	}
 };
+
+export const getVolumeTradeCollectionController = async (req: Request, res: Response) => {
+	try {
+		const id = String(req.params.id);
+		const result = await getVolumeCollectionService(id);
+		res.status(200).json({ data: result });
+	} catch (error: any) {
+		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+	}
+}
 
 export {
 	createCollection,
