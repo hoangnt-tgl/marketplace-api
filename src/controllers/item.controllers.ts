@@ -22,6 +22,8 @@ import {
 	getListItemByOwnerService,
 	getTransactionService,
 	updateItemService,
+	getVolumeAllItemService,
+	getVolumeItemService,
 } from "../services/item.services";
 import fs from "fs";
 
@@ -164,6 +166,18 @@ export const updateOwnerController = async (req: Request, res: Response) => {
 	} catch(error: any){
 		return res.status(500).json({ error: ERROR_RESPONSE[500] });
 	}
+};
+
+export const getVolumeAllItemController = async (req: Request, res: Response) => {
+	try {
+		const id = String(req.params.id);
+		const result = await getVolumeItemService(id);
+		res.status(200).json({ data: result });
+	} catch (error: any) {
+		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+	}
+
+
 };
 
 export { createItem, getItemById, getAllItem, getItemForUser };

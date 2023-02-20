@@ -17,7 +17,8 @@ import {
 	getTranController,
 	setItemController,
 	getItemController,
-	updateOwnerController
+	updateOwnerController,
+	getVolumeAllItemController
 } from "../controllers/item.controllers";
 
 const itemRouter = express.Router();
@@ -51,5 +52,5 @@ itemRouter.post("/setItem", setItemController);
 itemRouter.get("/getItem",	getItemController);
 
 itemRouter.put("/update-item", updateOwnerController);
-
+itemRouter.get("/get-volume-all-item/:id", getVolumeAllItemController);
 export default itemRouter;

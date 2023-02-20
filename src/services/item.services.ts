@@ -24,7 +24,7 @@ import {
 import { getOneUserService } from "./user.services";
 import interactionModel from "../models/interaction.model";
 import { async } from "@firebase/util";
-import { getHistoryByUserService } from "./history.services";
+import { getHistoryByUserService, getHistoryByItemService } from "./history.services";
 import axios from "axios";
 import { History } from "../interfaces/history.interfaces";
 import { getBalanceTokenForAccount } from "./aptos.services";
@@ -192,5 +192,43 @@ export const updateItemService = async (id: String, send: string, receive: Strin
 		return itemUpdate;
 	} else return null;
 };
+
+export const getVolumeAllItemService = async () => {
+	const item: Item[] = await getAllItemService({});
+	await Promise.all(
+		item.map(async (items: Item) => {
+			await getVolumeItemService(String(items._id));
+			// const volume: { volume: Number, date: Number, month: Number, year: Number } = await getVolumeItemService(String(items._id));
+			// console.log(volume);
+		}))
+	return 1;
+};
+
+export const getVolumeItemService = async (id: string) => {
+	let result: any[] = [];
+	let volume: { avgPrice: Number, date: Date, days: Number, month: Number, year: Number } = { avgPrice: 0, date: new Date(), days: 0, month: 0, year: 0 };
+	const history: History[] = await getHistoryByItemService(id, { type: 7 });
+	console.log(id);
+	history.forEach((history: History) => {
+		let index = result.findIndex((volume: any) => volume.days == history.createdAt.getDate() && volume.month == history.createdAt.getMonth() && volume.year == history.createdAt.getFullYear());
+		console.log(index)
+		if (index !== -1) {
+			let newVolume = result[index];
+			newVolume.avgPrice = Number(newVolume.avgPrice) + Number(history.price);
+			result[index] = newVolume;
+		} else {
+			volume = { avgPrice: 0, date: new Date(), days: 0, month: 0, year: 0};
+			volume.avgPrice = Number(history.price);
+			volume.date = history.createdAt;
+			volume.days = Number(history.createdAt.getDate());
+			volume.month = Number(history.createdAt.getMonth());
+			volume.year = Number(history.createdAt.getFullYear());
+			console.log("Volume: ",volume)
+			result.push(volume);
+		}
+	})
+	return result;
+};
+
 
 export { getOneItemService, getAllItemService, checkItemExistsService };
