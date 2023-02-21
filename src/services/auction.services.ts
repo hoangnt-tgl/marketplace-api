@@ -70,7 +70,7 @@ const queryAuctionService = async (
 	const queryStatus =
 		status === "live"
 			? { isLive: true }
-			: status === "upcoming"
+			: status === "nerver coming"
 			? { isLive: false, startTime: { $gt: Math.floor(Date.now() / 1000) } }
 			: status === "completed"
 			? { isLive: false, endTime: { $lte: Math.floor(Date.now() / 1000) } }

@@ -1,8 +1,7 @@
 import OrderModel from "../models/Order.model";
-import { createObjIdService, createService, findOneService, deleteOneService } from "./model.services";
+import { createObjIdService, createService, findOneService, deleteOneService, findManyService } from "./model.services";
 import { Order } from "../interfaces/order.interfaces";
 import axios from "axios";
-
 
 export const getCreationNumService = async (txn_hash: string) => {
     const response = await axios.get(`https://fullnode.testnet.aptoslabs.com/v1/transactions/by_hash/${txn_hash}`);
@@ -47,4 +46,9 @@ export const getOrderByIdService = async (orderId: string): Promise<Order> => {
 export const deleteOrderService = async (orderId: string) => {
     await deleteOneService(OrderModel, { _id: orderId});
     return "Done";
+};
+
+export const getOrderByItemIdService = async (itemId: string): Promise<Order[]> => {
+    const orders: Order[] = await findManyService(OrderModel, { itemId });
+    return orders;
 };

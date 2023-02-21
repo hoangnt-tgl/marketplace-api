@@ -10,6 +10,7 @@ import {
 	getTopCollection,
 	getNewCollectionController,
 	getAllCollectionByCategory,
+	getVolumeTradeCollectionController,
 } from "../controllers/collection.controllers";
 import { checkChainIdValid } from "../middlewares/checkOther.middlewares";
 import { checkCollectionName } from "../middlewares/checkCollection.middlewares";
@@ -46,5 +47,7 @@ collectionRouter.get("/get-info/collectionId/:collectionId", getCollectionById);
 collectionRouter.get("/get-new-created-collection", getNewCollectionController);
 
 collectionRouter.post("/top/chainId/:chainId/pageSize/:pageSize/page/:pageId", getTopCollection);
+
+collectionRouter.get("/get-volume-collection/:id", getVolumeTradeCollectionController);
 
 export default collectionRouter;

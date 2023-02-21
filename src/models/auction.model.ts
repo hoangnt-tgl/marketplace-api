@@ -9,7 +9,7 @@ const Schema = mongoose.Schema;
 const auctions = new Schema(
 	{
 		chainId: { type: Number, required: true },
-		listItemId: { type: Array },
+		itemId: { type: mongoose.Types.ObjectId },
 		collectionId: { type: mongoose.Types.ObjectId, ref: collectionModel },
 		paymentToken: { type: String, lowercase: true },
 		minPrice: { type: String, required: true },
@@ -17,7 +17,7 @@ const auctions = new Schema(
 		highestBidder: { type: String, default: NULL_ADDRESS, lowercase: true },
 		bidIncreasePercent: { type: Number, required: true },
 		seller: { type: String, lowercase: true, required: true },
-		refINO: { type: mongoose.Types.ObjectId, required: true },
+		// refINO: { type: mongoose.Types.ObjectId, required: true },
 		startTime: { type: Number, required: true },
 		endTime: { type: Number, required: true },
 		isLive: { type: Boolean, required: true },
@@ -45,15 +45,22 @@ auctions.virtual("ownerInfo", {
 	justOne: true, // for many-to-1 relationships
 });
 
-auctions.virtual("items", {
-	ref: itemModel,
-	localField: "listItemId",
-	foreignField: "_id",
-});
+// auctions.virtual("items", {
+// 	ref: itemModel,
+// 	localField: "listItemId",
+// 	foreignField: "_id",
+// });
 
 auctions.virtual("collectionInfo", {
 	ref: collectionModel,
 	localField: "collectionId",
+	foreignField: "_id",
+	justOne: true,
+});
+
+auctions.virtual("itemInfo", {
+	ref: itemModel,
+	localField: "itemId",
 	foreignField: "_id",
 	justOne: true,
 });

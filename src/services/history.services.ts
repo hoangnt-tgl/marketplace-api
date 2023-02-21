@@ -52,7 +52,18 @@ const getHistoryTradeByDayService = async (fromDate: number, toDate: number, obj
 
 const getHistoryByItemService = async (itemId: string, objectQuery: any): Promise<History[]> => {
 	const histories: any = historyModel
-		.find({ itemId })
+		.find({ itemId, ...objectQuery })
+		.lean()
+		.populate({ path: "itemInfo" })
+		.populate({ path: "fromUserInfo" })
+		.populate({ path: "collectionInfo" })
+		.sort({ createdAt: -1 });
+	return histories;
+};
+
+export const getHistoryByCollectionService = async (collectionId: string, objectQuery: any): Promise<History[]> => {
+	const histories: any = historyModel
+		.find({ collectionId, ...objectQuery })
 		.lean()
 		.populate({ path: "itemInfo" })
 		.populate({ path: "fromUserInfo" })

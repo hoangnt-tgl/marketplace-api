@@ -5,8 +5,10 @@ import historyModel from "../models/history.model";
 import collectionModel from "../models/collection.model";
 import itemModel from "../models/item.model";
 import { Order } from "../interfaces/order.interfaces";
-
+import { Item } from "../interfaces/item.interfaces";
+import auctionModel from "../models/auction.model";
 import {
+	createObjIdService,
 	findOneService,
 	updateOneService,
 	createService,
@@ -15,42 +17,81 @@ import {
 	deleteOneService,
 } from "../services/model.services";
 import userModel from "../models/user.model";
-import { createOrderService, getCreationNumService, getOrderByIdService, deleteOrderService } from "../services/order.services";
+import { 
+	createOrderService, 
+	getCreationNumService, 
+	getOrderByIdService, 
+	deleteOrderService, 
+	getOrderByItemIdService 
+} from "../services/order.services";
 import formidable from "formidable";
 import { handlePromiseUpload } from "../services/uploadFile.service";
 import { LoginUser, User } from "../interfaces/user.interfaces";
 import { ResponseAPI } from "../interfaces/responseData.interfaces";
 import { ERROR_RESPONSE } from "../constant/response.constants";
 import { getBalanceTokenForAccount } from "../services/aptos.services";
-import { async } from "@firebase/util";
 
 const sellItem = async (req: Request, res: Response) => {
 	try {
 		let { userAddress, chainId } = req.params;
 		userAddress = userAddress.toLowerCase();
-		let { price, quantity, itemId, to, txHash, collectionId, collectionName, itemName, creator } = req.body;
-		let collectionInfo = await findOneService(collectionModel, { collectionName, userAddress: creator, chainId });
-		if (!collectionInfo) return res.status(404).json({ error: ERROR_RESPONSE[404] });
-		let itemInfo = await findOneService(itemModel, { itemName, collectionId: collectionInfo._id });
+		let { price, quantity, itemId, to, txHash, coinType, startTime, instantSale, auctionId, endTime } = req.body;
+		//find id item
+		let itemInfo = await findOneService(itemModel, { _id: itemId });
 		if (!itemInfo) return res.status(404).json({ error: ERROR_RESPONSE[404] });
-		let balanceOwner = await getBalanceTokenForAccount(userAddress, creator, collectionName, itemName, chainId);
-		console.log(balanceOwner);
+		let collection: Collection = await findOneService(collectionModel, { _id: itemInfo.collectionId });
+		let balanceOwner = await getBalanceTokenForAccount(userAddress, itemInfo.creator, collection.collectionName, itemInfo.itemName, chainId);
 		let owners = itemInfo.owner;
 		if (balanceOwner.toString() === "0") {
 			owners = owners.filter((item: any) => item !== userAddress);
 		}
 		await updateOneService(itemModel, { _id: itemInfo._id }, { price: price, status: 1, owner: owners });
-		let newOrder = {
-			maker: userAddress,
-			chainId: chainId,
-			quantity: quantity,
-			itemId: itemInfo._id,
-			basePrice: price,
-			type: 6,
-		};
+		let newOrder = {};
+		if(instantSale === false) {
+			newOrder = {
+				chainId: 2,
+				maker: userAddress,
+				itemId: createObjIdService(itemId), 
+				minPrice: price,
+				coinType: coinType,
+				creationNumber: await getCreationNumService(txHash),
+				amount: quantity,
+				startTime: new Date(startTime),
+				expirationTime: new Date(endTime),
+				instantSale,
+				type: 6,
+				auctionId,
+			};
+			let newAuction = {
+				chainId: 2,
+				itemId: itemId,
+				collectionId: createObjIdService(itemInfo.collectionId),
+				paymentToken: coinType,
+				minPrice: price,
+				seller: userAddress,
+				startTime,
+				endTime,
+				isLive: true,
+			};
+			await createService(auctionModel, newAuction);
+		} else{ 
+			newOrder = {
+				chainId: 2,
+				maker: userAddress,
+				itemId: createObjIdService(itemId), 
+				minPrice: price,
+				coinType: coinType,
+				creationNumber: await getCreationNumService(txHash),
+				amount: quantity,
+				startTime: new Date(startTime),
+				expirationTime: new Date(endTime),
+				instantSale,
+				type: 6,
+			};
+		}
 		let orderInfo = await createService(orderModel, newOrder);
 		let newHistory = {
-			collectionId: collectionInfo._id,
+			collectionId: itemInfo.collectionId,
 			itemId: itemInfo._id,
 			from: userAddress,
 			to: to,
@@ -58,6 +99,7 @@ const sellItem = async (req: Request, res: Response) => {
 			type: 6,
 			txHash: txHash,
 			price: price,
+			priceType: coinType,
 		};
 		createService(historyModel, newHistory);
 		return res.status(200).json({ data: orderInfo });
@@ -105,28 +147,33 @@ const cancelOrder = async (req: Request, res: Response) => {
 	try {
 		let { userAddress, chainId } = req.params;
 		userAddress = userAddress.toLowerCase();
-		let { itemId, collectionId, owner, collectionName, itemName, creator, to, txHash, quantity } = req.body;
-		let collectionInfo = await findOneService(collectionModel, { collectionName, userAddress: creator, chainId });
+		let { orderId, txHash } = req.body;
+		let orderInfo: Order = await findOneService(orderModel, { _id: orderId });
+		let itemInfo: Item = await findOneService(itemModel, { _id: orderInfo.itemId });
+		let collectionInfo: Collection = await findOneService(collectionModel, { _id: itemInfo.collectionId });
+		// let collectionInfo = await findOneService(collectionModel, { collection.collectionName, userAddress: creator, chainId });
 		if (!collectionInfo) return res.status(404).json({ error: ERROR_RESPONSE[404] });
-		let itemInfo = await findOneService(itemModel, { itemName, collectionId: collectionInfo._id });
+		// let itemInfo = await findOneService(itemModel, { itemName, collectionId: collectionInfo._id });
 		if (!itemInfo) return res.status(404).json({ error: ERROR_RESPONSE[404] });
 		let owners = itemInfo.owner;
 		if (!owners.includes(userAddress)) {
 			owners.push(userAddress);
 		}
-		await updateOneService(itemModel, { _id: itemInfo._id }, { price: 0, status: 0, owner: owners });
-		deleteOneService(orderModel, { itemId: itemInfo._id });
 		let newHistory = {
 			collectionId: collectionInfo._id,
 			itemId: itemInfo._id,
 			from: userAddress,
-			to: to,
-			quantity: quantity,
+			quantity: Number(orderInfo.amount),
 			type: 5,
 			txHash: txHash,
 			price: 0,
 		};
 		createService(historyModel, newHistory);
+		deleteOneService(orderModel, { itemId: itemInfo._id });
+		let findOrderItemId: Order | null = await findManyService(orderModel, { itemId: itemInfo._id });
+		if(findOrderItemId === null) {
+			await updateOneService(itemModel, { _id: itemInfo._id }, { price: 0, status: 0, owner: owners });	
+		}
 		return res.status(200).json({ message: "Cancel order success" });
 	} catch (error: any) {
 		console.log(error);
@@ -200,4 +247,16 @@ export const deleteOrderController = async(req: Request, res: Response) => {
 		return res.status(500).json({ message: "Delete order fail" });
 	}
 };
+
+export const getOrderByItemIdController = async(req: Request, res: Response) =>{
+	try{
+		const { itemId } = req.params;
+		const orders: Order[] = await getOrderByItemIdService(itemId);
+		res.status(200).json({data: orders});
+	} catch(error: any) {
+		return res.status(500).json({ message: "Get order by item id fail" });
+	}
+};
+
+
 export { buyItem, sellItem, cancelOrder, getOrderSellItem };
