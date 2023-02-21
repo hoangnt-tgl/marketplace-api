@@ -22,7 +22,9 @@ import {
 	getCreationNumService, 
 	getOrderByIdService, 
 	deleteOrderService, 
-	getOrderByItemIdService 
+	getOrderByItemIdService,
+	getOrderByInstantSaleFalseService,
+	getOrderByInstantSaleTrueService, 
 } from "../services/order.services";
 import formidable from "formidable";
 import { handlePromiseUpload } from "../services/uploadFile.service";
@@ -271,6 +273,24 @@ export const getOrderByItemIdController = async(req: Request, res: Response) =>{
 		res.status(200).json({data: orders});
 	} catch(error: any) {
 		return res.status(500).json({ message: "Get order by item id fail" });
+	}
+};
+
+export const getOrderByInstantSaleTrueController = async(req: Request, res: Response) => {
+	try{
+		const orders: Order[] = await getOrderByInstantSaleTrueService();
+		res.status(200).json({data: orders});
+	} catch(error: any){
+		return res.status(500).json({ message: "Get order by instant sale true fail" });
+	}
+};
+
+export const getOrderByInstantSaleFalseController = async(req: Request, res: Response) => {
+	try{
+		const orders: Order[] = await getOrderByInstantSaleFalseService();
+		res.status(200).json({data: orders});
+	} catch(error: any){
+		return res.status(500).json({ message: "Get order by instant sale false fail" });
 	}
 };
 

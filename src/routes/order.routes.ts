@@ -18,6 +18,8 @@ import {
 	getOrderByIdController,
 	deleteOrderController,
 	getOrderByItemIdController,
+	getOrderByInstantSaleTrueController,
+	getOrderByInstantSaleFalseController,
 } from "../controllers/order.controllers";
 const orderRouter = express.Router();
 
@@ -49,5 +51,7 @@ orderRouter.get("/get-order-by-id/:orderId", getOrderByIdController);
 orderRouter.delete("/delete-order/:orderId", deleteOrderController);
 
 orderRouter.get("/get-order-by-itemId/:itemId", getOrderByItemIdController);
+orderRouter.get("/get-order-by-instantSale-true", getOrderByInstantSaleTrueController);
+orderRouter.get("/get-order-by-instantSale-false", getOrderByInstantSaleFalseController);
 
 export default orderRouter;

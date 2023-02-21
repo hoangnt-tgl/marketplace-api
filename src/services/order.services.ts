@@ -49,6 +49,16 @@ export const deleteOrderService = async (orderId: string) => {
 };
 
 export const getOrderByItemIdService = async (itemId: string): Promise<Order[]> => {
-    const orders: Order[] = await findManyService(OrderModel, { itemId });
+    const orders: Order[] = await OrderModel.find({ itemId }).lean().populate("itemInfo");;
+    return orders;
+};
+
+export const getOrderByInstantSaleTrueService = async (): Promise<Order[]> => {
+    const orders: Order[] = await OrderModel.find({ instantSale: true }).lean().populate("itemInfo");
+    return orders;
+};
+
+export const getOrderByInstantSaleFalseService = async (): Promise<Order[]> => {
+    const orders: Order[] = await OrderModel.find({ instantSale: false }).lean().populate("itemInfo");
     return orders;
 };
