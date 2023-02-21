@@ -17,6 +17,7 @@ import {
 	createOrderController, 
 	getOrderByIdController,
 	deleteOrderController,
+	getOrderByItemIdController,
 } from "../controllers/order.controllers";
 const orderRouter = express.Router();
 
@@ -46,5 +47,7 @@ orderRouter.get("/get-order-sell", getOrderSellItem);
 orderRouter.post("/create-order", createOrderController);
 orderRouter.get("/get-order-by-id/:orderId", getOrderByIdController);
 orderRouter.delete("/delete-order/:orderId", deleteOrderController);
+
+orderRouter.get("/get-order-by-itemId/:itemId", getOrderByItemIdController);
 
 export default orderRouter;
