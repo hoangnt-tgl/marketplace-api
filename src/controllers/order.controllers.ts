@@ -33,6 +33,7 @@ import { ResponseAPI } from "../interfaces/responseData.interfaces";
 import { ERROR_RESPONSE } from "../constant/response.constants";
 import { getBalanceTokenForAccount } from "../services/aptos.services";
 import { changePricetoUSD } from "../services/changePrice.services";
+import { getDecimalService } from "../services/token.services";
 
 const sellItem = async (req: Request, res: Response) => {
 	try {
@@ -128,7 +129,9 @@ const buyItem = async (req: Request, res: Response) => {
 		await updateOneService(itemModel, { _id: itemInfo._id }, { owner: owners, status: 0 });
 		deleteOneService(orderModel, { itemId: itemInfo._id });
 		let newHistory = {}
-		let priceUSD: Number = await changePricetoUSD(priceType.toString(), Number(price));
+		let decimalToken = await getDecimalService(itemInfo.priceType.toString());
+		let priceDecimals = price / (10 ** Number(decimalToken));
+		let priceUSD: Number = await changePricetoUSD(priceType.toString(), Number(priceDecimals));
 		if(priceUSD){
 			newHistory = {
 				collectionId: collectionInfo._id,
