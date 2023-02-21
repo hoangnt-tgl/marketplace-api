@@ -30,6 +30,7 @@ import { LoginUser, User } from "../interfaces/user.interfaces";
 import { ResponseAPI } from "../interfaces/responseData.interfaces";
 import { ERROR_RESPONSE } from "../constant/response.constants";
 import { getBalanceTokenForAccount } from "../services/aptos.services";
+import { changePricetoUSD } from "../services/changePrice.services";
 
 const sellItem = async (req: Request, res: Response) => {
 	try {
@@ -112,7 +113,7 @@ const buyItem = async (req: Request, res: Response) => {
 	try {
 		let { userAddress, chainId } = req.params;
 		userAddress = userAddress.toLowerCase();
-		let { quantity, itemId, to, txHash, collectionId, owner, collectionName, itemName, price, creator } = req.body;
+		let { quantity, itemId, to, txHash, collectionId, owner, collectionName, itemName, price, creator, priceType } = req.body;
 		let collectionInfo = await findOneService(collectionModel, { collectionName, userAddress: creator, chainId });
 		if (!collectionInfo) return res.status(404).json({ error: ERROR_RESPONSE[404] });
 		let itemInfo = await findOneService(itemModel, { itemName, collectionId: collectionInfo._id });
@@ -124,16 +125,32 @@ const buyItem = async (req: Request, res: Response) => {
 		}
 		await updateOneService(itemModel, { _id: itemInfo._id }, { owner: owners, status: 0 });
 		deleteOneService(orderModel, { itemId: itemInfo._id });
-		let newHistory = {
-			collectionId: collectionInfo._id,
-			itemId: itemInfo._id,
-			from: userAddress,
-			to: to,
-			quantity: quantity,
-			type: 7,
-			txHash: txHash,
-			price: price,
-		};
+		let newHistory = {}
+		let priceUSD: Number = await changePricetoUSD(priceType.toString(), Number(price));
+		if(priceUSD){
+			newHistory = {
+				collectionId: collectionInfo._id,
+				itemId: itemInfo._id,
+				from: userAddress,
+				to: to,
+				quantity: quantity,
+				type: 7,
+				txHash: txHash,
+				price: priceUSD,
+				priceType: "USD",
+			};
+		} else{
+			newHistory = {
+				collectionId: collectionInfo._id,
+				itemId: itemInfo._id,
+				from: userAddress,
+				to: to,
+				quantity: quantity,
+				type: 7,
+				txHash: txHash,
+				price: price,
+			};
+		}
 		createService(historyModel, newHistory);
 		return res.status(200).json({ data: newHistory });
 	} catch (error: any) {

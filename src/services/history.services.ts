@@ -13,6 +13,7 @@ import { Item } from "../interfaces/item.interfaces";
 import { ExtraHistory, History, HistoryTrade, minTrade } from "../interfaces/history.interfaces";
 import { getOneItemService } from "./item.services";
 import { ObjectId } from "mongoose";
+import { changePricetoUSD }	from "./changePrice.services";
 
 export const getManyHistoryService = async (objQuery: any): Promise<History[]> => {
 	const histories: any[] = await historyModel
@@ -129,4 +130,13 @@ export const getHistoryByUserService = async (from: string, objectQuery: any): P
 	return histories;
 };
 
+export const changePriceService = async () => {
+	const history: History[] = await findManyService(historyModel, { });
+	const runTask = history.map(async (historys: History) => {
+		const priceChange: Number = await changePricetoUSD(historys.priceType.toString(), Number(historys.price));
+		const priceTypeChange = "USD";
+		await updateOneService(historyModel, { _id: historys._id }, { price: priceChange, priceType: priceTypeChange });
+	});
+	await Promise.all(runTask);
+}
 export { getHistoryTradeByDayService, getHistoryByItemService };
