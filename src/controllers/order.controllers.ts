@@ -34,6 +34,7 @@ import { ERROR_RESPONSE } from "../constant/response.constants";
 import { getBalanceTokenForAccount } from "../services/aptos.services";
 import { changePricetoUSD } from "../services/changePrice.services";
 import { getDecimalService } from "../services/token.services";
+import { getOneItemService } from "../services/item.services";
 
 const sellItem = async (req: Request, res: Response) => {
 	try {
@@ -112,47 +113,52 @@ const buyItem = async (req: Request, res: Response) => {
 	try {
 		let { userAddress, chainId } = req.params;
 		userAddress = userAddress.toLowerCase();
-		let { quantity, itemId, to, txHash, collectionId, owner, collectionName, itemName, price, creator, priceType } =
-			req.body;
-		let collectionInfo = await findOneService(collectionModel, { collectionName, userAddress: creator, chainId });
-		if (!collectionInfo) return res.status(404).json({ error: ERROR_RESPONSE[404] });
-		let itemInfo = await findOneService(itemModel, { itemName, collectionId: collectionInfo._id });
+		let { quantity, itemId, to, txHash, orderId } = req.body;
+		let orderInfo = await getOrderByIdService(orderId);
+		let itemInfo = await getOneItemService({ _id: itemId });
 		if (!itemInfo) return res.status(404).json({ error: ERROR_RESPONSE[404] });
-		updateOneService(collectionModel, { _id: collectionInfo._id }, { volumeTrade: collectionInfo.volumeTrade + price });
+		await updateOneService(
+			collectionModel,
+			{ _id: itemInfo.collectionId },
+			{ volumeTrade: itemInfo.collectionInfo.volumeTrade + orderInfo.minPrice },
+		);
 		let owners = itemInfo.owner;
+		let balance = await getBalanceTokenForAccount(
+			orderInfo.maker,
+			itemInfo.creator,
+			itemInfo.collectionInfo.collectionName,
+			"2",
+		);
+		if (balance === "0") {
+			owners = owners.filter((owner: string) => owner !== orderInfo.maker);
+		}
 		if (!owners.includes(userAddress)) {
 			owners.push(userAddress);
 		}
-		await updateOneService(itemModel, { _id: itemInfo._id }, { owner: owners, status: 0 });
-		deleteOneService(orderModel, { itemId: itemInfo._id });
-		let newHistory = {};
-		let decimalToken = await getDecimalService(itemInfo.priceType.toString());
-		let priceDecimals = price / 10 ** Number(decimalToken);
-		let priceUSD: Number = await changePricetoUSD(priceType.toString(), Number(priceDecimals));
-		if (priceUSD) {
-			newHistory = {
-				collectionId: collectionInfo._id,
-				itemId: itemInfo._id,
-				from: userAddress,
-				to: to,
-				quantity: quantity,
-				type: 7,
-				txHash: txHash,
-				price: priceUSD,
-				priceType: "USD",
-			};
+		deleteOneService(orderModel, { _id: orderId });
+		let isExist = await queryExistService(orderModel, { itemId: itemId, instantSale: false });
+		if (!isExist) {
+			await updateOneService(itemModel, { _id: itemInfo._id }, { owner: owners, status: 0 });
 		} else {
-			newHistory = {
-				collectionId: collectionInfo._id,
-				itemId: itemInfo._id,
-				from: userAddress,
-				to: to,
-				quantity: quantity,
-				type: 7,
-				txHash: txHash,
-				price: price,
-			};
+			await updateOneService(itemModel, { _id: itemInfo._id }, { owner: owners });
 		}
+
+		let newHistory = {};
+		// let decimalToken = await getDecimalService(orderInfo..toString());
+		// let priceDecimals = price / 10 ** Number(decimalToken);
+		// let priceUSD: Number = await changePricetoUSD(priceType.toString(), Number(priceDecimals));
+
+		newHistory = {
+			collectionId: itemInfo.collectionId,
+			itemId: itemInfo._id,
+			from: userAddress,
+			to: to,
+			quantity: quantity,
+			type: 7,
+			txHash: txHash,
+			price: orderInfo.minPrice,
+			priceType: orderInfo.coinType,
+		};
 		createService(historyModel, newHistory);
 		return res.status(200).json({ data: newHistory });
 	} catch (error: any) {
