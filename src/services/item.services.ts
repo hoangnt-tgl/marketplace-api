@@ -229,5 +229,6 @@ export const getVolumeItemService = async (id: string) => {
 	return result;
 };
 
+updateOneService(itemModel, {status: 1}, {status: 0})
 
 export { getOneItemService, getAllItemService, checkItemExistsService };
