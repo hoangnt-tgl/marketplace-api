@@ -123,23 +123,27 @@ const buyItem = async (req: Request, res: Response) => {
 			{ volumeTrade: itemInfo.collectionInfo.volumeTrade + orderInfo.minPrice },
 		);
 		let owners = itemInfo.owner;
+		console.log("owners", owners);
 		let balance = await getBalanceTokenForAccount(
 			orderInfo.maker,
 			itemInfo.creator,
 			itemInfo.collectionInfo.collectionName,
-			"2",
+			itemInfo.itemName,
 		);
+		console.log("balance", balance);
 		if (balance === "0") {
 			owners = owners.filter((owner: string) => owner !== orderInfo.maker);
 		}
 		if (!owners.includes(userAddress)) {
 			owners.push(userAddress);
 		}
-		deleteOneService(orderModel, { _id: orderId });
-		let isExist = await queryExistService(orderModel, { itemId: itemId, instantSale: false });
+		console.log("owners", owners);
+		await deleteOneService(orderModel, { _id: orderId });
+		let isExist = await queryExistService(orderModel, { itemId: itemId, instantSale: true });
 		if (!isExist) {
 			await updateOneService(itemModel, { _id: itemInfo._id }, { owner: owners, status: 0 });
 		} else {
+			console.log("isExist", owners);
 			await updateOneService(itemModel, { _id: itemInfo._id }, { owner: owners });
 		}
 
@@ -173,16 +177,10 @@ const cancelOrder = async (req: Request, res: Response) => {
 		userAddress = userAddress.toLowerCase();
 		let { orderId, txHash } = req.body;
 		let orderInfo: Order = await findOneService(orderModel, { _id: orderId });
-		let itemInfo: Item = await findOneService(itemModel, { _id: orderInfo.itemId });
-		let collectionInfo: Collection = await findOneService(collectionModel, { _id: itemInfo.collectionId });
-		if (!collectionInfo) return res.status(404).json({ error: ERROR_RESPONSE[404] });
+		let itemInfo = await getOneItemService({ _id: orderInfo.itemId });
 		if (!itemInfo) return res.status(404).json({ error: ERROR_RESPONSE[404] });
-		let owners = itemInfo.owner;
-		if (!owners.includes(userAddress)) {
-			owners.push(userAddress);
-		}
 		let newHistory = {
-			collectionId: collectionInfo._id,
+			collectionId: itemInfo.collectionId,
 			itemId: itemInfo._id,
 			from: userAddress,
 			quantity: Number(orderInfo.amount),
@@ -191,10 +189,10 @@ const cancelOrder = async (req: Request, res: Response) => {
 			price: 0,
 		};
 		createService(historyModel, newHistory);
-		deleteOneService(orderModel, { _id: orderId });
-		let findOrderItemId: Order | null = await findManyService(orderModel, { itemId: itemInfo._id });
-		if (findOrderItemId === null) {
-			await updateOneService(itemModel, { _id: itemInfo._id }, { price: 0, status: 0, owner: owners });
+		await deleteOneService(orderModel, { _id: orderId });
+		let findOrderItemId = await queryExistService(orderModel, { itemId: itemInfo._id });
+		if (!findOrderItemId) {
+			await updateOneService(itemModel, { _id: itemInfo._id }, { status: 0 });
 		}
 		return res.status(200).json({ message: "Cancel order success" });
 	} catch (error: any) {

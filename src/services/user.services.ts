@@ -222,7 +222,7 @@ export const topTraderAutoService = async () => {
 			let percentTrade30 = await getTradeByDay(30, user.userAddress, chainID);
 			return {
 				user,
-				volume24Hours: sum1,
+				volume24Hour: sum1,
 				volume7Days: sum7,
 				volume30Days: sum30,
 				percent24Hour: percentTrade1,

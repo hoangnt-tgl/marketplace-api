@@ -13,6 +13,8 @@ import {
 	updateObjService,
 	updateOneService,
 	countByQueryService,
+	deleteManyService,
+	updateManyService,
 } from "./model.services";
 import {
 	getDataFromURL,
@@ -23,7 +25,6 @@ import {
 } from "./other.services";
 import { getOneUserService } from "./user.services";
 import interactionModel from "../models/interaction.model";
-import { async } from "@firebase/util";
 import { getHistoryByUserService, getHistoryByItemService } from "./history.services";
 import axios from "axios";
 import { History } from "../interfaces/history.interfaces";
@@ -232,3 +233,37 @@ export const getVolumeItemService = async (id: string) => {
 // updateOneService(itemModel, {status: 1}, {status: 0})
 
 export { getOneItemService, getAllItemService, checkItemExistsService };
+
+
+const updateOwnerItem = async () => {
+	const items = await getAllItemService({});
+	for (let i = 0; i < items.length; i++) {
+		const item = items[i];
+		const owners = item.owner;
+		for (let j = 0; j < owners.length; j++) {
+			const owner = owners[j];
+			const balance = await getBalanceTokenForAccount(owner, item.creator, item.collectionInfo.collectionName, item.itemName, item.chainId).then((balance) => balance).catch((err) => console.log(err));
+			if (balance === "0") {
+				owners.splice(j, 1);
+				j--;
+			}
+		}
+		await updateOneService(itemModel, { _id: item._id }, { owner: owners });
+		await new Promise((resolve) => setTimeout(resolve, 1000));
+		console.log(i);
+	}
+	console.log("Done");
+}
+
+const deletaItemNotOwner = async () => {
+	deleteManyService(itemModel, { owner: [] });
+}
+
+const updateStatusItem = async () => {
+	updateManyService(itemModel, { status: 1 }, { status: 0 });
+}
+// updateStatusItem();
+// deletaItemNotOwner();
+
+// updateOwnerItem();
+
