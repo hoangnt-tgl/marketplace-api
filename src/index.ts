@@ -12,5 +12,5 @@ setInterval(async () => {
 
 setInterval(async () => {
 	await topTraderAutoService();
-}, 60000);
+}, UPDATE_TOP_COLLECTION_TIME);
 

@@ -2,6 +2,8 @@ import OrderModel from "../models/Order.model";
 import { createObjIdService, createService, findOneService, deleteOneService, findManyService } from "./model.services";
 import { Order } from "../interfaces/order.interfaces";
 import axios from "axios";
+import path from "path";
+import { removeUndefinedOfObj } from "./other.services";
 
 export const getCreationNumService = async (txn_hash: string) => {
 	try {
@@ -15,6 +17,24 @@ export const getCreationNumService = async (txn_hash: string) => {
 			}
 		});
 		return creationNumber;
+	} catch (error: any) {
+		console.log(error.message);
+		throw new Error("Error when get creation number");
+	}
+};
+
+export const getAuctionIdService = async (txHash: string) => {
+	try {
+		let auctionId = 0;
+		await new Promise(resolve => setTimeout(resolve, 1000));
+		const response = await axios.get(`https://fullnode.testnet.aptoslabs.com/v1/transactions/by_hash/${txHash}`);
+		let data = response.data.events;
+		data.forEach((element: any) => {
+			if (element.type.includes("auction::AuctionEvent")) {
+				auctionId = element.data.auction_id;
+			}
+		});
+		return auctionId;
 	} catch (error: any) {
 		console.log(error.message);
 		throw new Error("Error when get creation number");
@@ -52,7 +72,9 @@ export const createOrderService = async (
 };
 
 export const getOrderByIdService = async (orderId: string): Promise<Order> => {
-	const order: Order = await findOneService(OrderModel, { _id: orderId });
+	const order: any = await OrderModel.findOne({ _id: orderId })
+		.lean()
+		.populate({ path: "itemInfo", populate: "collectionInfo" });
 	return order;
 };
 
@@ -74,4 +96,10 @@ export const getOrderByInstantSaleTrueService = async (): Promise<Order[]> => {
 export const getOrderByInstantSaleFalseService = async (): Promise<Order[]> => {
 	const orders: Order[] = await OrderModel.find({ instantSale: false }).lean().populate("itemInfo");
 	return orders;
+};
+
+export const getOneOrderService = async (query: Object): Promise<Order | null> => {
+	query = removeUndefinedOfObj(query);
+	const order: Order | null = await OrderModel.findOne(query).lean().populate("itemInfo");
+	return order;
 };

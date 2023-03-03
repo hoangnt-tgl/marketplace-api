@@ -25,6 +25,8 @@ import {
 	getOrderByItemIdService,
 	getOrderByInstantSaleFalseService,
 	getOrderByInstantSaleTrueService,
+	getAuctionIdService,
+	getOneOrderService,
 } from "../services/order.services";
 import formidable from "formidable";
 import { handlePromiseUpload } from "../services/uploadFile.service";
@@ -41,6 +43,8 @@ const sellItem = async (req: Request, res: Response) => {
 		let { userAddress, chainId } = req.params;
 		userAddress = userAddress.toLowerCase();
 		let { price, quantity, itemId, to, txHash, coinType, startTime, instantSale, auctionId, endTime } = req.body;
+		// startTime = new Date(startTime).getTime()
+		// endTime = new Date(endTime).getTime()
 		//find id item
 		let itemInfo = await findOneService(itemModel, { _id: itemId });
 		if (!itemInfo) return res.status(404).json({ error: ERROR_RESPONSE[404] });
@@ -56,24 +60,24 @@ const sellItem = async (req: Request, res: Response) => {
 				coinType: coinType,
 				creationNumber: await getCreationNumService(txHash),
 				amount: quantity,
-				startTime: new Date(Number(startTime)),
-				expirationTime: new Date(Number(endTime)),
+				startTime: startTime,
+				expirationTime: endTime,
 				instantSale,
 				type: 6,
-				auctionId,
+				auctionId: await getAuctionIdService(txHash),
 			};
-			let newAuction = {
-				chainId: 2,
-				itemId: itemId,
-				collectionId: createObjIdService(itemInfo.collectionId),
-				paymentToken: coinType,
-				minPrice: price,
-				seller: userAddress,
-				startTime: new Date(Number(startTime)),
-				endTime: new Date(Number(endTime)),
-				isLive: true,
-			};
-			await createService(auctionModel, newAuction);
+			// let newAuction = {
+			// 	chainId: 2,
+			// 	itemId: itemId,
+			// 	collectionId: createObjIdService(itemInfo.collectionId),
+			// 	paymentToken: coinType,
+			// 	minPrice: price,
+			// 	seller: userAddress,
+			// 	startTime: new Date(Number(startTime)),
+			// 	endTime: new Date(Number(endTime)),
+			// 	isLive: true,
+			// };
+			// await createService(auctionModel, newAuction);
 		} else {
 			newOrder = {
 				chainId: 2,
@@ -83,8 +87,8 @@ const sellItem = async (req: Request, res: Response) => {
 				coinType: coinType,
 				creationNumber: await getCreationNumService(txHash),
 				amount: quantity,
-				startTime: new Date(Number(startTime)),
-				expirationTime: new Date(Number(endTime)),
+				startTime: startTime,
+				expirationTime: endTime,
 				instantSale,
 				type: 6,
 			};
@@ -123,35 +127,27 @@ const buyItem = async (req: Request, res: Response) => {
 			{ volumeTrade: itemInfo.collectionInfo.volumeTrade + orderInfo.minPrice },
 		);
 		let owners = itemInfo.owner;
-		console.log("owners", owners);
 		let balance = await getBalanceTokenForAccount(
 			orderInfo.maker,
 			itemInfo.creator,
 			itemInfo.collectionInfo.collectionName,
 			itemInfo.itemName,
 		);
-		console.log("balance", balance);
 		if (balance === "0") {
 			owners = owners.filter((owner: string) => owner !== orderInfo.maker);
 		}
 		if (!owners.includes(userAddress)) {
 			owners.push(userAddress);
 		}
-		console.log("owners", owners);
 		await deleteOneService(orderModel, { _id: orderId });
 		let isExist = await queryExistService(orderModel, { itemId: itemId, instantSale: true });
 		if (!isExist) {
 			await updateOneService(itemModel, { _id: itemInfo._id }, { owner: owners, status: 0 });
 		} else {
-			console.log("isExist", owners);
 			await updateOneService(itemModel, { _id: itemInfo._id }, { owner: owners });
 		}
 
 		let newHistory = {};
-		// let decimalToken = await getDecimalService(orderInfo..toString());
-		// let priceDecimals = price / 10 ** Number(decimalToken);
-		// let priceUSD: Number = await changePricetoUSD(priceType.toString(), Number(priceDecimals));
-
 		newHistory = {
 			collectionId: itemInfo.collectionId,
 			itemId: itemInfo._id,
@@ -284,6 +280,18 @@ export const getOrderByInstantSaleFalseController = async (req: Request, res: Re
 		res.status(200).json({ data: orders });
 	} catch (error: any) {
 		return res.status(500).json({ message: "Get order by instant sale false fail" });
+	}
+};
+
+export const getOrderByCreationNumber = async (req: Request, res: Response) => {
+	try {
+		let { userAddress } = req.params;
+		userAddress = userAddress.toLowerCase();
+		const { creationNumber } = req.body;
+		let orderInfo = await getOneOrderService({ maker: userAddress, creationNumber: creationNumber });
+		res.status(200).json(orderInfo);
+	} catch (error: any) {
+		return res.status(500).json({ message: error.message });
 	}
 };
 
