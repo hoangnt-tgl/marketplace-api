@@ -13,9 +13,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getListBidderService = exports.getTopBidOfAuction = exports.getAmountBidService = exports.deleteBidService = exports.createBidService = void 0;
+// import { ExtraMakeBid, MakeBid } from "../interfaces/INO.interfaces";
 const makeBid_model_1 = __importDefault(require("../models/makeBid.model"));
 const model_services_1 = require("./model.services");
-const price_services_1 = require("./price.services");
+// import { fromWeiToTokenService, getTokenService } from "./price.services";
 const auction_model_1 = __importDefault(require("../models/auction.model"));
 const createBidService = (auctionId, userAddress, bidAmount, paymentToken, transactionHash) => __awaiter(void 0, void 0, void 0, function* () {
     const newBid = {
@@ -31,10 +32,10 @@ const createBidService = (auctionId, userAddress, bidAmount, paymentToken, trans
 });
 exports.createBidService = createBidService;
 const getTopBidOfAuction = (auctionId) => __awaiter(void 0, void 0, void 0, function* () {
-    const bids = yield (0, model_services_1.findManyService)(makeBid_model_1.default, { auctionId: (0, model_services_1.createObjIdService)(auctionId) }, "", {
-        bidAmount: -1,
-    });
-    return bids[0];
+    // const bids: MakeBid[] = await findManyService(makeBidModel, { auctionId: createObjIdService(auctionId) }, "", {
+    // 	bidAmount: -1,
+    // });
+    // return bids[0];
 });
 exports.getTopBidOfAuction = getTopBidOfAuction;
 const getAmountBidService = (auctionId) => __awaiter(void 0, void 0, void 0, function* () {
@@ -43,20 +44,24 @@ const getAmountBidService = (auctionId) => __awaiter(void 0, void 0, void 0, fun
 });
 exports.getAmountBidService = getAmountBidService;
 const getListBidderService = (auctionId) => __awaiter(void 0, void 0, void 0, function* () {
-    const biders = yield makeBid_model_1.default
-        .find({ auctionId: (0, model_services_1.createObjIdService)(auctionId) })
-        .sort({ createdAt: -1 })
-        .lean()
-        .populate({ path: "userInfo", select: "username avatar" });
-    const extraBidders = [];
-    if (biders.length > 0) {
-        const token = yield (0, price_services_1.getTokenService)({ tokenAddress: biders[0].paymentToken });
-        for (let i = 0; i < biders.length; i++) {
-            const extraBidder = Object.assign(Object.assign({}, biders[i]), { tokenAmount: (0, price_services_1.fromWeiToTokenService)(biders[i].bidAmount, token.decimal), priceType: token.tokenSymbol });
-            extraBidders.push(extraBidder);
-        }
-    }
-    return extraBidders;
+    // const biders: MakeBid[] = await makeBidModel
+    // 	.find({ auctionId: createObjIdService(auctionId) })
+    // 	.sort({ createdAt: -1 })
+    // 	.lean()
+    // 	.populate({ path: "userInfo", select: "username avatar" });
+    // const extraBidders: ExtraMakeBid[] = [];
+    // if (biders.length > 0) {
+    // 	const token: Token = await getTokenService({ tokenAddress: biders[0].paymentToken });
+    // 	for (let i = 0; i < biders.length; i++) {
+    // 		const extraBidder: ExtraMakeBid = {
+    // 			...biders[i],
+    // 			tokenAmount: fromWeiToTokenService(biders[i].bidAmount, token.decimal),
+    // 			priceType: token.tokenSymbol,
+    // 		};
+    // 		extraBidders.push(extraBidder);
+    // 	}
+    // }
+    // return extraBidders;
 });
 exports.getListBidderService = getListBidderService;
 const deleteBidService = (auctionId) => __awaiter(void 0, void 0, void 0, function* () {

@@ -12,6 +12,6 @@ const interactionRouter = express_1.default.Router();
  ********************************************/
 interactionRouter.post("/create/userAddress/:userAddress", checkUser_middlewares_1.checkUserExist, 
 // checkSignLikeItemMiddleware,
-interaction_controllers_1.createInteractionController);
+checkUser_middlewares_1.checkUserAuthen, interaction_controllers_1.createInteractionController);
 interactionRouter.get("/userAddress/:userAddress", checkUser_middlewares_1.checkUserExist, interaction_controllers_1.getListItemInteractionController);
 exports.default = interactionRouter;

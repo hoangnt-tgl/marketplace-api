@@ -9,8 +9,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getHistoryByItemId = exports.getHistoryByUser = void 0;
+exports.getHistoryByItemId = exports.changePrice = exports.getHistoryByCollection = exports.getHistoryByUser = void 0;
 const response_constants_1 = require("../constant/response.constants");
+const changePrice_services_1 = require("../services/changePrice.services");
 const history_services_1 = require("../services/history.services");
 const getHistoryByItemId = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -34,3 +35,28 @@ const getHistoryByUser = (req, res) => __awaiter(void 0, void 0, void 0, functio
     }
 });
 exports.getHistoryByUser = getHistoryByUser;
+const getHistoryByCollection = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let { collectionId } = req.params;
+        let history = yield (0, history_services_1.getManyHistoryService)({ collectionId });
+        return res.status(200).json({ data: history });
+    }
+    catch (error) {
+        return res.status(500).json({ error: response_constants_1.ERROR_RESPONSE[500] });
+    }
+});
+exports.getHistoryByCollection = getHistoryByCollection;
+const changePrice = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { fsyms } = req.query;
+        if (fsyms === undefined)
+            return res.status(400).json({ error: response_constants_1.ERROR_RESPONSE[400] });
+        let s = fsyms.toString();
+        const result = yield (0, changePrice_services_1.changePricetoUSD)(s, 1);
+        return res.status(200).json({ data: result });
+    }
+    catch (error) {
+        return res.status(500).json({ error: response_constants_1.ERROR_RESPONSE[500] });
+    }
+});
+exports.changePrice = changePrice;

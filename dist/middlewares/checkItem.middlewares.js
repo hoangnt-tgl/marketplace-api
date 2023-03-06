@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkItemExistMiddleware = void 0;
+exports.checkItemExistMiddleware = exports.checkItemMedia = exports.checkItemDescription = exports.checkItemName = void 0;
 const model_services_1 = require("../services/model.services");
 const item_services_1 = require("../services/item.services");
 const checkItemExistMiddleware = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
@@ -29,3 +29,45 @@ const checkItemExistMiddleware = (req, res, next) => __awaiter(void 0, void 0, v
     }
 });
 exports.checkItemExistMiddleware = checkItemExistMiddleware;
+const checkItemName = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let { itemName } = req.body;
+        if (itemName.length > 128) {
+            return res.status(400).json({ error: "Collection name is too long" });
+        }
+        next();
+    }
+    catch (error) {
+        res.status(500).json({ error: "Cannot not check collection name" });
+    }
+});
+exports.checkItemName = checkItemName;
+//check desscription not over 1500 character
+const checkItemDescription = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let { description } = req.body;
+        if (description.length > 1500) {
+            return res.status(400).json({ error: "Collection description is too long" });
+        }
+        next();
+    }
+    catch (error) {
+        res.status(500).json({ error: "Cannot not check collection description" });
+    }
+});
+exports.checkItemDescription = checkItemDescription;
+const checkItemMedia = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    next();
+    // const { itemMedia } = req.body.itemMedia;
+    // fetch(itemMedia)
+    // 	.then(res => {
+    // 		if (res.ok) {
+    // 			next();
+    // 		}
+    // 	})
+    // 	.catch(err => {
+    // 		return res.status(400).json({ error: "Item media is not valid" });
+    // 	});
+    // res.status(500).json({ error: "Item media is not valid" });
+});
+exports.checkItemMedia = checkItemMedia;

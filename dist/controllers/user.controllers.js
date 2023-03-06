@@ -8,22 +8,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUserProfileController = exports.logoutUserController = exports.verificationEmailController = exports.uploadUserImageController = exports.updateUserController = exports.createUserController = exports.topTraderController = void 0;
+exports.getUserProfileController = exports.logoutUserController = exports.verificationEmailController = exports.uploadUserImageController = exports.updateUserController = exports.createUserController = exports.gettopTraderAutoController = exports.topTraderController = void 0;
 const user_services_1 = require("../services/user.services");
 const model_services_1 = require("../services/model.services");
 const user_model_1 = __importDefault(require("../models/user.model"));
@@ -37,22 +26,11 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const fs_1 = __importDefault(require("fs"));
 const createUserController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let { userAddress, signature, publicKey, nonce, isFirst } = req.body;
+        let { userAddress } = req.body;
         userAddress = userAddress.toLowerCase();
-        if (true) {
-            const user = yield (0, user_services_1.createUserIfNotExistService)(userAddress, nonce);
-            const { nonce: _ } = user, data = __rest(user, ["nonce"]);
-            req.session.user = {
-                signature,
-                publicKey,
-            };
-            return res.status(200).json({ data: data });
-        }
-        else {
-            const user = yield (0, user_services_1.getOneUserService)(userAddress);
-            const { nonce: _ } = user, data = __rest(user, ["nonce"]);
-            return res.status(200).json({ data: data });
-        }
+        const user = yield (0, user_services_1.createUserIfNotExistService)(userAddress, "123");
+        const token = req.body.token;
+        return res.status(200).json({ token, data: user });
     }
     catch (error) {
         return res.status(403).json({ error: "Cannot Create User" });
@@ -71,7 +49,6 @@ const uploadUserImageController = (req, res) => __awaiter(void 0, void 0, void 0
 });
 exports.uploadUserImageController = uploadUserImageController;
 const updateUserController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
     try {
         const { userAddress } = req.params;
         let data = req.body;
@@ -81,8 +58,7 @@ const updateUserController = (req, res) => __awaiter(void 0, void 0, void 0, fun
             let html = fs_1.default.readFileSync(`${default_constant_1.STATIC_FOLDER}/views/verificationEmail.html`, { encoding: "utf8" });
             let token = jsonwebtoken_1.default.sign({ userAddress }, "secret", { expiresIn: "10m" });
             token = encodeURIComponent(token);
-            let host = ((_a = req.headers.host) === null || _a === void 0 ? void 0 : _a.includes("localhost")) ? "http://" : "https://";
-            host += req.headers.host;
+            let host = "https://api.nftspacex.io/aptos";
             let link = `${host}/users/verify-email/${userAddress}/${token}`;
             html = html.replace("{{link}}", link);
             yield (0, mail_services_1.sendMailService)(data.email, "Verify your email", html);
@@ -177,3 +153,12 @@ const getUserProfileController = (req, res) => __awaiter(void 0, void 0, void 0,
     }
 });
 exports.getUserProfileController = getUserProfileController;
+const gettopTraderAutoController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        return res.status(200).json(yield (0, user_services_1.gettopTraderAutoService)());
+    }
+    catch (error) {
+        return res.status(500).json({ error: response_constants_1.ERROR_RESPONSE[500] });
+    }
+});
+exports.gettopTraderAutoController = gettopTraderAutoController;

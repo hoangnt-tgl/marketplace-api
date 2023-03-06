@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.verifySignUserService = exports.getSearchUserByIdService = exports.getAllUsersService = exports.getManyUserService = exports.getOneUserService = exports.updateUserService = exports.checkUserExistsService = exports.createUserIfNotExistService = exports.topTraderService = void 0;
+exports.verifySignUserService = exports.getSearchUserByIdService = exports.getAllUsersService = exports.getManyUserService = exports.getOneUserService = exports.updateUserService = exports.checkUserExistsService = exports.createUserIfNotExistService = exports.gettopTraderAutoService = exports.topTraderAutoService = exports.topTraderService = void 0;
 const user_model_1 = __importDefault(require("../models/user.model"));
 const tweetnacl_1 = __importDefault(require("tweetnacl"));
 const sha256_1 = __importDefault(require("sha256"));
@@ -20,6 +20,7 @@ const model_services_1 = require("./model.services");
 const history_services_1 = require("./history.services");
 const other_services_1 = require("./other.services");
 const collection_services_1 = require("./collection.services");
+const fs_1 = __importDefault(require("fs"));
 const createUserIfNotExistService = (userAddress, nonce) => __awaiter(void 0, void 0, void 0, function* () {
     let user = yield (0, model_services_1.findOneService)(user_model_1.default, { userAddress });
     if (!user) {
@@ -88,82 +89,107 @@ const getTraderByDayService = (address, fromDate, toDate, chainId) => __awaiter(
         from: address,
     });
     let result = 0;
-    yield Promise.all(histories.map((history) => __awaiter(void 0, void 0, void 0, function* () {
+    histories.map((history) => __awaiter(void 0, void 0, void 0, function* () {
         const check = yield (0, collection_services_1.checkChainIdCollectionService)(history.collectionId.toString(), Number(chainId));
         if (check === true) {
             result = result + history.usdPrice;
         }
-    })));
+    }));
     return result;
+});
+const getTradeByDay = (request, address, chainId) => __awaiter(void 0, void 0, void 0, function* () {
+    const now = Date.now();
+    const curDay = now - Number(request) * 24 * 3600 * 1000;
+    const lastDay = curDay - Number(request) * 24 * 3600 * 1000;
+    const newVolume = yield getTraderByDayService(address, curDay, now, chainId);
+    const oldVolume = yield getTraderByDayService(address, lastDay, curDay, chainId);
+    const percent = oldVolume > 0 ? ((newVolume - oldVolume) / oldVolume) * 100 : 0;
+    return percent;
 });
 const topTraderService = (request, chainID) => __awaiter(void 0, void 0, void 0, function* () {
     let trd = new Array();
-    let data = [];
     const user = yield getAllUsersService();
-    const getTradeByDay = (address, chainId) => __awaiter(void 0, void 0, void 0, function* () {
-        const now = Date.now();
-        const curDay = now - 24 * 3600 * 1000;
-        const lastDay = curDay - 24 * 3600 * 1000;
-        const newVolume = yield getTraderByDayService(address, curDay, now, chainId);
-        const oldVolume = yield getTraderByDayService(address, lastDay, curDay, chainId);
-        const percent = oldVolume > 0 ? ((newVolume - oldVolume) / oldVolume) * 100 : 0;
-        return percent;
-    });
-    const getTradeByWeek = (address, chainId) => __awaiter(void 0, void 0, void 0, function* () {
-        const now = Date.now();
-        const curWeek = now - 7 * 24 * 3600 * 1000;
-        const lastWeek = curWeek - 7 * 24 * 3600 * 1000;
-        const newVolume = yield getTraderByDayService(address, curWeek, now, chainId);
-        const oldVolume = yield getTraderByDayService(address, lastWeek, curWeek, chainId);
-        const percent = oldVolume > 0 ? ((newVolume - oldVolume) / oldVolume) * 100 : 0;
-        return percent;
-    });
-    const getTradeByMonth = (address, chainId) => __awaiter(void 0, void 0, void 0, function* () {
-        const now = Date.now();
-        const curMonth = now - 30 * 24 * 3600 * 1000;
-        const lastMonth = curMonth - 30 * 24 * 3600 * 1000;
-        const newVolume = yield getTraderByDayService(address, curMonth, now, chainId);
-        const oldVolume = yield getTraderByDayService(address, lastMonth, curMonth, chainId);
-        const percent = oldVolume > 0 ? ((newVolume - oldVolume) / oldVolume) * 100 : 0;
-        return percent;
-    });
-    console.log(request);
-    yield Promise.all(user.map((user, index) => __awaiter(void 0, void 0, void 0, function* () {
+    const userTrades = yield Promise.all(user.map((user) => __awaiter(void 0, void 0, void 0, function* () {
         const date = new Date(new Date().setDate(new Date().getDate() - Number(request)));
         let from = user.userAddress.toString();
         const trade = yield (0, history_services_1.getManyHistoryService)({ from, createdAt: { $gte: date } });
         let sum = 0;
-        yield Promise.all(trade.map((trader) => __awaiter(void 0, void 0, void 0, function* () {
+        trade.forEach((trader) => __awaiter(void 0, void 0, void 0, function* () {
             const check = yield (0, collection_services_1.checkChainIdCollectionService)(String(trader.collectionId), chainID);
-            if (check === true) {
-                sum = sum + Number(trader.price);
+            if (check) {
+                sum += Number(trader.price);
             }
-        })));
-        let percentTrade = 0;
-        switch (request) {
-            case 7:
-                percentTrade = yield getTradeByWeek(user.userAddress, chainID);
-                break;
-            case 30:
-                percentTrade = yield getTradeByMonth(user.userAddress, chainID);
-                break;
-            default:
-                percentTrade = yield getTradeByDay(user.userAddress, chainID);
-        }
-        const tradeOne = {
+        }));
+        let percentTrade = yield getTradeByDay(request, user.userAddress, chainID);
+        return {
             user,
             volumeTrade: sum,
             percentTrade,
         };
-        data.push(tradeOne);
     })));
-    data.sort((a, b) => parseFloat(b.volumeTrade.toString()) - parseFloat(a.volumeTrade.toString()));
-    data.map((data, index) => {
-        // Volume Trade > 0
-        if (data.volumeTrade) {
-            trd.push(data);
-        }
-    });
+    userTrades.sort((a, b) => b.volumeTrade - a.volumeTrade);
+    trd = userTrades.filter(data => data.volumeTrade);
     return trd;
 });
 exports.topTraderService = topTraderService;
+const topTraderAutoService = () => __awaiter(void 0, void 0, void 0, function* () {
+    let chainID = 2;
+    let trd = new Array();
+    const user = yield getAllUsersService();
+    const userTrades = yield Promise.all(user.map((user) => __awaiter(void 0, void 0, void 0, function* () {
+        //24 Hours
+        let from = user.userAddress.toString();
+        const date1 = new Date(new Date().setDate(new Date().getDate() - 1));
+        const trade1 = yield (0, history_services_1.getManyHistoryService)({ from, createdAt: { $gte: date1 } });
+        let sum1 = 0;
+        yield Promise.all(trade1.map((trader) => __awaiter(void 0, void 0, void 0, function* () {
+            const check = yield (0, collection_services_1.checkChainIdCollectionService)(String(trader.collectionId), chainID);
+            if (check) {
+                sum1 += Number(trader.price);
+            }
+        })));
+        let percentTrade1 = yield getTradeByDay(1, user.userAddress, chainID);
+        //7 Days
+        const date7 = new Date(new Date().setDate(new Date().getDate() - 7));
+        const trade7 = yield (0, history_services_1.getManyHistoryService)({ from, createdAt: { $gte: date7 } });
+        let sum7 = 0;
+        yield Promise.all(trade7.map((trader) => __awaiter(void 0, void 0, void 0, function* () {
+            const check = yield (0, collection_services_1.checkChainIdCollectionService)(String(trader.collectionId), chainID);
+            if (check) {
+                sum7 += Number(trader.price);
+            }
+        })));
+        let percentTrade7 = yield getTradeByDay(7, user.userAddress, chainID);
+        //30 Days
+        const date30 = new Date(new Date().setDate(new Date().getDate() - 30));
+        const trade30 = yield (0, history_services_1.getManyHistoryService)({ from, createdAt: { $gte: date30 } });
+        let sum30 = 0;
+        yield Promise.all(trade30.map((trader) => __awaiter(void 0, void 0, void 0, function* () {
+            const check = yield (0, collection_services_1.checkChainIdCollectionService)(String(trader.collectionId), chainID);
+            if (check) {
+                sum30 += Number(trader.price);
+            }
+        })));
+        let percentTrade30 = yield getTradeByDay(30, user.userAddress, chainID);
+        return {
+            user,
+            volume24Hour: sum1,
+            volume7Days: sum7,
+            volume30Days: sum30,
+            percent24Hour: percentTrade1,
+            percent7Days: percentTrade7,
+            percent30Days: percentTrade30,
+        };
+    })));
+    // userTrades.sort((a, b) => b.volumeTrade - a.volumeTrade);
+    trd = userTrades.filter(data => data.volume30Days);
+    fs_1.default.writeFile("./public/topTrader.json", JSON.stringify(trd), "utf8", () => {
+        console.log(`Update top trader successfully at ${new Date(Date.now())}`);
+    });
+});
+exports.topTraderAutoService = topTraderAutoService;
+const gettopTraderAutoService = () => __awaiter(void 0, void 0, void 0, function* () {
+    const data = fs_1.default.readFileSync("./public/topTrader.json", "utf8");
+    return JSON.parse(data);
+});
+exports.gettopTraderAutoService = gettopTraderAutoService;

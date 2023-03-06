@@ -1,3 +1,4 @@
+import { cancelAuction, finalAuctionController } from "./../controllers/order.controllers";
 import express from "express";
 
 import { checkUserAuthen, checkUserExist } from "../middlewares/checkUser.middlewares";
@@ -46,6 +47,8 @@ orderRouter.post(
 	cancelOrder,
 );
 
+orderRouter.post("/cancel-auction/userAddress/:userAddress", checkUserExist, checkUserAuthen, cancelAuction);
+
 orderRouter.get("/get-order-sell", getOrderSellItem);
 orderRouter.post("/create-order", createOrderController);
 orderRouter.get("/get-order-by-id/:orderId", getOrderByIdController);
@@ -54,6 +57,7 @@ orderRouter.delete("/delete-order/:orderId", deleteOrderController);
 orderRouter.get("/get-order-by-itemId/:itemId", getOrderByItemIdController);
 orderRouter.get("/get-order-by-instantSale-true", getOrderByInstantSaleTrueController);
 orderRouter.get("/get-order-by-instantSale-false", getOrderByInstantSaleFalseController);
+orderRouter.post("/final-auction", finalAuctionController);
 
 orderRouter.post("/get-order-by-creationNumber/userAddress/:userAddress", getOrderByCreationNumber);
 export default orderRouter;

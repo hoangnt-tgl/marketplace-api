@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getListCollectionService = exports.writeTopCollectionService = exports.getTopCollectionService = exports.getListCollectionByCategory = exports.getAllCollectionService = exports.checkChainIdCollectionService = exports.getNewCollectionService = void 0;
+exports.getListCollectionService = exports.writeTopCollectionService = exports.getTopCollectionService = exports.getVolumeCollectionService = exports.checkChainIdCollectionService = exports.getNewCollectionService = void 0;
 const collection_model_1 = __importDefault(require("../models/collection.model"));
 const item_model_1 = __importDefault(require("../models/item.model"));
 const history_model_1 = __importDefault(require("../models/history.model"));
@@ -29,6 +29,12 @@ const getTopCollectionService = (sortBy = "volumeTrade", sortFrom, objectQuery =
         });
     }
     const file = fs_1.default.readFileSync("./public/topCollection.json");
+    if (Buffer.byteLength(file) === 0) {
+        return { data: [], pagination: { totalPages: 0,
+                currentPage: 0,
+                pageSize: 0,
+                totalItems: 0 } };
+    }
     const topCollection = JSON.parse(file)[chainId];
     const sortable = Object.entries(topCollection).filter(([, value]) => {
         let result = true;
@@ -43,7 +49,6 @@ const getTopCollectionService = (sortBy = "volumeTrade", sortFrom, objectQuery =
         returnValue = sortable
             .sort(([, value1], [, value2]) => value2[sortBy] - value1[sortBy])
             .reduce((r, [k, v]) => (Object.assign(Object.assign({}, r), { [k]: v })), {});
-        console.log("1");
     }
     else {
         returnValue = sortable
@@ -202,13 +207,30 @@ const getListCollectionService = (query) => __awaiter(void 0, void 0, void 0, fu
     return collections;
 });
 exports.getListCollectionService = getListCollectionService;
-const getAllCollectionService = () => __awaiter(void 0, void 0, void 0, function* () {
-    const collection = yield (0, model_services_1.findManyService)(collection_model_1.default, {});
-    return collection;
+const getVolumeCollectionService = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    let result = [];
+    let volume = { avgPrice: 0, date: new Date(), days: 0, month: 0, year: 0 };
+    const history = yield (0, history_services_1.getHistoryByCollectionService)(id, { type: 7 });
+    console.log(id);
+    history.forEach((history) => {
+        let index = result.findIndex((volume) => volume.days == history.createdAt.getDate() && volume.month == history.createdAt.getMonth() && volume.year == history.createdAt.getFullYear());
+        console.log(index);
+        if (index !== -1) {
+            let newVolume = result[index];
+            newVolume.avgPrice = Number(newVolume.avgPrice) + Number(history.price);
+            result[index] = newVolume;
+        }
+        else {
+            volume = { avgPrice: 0, date: new Date(), days: 0, month: 0, year: 0 };
+            volume.avgPrice = Number(history.price);
+            volume.date = history.createdAt;
+            volume.days = Number(history.createdAt.getDate());
+            volume.month = Number(history.createdAt.getMonth());
+            volume.year = Number(history.createdAt.getFullYear());
+            console.log("Volume: ", volume);
+            result.push(volume);
+        }
+    });
+    return result;
 });
-exports.getAllCollectionService = getAllCollectionService;
-const getListCollectionByCategory = (query) => __awaiter(void 0, void 0, void 0, function* () {
-    const collections = yield (0, model_services_1.findManyService)(collection_model_1.default, query);
-    return collections;
-});
-exports.getListCollectionByCategory = getListCollectionByCategory;
+exports.getVolumeCollectionService = getVolumeCollectionService;

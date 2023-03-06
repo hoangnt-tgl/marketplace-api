@@ -12,11 +12,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkUserAddressValid = exports.checkUserAuthen = exports.checkUserExist = void 0;
+exports.checkBioUser = exports.checkUserAddressValid = exports.checkUserAuthen = exports.checkUserExist = void 0;
 const model_services_1 = require("../services/model.services");
 const user_model_1 = __importDefault(require("../models/user.model"));
 const response_constants_1 = require("../constant/response.constants");
 const user_services_1 = require("../services/user.services");
+const other_services_1 = require("../services/other.services");
 const checkUserExist = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let userAddress = req.body.userAddress || req.params.userAddress || req.query.userAddress;
@@ -36,27 +37,30 @@ const checkUserExist = (req, res, next) => __awaiter(void 0, void 0, void 0, fun
 });
 exports.checkUserExist = checkUserExist;
 const checkUserAuthen = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b, _c, _d;
     try {
         const userAddress = req.body.userAddress || req.params.userAddress;
         const { publicKey, nonce, signature } = req.body;
-        const session = req.session;
-        if (((_a = session.user) === null || _a === void 0 ? void 0 : _a.signature) && ((_b = session.user) === null || _b === void 0 ? void 0 : _b.publicKey)) {
-            const userExist = yield (0, user_services_1.checkUserExistsService)(userAddress);
-            if (userExist) {
-                const user = yield (0, user_services_1.getOneUserService)(userAddress);
-                const isValid = (0, user_services_1.verifySignUserService)((_c = session.user) === null || _c === void 0 ? void 0 : _c.publicKey, user.nonce, (_d = session.user) === null || _d === void 0 ? void 0 : _d.signature);
-                if (isValid) {
-                    req.body.isFirst = false;
-                    return next();
-                }
-            }
-        }
-        else {
+        if (publicKey && nonce && signature) {
             const isValid = (0, user_services_1.verifySignUserService)(publicKey, nonce, signature);
             if (isValid) {
-                req.body.isFirst = true;
+                const token = (0, other_services_1.encodeJwt)({ publicKey, nonce, signature, userAddress }, "1d");
+                req.body.token = token;
                 return next();
+            }
+        }
+        else if (req.headers.authorization && req.headers.authorization.split(" ")[0] === "Bearer") {
+            const userExist = yield (0, user_services_1.checkUserExistsService)(userAddress);
+            if (!userExist)
+                return res.status(401).json({ error: response_constants_1.ERROR_RESPONSE[401] });
+            const token = req.headers.authorization.split(" ")[1];
+            const decode = (0, other_services_1.decodeJwt)(token);
+            if (userAddress !== decode.userAddress)
+                return res.status(401).json({ error: response_constants_1.ERROR_RESPONSE[401] });
+            if (decode) {
+                const isValid = (0, user_services_1.verifySignUserService)(decode.publicKey, decode.nonce, decode.signature);
+                if (isValid) {
+                    return next();
+                }
             }
         }
         return res.status(401).json({ error: response_constants_1.ERROR_RESPONSE[401] });
@@ -78,3 +82,15 @@ const checkUserAddressValid = (req, res, next) => __awaiter(void 0, void 0, void
     }
 });
 exports.checkUserAddressValid = checkUserAddressValid;
+const checkBioUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { bio } = req.body;
+        if (bio.length > 1500)
+            return res.status(400).json({ error: response_constants_1.ERROR_RESPONSE[400] });
+        next();
+    }
+    catch (error) {
+        return res.status(500).json({ error: response_constants_1.ERROR_RESPONSE[500] });
+    }
+});
+exports.checkBioUser = checkBioUser;

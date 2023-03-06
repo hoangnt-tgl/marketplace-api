@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getTopCollection = exports.getAllCollection = exports.getCollectionByCategory = exports.getCollectionByUserAddress = exports.getCollectionById = exports.createCollection = exports.getAllCollectionByCategory = exports.getNewCollectionController = void 0;
+exports.getTopCollection = exports.getAllCollection = exports.getCollectionByCategory = exports.getCollectionByUserAddress = exports.getCollectionById = exports.createCollection = exports.getVolumeTradeCollectionController = exports.getAllCollectionByCategory = exports.getNewCollectionController = void 0;
 const collection_model_1 = __importDefault(require("../models/collection.model"));
 const item_model_1 = __importDefault(require("../models/item.model"));
 const history_model_1 = __importDefault(require("../models/history.model"));
@@ -21,7 +21,7 @@ const item_services_1 = require("../services/item.services");
 const response_constants_1 = require("../constant/response.constants");
 const collection_services_1 = require("../services/collection.services");
 const collection_constant_1 = require("../constant/collection.constant");
-const console_1 = __importDefault(require("console"));
+const history_services_1 = require("../services/history.services");
 const createCollection = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let { userAddress, chainId } = req.params;
@@ -55,11 +55,21 @@ exports.createCollection = createCollection;
 const getCollectionById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let { collectionId } = req.params;
+        let ownerFull = [];
+        let ownerFill = [];
         let collectionInfo = yield (0, model_services_1.findOneService)(collection_model_1.default, { _id: collectionId });
+        collectionInfo.countOwner = 0;
         if (!collectionInfo)
             return res.status(404).json({ error: response_constants_1.ERROR_RESPONSE[404] });
         let items = yield (0, item_services_1.getAllItemService)({ collectionId: collectionInfo._id });
+        yield Promise.all(items.map((item) => __awaiter(void 0, void 0, void 0, function* () {
+            ownerFull.push(String(item.owner));
+        })));
+        ownerFill = Array.from(new Set(ownerFull));
+        collectionInfo.volumeTrade = Number(yield (0, history_services_1.getHistoryTradeByCollectionIdService)(collectionId));
+        collectionInfo.countOwner = Number(ownerFill.length);
         collectionInfo.listItem = items;
+        collectionInfo.minTradeItem = yield (0, history_services_1.getMinTradeItemService)(String(collectionInfo._id));
         return res.status(200).json({ data: collectionInfo });
     }
     catch (error) {
@@ -71,7 +81,7 @@ const getCollectionByUserAddress = (req, res) => __awaiter(void 0, void 0, void 
     try {
         let { userAddress, chainId } = req.params;
         userAddress = userAddress.toLowerCase();
-        let collectionInfo = yield (0, model_services_1.findManyService)(collection_model_1.default, { userAddress, chainId });
+        let collectionInfo = yield (0, collection_services_1.getListCollectionService)({ userAddress, chainId });
         yield Promise.all(collectionInfo.map((collection, index) => __awaiter(void 0, void 0, void 0, function* () {
             let items = yield (0, model_services_1.findManyService)(item_model_1.default, { collectionId: collection._id });
             collectionInfo[index].listItem = items;
@@ -126,7 +136,6 @@ const getTopCollection = (req, res) => __awaiter(void 0, void 0, void 0, functio
             category,
         };
         const collections = yield (0, collection_services_1.getTopCollectionService)(sortBy, sortFrom, objectQuery, Number(pageSize), Number(pageId), chainId);
-        console_1.default.log(collections);
         return res.status(200).json(collections);
     }
     catch (error) {
@@ -169,3 +178,14 @@ const getAllCollectionByCategory = (req, res) => __awaiter(void 0, void 0, void 
     }
 });
 exports.getAllCollectionByCategory = getAllCollectionByCategory;
+const getVolumeTradeCollectionController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const id = String(req.params.id);
+        const result = yield (0, collection_services_1.getVolumeCollectionService)(id);
+        res.status(200).json({ data: result });
+    }
+    catch (error) {
+        return res.status(500).json({ error: response_constants_1.ERROR_RESPONSE[500] });
+    }
+});
+exports.getVolumeTradeCollectionController = getVolumeTradeCollectionController;

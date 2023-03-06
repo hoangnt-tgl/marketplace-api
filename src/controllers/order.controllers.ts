@@ -27,6 +27,7 @@ import {
 	getOrderByInstantSaleTrueService,
 	getAuctionIdService,
 	getOneOrderService,
+	finalAuction,
 } from "../services/order.services";
 import formidable from "formidable";
 import { handlePromiseUpload } from "../services/uploadFile.service";
@@ -42,7 +43,7 @@ const sellItem = async (req: Request, res: Response) => {
 	try {
 		let { userAddress, chainId } = req.params;
 		userAddress = userAddress.toLowerCase();
-		let { price, quantity, itemId, to, txHash, coinType, startTime, instantSale, auctionId, endTime } = req.body;
+		let { price, quantity, itemId, to, txHash, coinType, startTime, instantSale, endTime } = req.body;
 		// startTime = new Date(startTime).getTime()
 		// endTime = new Date(endTime).getTime()
 		//find id item
@@ -63,7 +64,6 @@ const sellItem = async (req: Request, res: Response) => {
 				startTime: startTime,
 				expirationTime: endTime,
 				instantSale,
-				type: 6,
 				auctionId: await getAuctionIdService(txHash),
 			};
 			// let newAuction = {
@@ -90,7 +90,6 @@ const sellItem = async (req: Request, res: Response) => {
 				startTime: startTime,
 				expirationTime: endTime,
 				instantSale,
-				type: 6,
 			};
 		}
 		let orderInfo = await createService(orderModel, newOrder);
@@ -100,7 +99,7 @@ const sellItem = async (req: Request, res: Response) => {
 			from: userAddress,
 			to: to,
 			quantity: quantity,
-			type: 6,
+			type: instantSale ? 6 : 8,
 			txHash: txHash,
 			price: price,
 			priceType: coinType,
@@ -197,6 +196,34 @@ const cancelOrder = async (req: Request, res: Response) => {
 	}
 };
 
+const cancelAuction = async (req: Request, res: Response) => {
+	try {
+		const { orderId, txHash } = req.body;
+		const { userAddress } = req.params;
+		const orderInfo = await findOneService(orderModel, { _id: orderId, maker: userAddress });
+		const itemInfo = await findOneService(itemModel, { _id: orderInfo.itemInfo });
+		await deleteOneService(orderModel, { _id: orderId, maker: userAddress });
+		let findOrderItemId = await queryExistService(orderModel, { itemId: orderInfo.itemId });
+		if (!findOrderItemId) {
+			await updateOneService(itemModel, { _id: orderInfo.itemId }, { status: 0 });
+		}
+		let newHistory = {
+			collectionId: itemInfo.collectionId,
+			itemId: orderInfo.itemId,
+			from: userAddress,
+			quantity: orderInfo.amount,
+			type: 5,
+			txHash: txHash,
+			price: orderInfo.minPrice,
+			priceType: orderInfo.coinType,
+		};
+		createService(historyModel, newHistory);
+		return res.status(200).json({ message: "Cancel auction success" });
+	} catch (error: any) {
+		return res.status(500).json({ message: error.message });
+	}
+};
+
 const getOrderSellItem = async (req: Request, res: Response) => {
 	try {
 		let { userAddress, chainId } = req.params;
@@ -255,7 +282,7 @@ export const deleteOrderController = async (req: Request, res: Response) => {
 	}
 };
 
-export const getOrderByItemIdController = async (req: Request, res: Response) => {
+const getOrderByItemIdController = async (req: Request, res: Response) => {
 	try {
 		const { itemId } = req.params;
 		const orders: Order[] = await getOrderByItemIdService(itemId);
@@ -265,7 +292,7 @@ export const getOrderByItemIdController = async (req: Request, res: Response) =>
 	}
 };
 
-export const getOrderByInstantSaleTrueController = async (req: Request, res: Response) => {
+const getOrderByInstantSaleTrueController = async (req: Request, res: Response) => {
 	try {
 		const orders: Order[] = await getOrderByInstantSaleTrueService();
 		res.status(200).json({ data: orders });
@@ -283,7 +310,7 @@ export const getOrderByInstantSaleFalseController = async (req: Request, res: Re
 	}
 };
 
-export const getOrderByCreationNumber = async (req: Request, res: Response) => {
+const getOrderByCreationNumber = async (req: Request, res: Response) => {
 	try {
 		let { userAddress } = req.params;
 		userAddress = userAddress.toLowerCase();
@@ -295,4 +322,25 @@ export const getOrderByCreationNumber = async (req: Request, res: Response) => {
 	}
 };
 
-export { buyItem, sellItem, cancelOrder, getOrderSellItem };
+const finalAuctionController = async (req: Request, res: Response) => {
+	try {
+		const { txHash, orderId, itemId } = req.body;
+		await finalAuction(txHash, itemId);
+		res.status(200).json("Update successful");
+	} catch (error: any) {
+		console.log(error);
+		res.status(500).json(error);
+	}
+};
+
+export {
+	buyItem,
+	sellItem,
+	cancelOrder,
+	cancelAuction,
+	getOrderSellItem,
+	finalAuctionController,
+	getOrderByCreationNumber,
+	getOrderByItemIdController,
+	getOrderByInstantSaleTrueController,
+};

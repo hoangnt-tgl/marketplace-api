@@ -8,15 +8,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const app_1 = require("./app");
-const collection_services_1 = require("./services/collection.services");
-const user_services_1 = require("./services/user.services");
-(0, app_1.runningApp)();
-const UPDATE_TOP_COLLECTION_TIME = Number(process.env.UPDATE_TOP_COLLECTION_TIME) || 1000 * 5;
-setInterval(() => __awaiter(void 0, void 0, void 0, function* () {
-    yield (0, collection_services_1.writeTopCollectionService)();
-}), Number(UPDATE_TOP_COLLECTION_TIME));
-setInterval(() => __awaiter(void 0, void 0, void 0, function* () {
-    yield (0, user_services_1.topTraderAutoService)();
-}), UPDATE_TOP_COLLECTION_TIME);
+exports.changePricetoUSD = void 0;
+const axios_1 = __importDefault(require("axios"));
+const changePricetoUSD = (fsyms, price) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log(fsyms);
+    const url = `https://min-api.cryptocompare.com/data/price?fsym=${fsyms}&tsyms=USD`;
+    const response = yield axios_1.default.get(url);
+    const result = response.data.USD * price;
+    return result;
+});
+exports.changePricetoUSD = changePricetoUSD;

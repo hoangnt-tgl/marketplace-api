@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkOwnerCollection = void 0;
+exports.checkOwnerCollection = exports.checkCollectionDescription = exports.checkCollectionName = void 0;
 const collection_model_1 = __importDefault(require("../models/collection.model"));
 const model_services_1 = require("../services/model.services");
 const checkOwnerCollection = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
@@ -33,3 +33,31 @@ const checkOwnerCollection = (req, res, next) => __awaiter(void 0, void 0, void 
     }
 });
 exports.checkOwnerCollection = checkOwnerCollection;
+//check collection name not over 128 character
+const checkCollectionName = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let { collectionName } = req.body;
+        if (collectionName.length > 128) {
+            return res.status(400).json({ error: "Collection name is too long" });
+        }
+        next();
+    }
+    catch (error) {
+        res.status(500).json({ error: "Cannot not check collection name" });
+    }
+});
+exports.checkCollectionName = checkCollectionName;
+//check desscription not over 1500 character
+const checkCollectionDescription = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let { description } = req.body;
+        if (description.length > 1500) {
+            return res.status(400).json({ error: "Collection description is too long" });
+        }
+        next();
+    }
+    catch (error) {
+        res.status(500).json({ error: "Cannot not check collection description" });
+    }
+});
+exports.checkCollectionDescription = checkCollectionDescription;

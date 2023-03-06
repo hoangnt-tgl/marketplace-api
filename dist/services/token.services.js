@@ -12,17 +12,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.connectDB = void 0;
-const mongoose_1 = __importDefault(require("mongoose"));
-require("dotenv").config();
-const connectDB = () => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        console.log(`Connecting to mongo db`, process.env.MONGO_URI);
-        yield mongoose_1.default.connect(process.env.MONGO_URI || "");
-        console.log(`Mongo db connected`);
-    }
-    catch (error) {
-        console.log(error.message);
-    }
+exports.getDecimalService = exports.getAllTokenService = void 0;
+const token_model_1 = __importDefault(require("../models/token.model"));
+const model_services_1 = require("./model.services");
+const getAllTokenService = () => __awaiter(void 0, void 0, void 0, function* () {
+    const token = yield (0, model_services_1.findManyService)(token_model_1.default, {});
+    return token;
 });
-exports.connectDB = connectDB;
+exports.getAllTokenService = getAllTokenService;
+const getDecimalService = (tokenSymbol) => __awaiter(void 0, void 0, void 0, function* () {
+    const token = yield (0, model_services_1.findManyService)(token_model_1.default, { tokenSymbol });
+    return token.decimal;
+});
+exports.getDecimalService = getDecimalService;

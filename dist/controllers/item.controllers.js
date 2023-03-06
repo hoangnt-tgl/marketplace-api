@@ -12,12 +12,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getItemForUser = exports.getAllItem = exports.getItemById = exports.createItem = exports.getListItemByOwnerController = exports.getListItemByCreatedController = exports.showRandomListItemController = exports.showSelectItemController = void 0;
+exports.getItemForUser = exports.getAllItem = exports.getItemById = exports.createItem = exports.getVolumeAllItemController = exports.updateOwnerController = exports.getItemController = exports.setItemController = exports.getTranController = exports.getListItemByOwnerController = exports.getListItemByCreatedController = exports.showRandomListItemController = exports.showSelectItemController = void 0;
 const item_model_1 = __importDefault(require("../models/item.model"));
 const response_constants_1 = require("../constant/response.constants");
 const history_model_1 = __importDefault(require("../models/history.model"));
 const model_services_1 = require("../services/model.services");
 const item_services_1 = require("../services/item.services");
+const fs_1 = __importDefault(require("fs"));
 const createItem = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let { chainId, userAddress } = req.params;
@@ -127,3 +128,61 @@ const getListItemByOwnerController = (req, res) => __awaiter(void 0, void 0, voi
     }
 });
 exports.getListItemByOwnerController = getListItemByOwnerController;
+const getTranController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const result = yield (0, item_services_1.getTransactionService)();
+        return res.status(200).json({ result });
+    }
+    catch (error) {
+        return res.status(500).json({ error: response_constants_1.ERROR_RESPONSE[500] });
+    }
+});
+exports.getTranController = getTranController;
+const setItemController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const listItemId = req.body.listItemId;
+        // fs.writeFileSync("./public/listItemId.json", JSON.stringify(listItemId));
+        fs_1.default.writeFile("./public/listItemId.json", JSON.stringify(listItemId), "utf8", () => {
+            console.log(`Update lits item successfully at ${new Date(Date.now())}`);
+        });
+        return res.status(200).json({ result: "success" });
+    }
+    catch (error) {
+        return res.status(500).json({ error: response_constants_1.ERROR_RESPONSE[500] });
+    }
+});
+exports.setItemController = setItemController;
+const getItemController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const listItemId = JSON.parse(fs_1.default.readFileSync("./public/listItemId.json", "utf8"));
+        const listItem = yield (0, item_services_1.getListSelectItemService)(listItemId);
+        return res.status(200).json({ data: listItem });
+    }
+    catch (error) {
+        return res.status(500).json({ error: response_constants_1.ERROR_RESPONSE[500] });
+    }
+});
+exports.getItemController = getItemController;
+const updateOwnerController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { itemId, send, receive, quantity, txHash } = req.body;
+        const result = yield (0, item_services_1.updateItemService)(itemId, send, receive, quantity, txHash);
+        return res.status(200).json({ data: result });
+    }
+    catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: response_constants_1.ERROR_RESPONSE[500] });
+    }
+});
+exports.updateOwnerController = updateOwnerController;
+const getVolumeAllItemController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const id = String(req.params.id);
+        const result = yield (0, item_services_1.getVolumeItemService)(id);
+        res.status(200).json({ data: result });
+    }
+    catch (error) {
+        return res.status(500).json({ error: response_constants_1.ERROR_RESPONSE[500] });
+    }
+});
+exports.getVolumeAllItemController = getVolumeAllItemController;

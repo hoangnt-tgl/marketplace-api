@@ -12,12 +12,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.auctionParticipateService = exports.getAuctionByIdService = exports.getManyAuctionService = exports.updateAuctionStatusService = exports.checkItemIsAuctionService = exports.getTopBidService = exports.queryAuctionService = exports.getOneAuctionService = exports.checkAuctionExistService = exports.makeBidService = exports.settleAuctionService = exports.createAuctionService = void 0;
+exports.getManyAuctionService = exports.updateAuctionStatusService = exports.checkItemIsAuctionService = exports.getTopBidService = exports.queryAuctionService = exports.checkAuctionExistService = exports.makeBidService = exports.settleAuctionService = exports.createAuctionService = void 0;
 const makeBid_model_1 = __importDefault(require("../models/makeBid.model"));
 const auction_model_1 = __importDefault(require("../models/auction.model"));
-const makeBid_services_1 = require("./makeBid.services");
 const model_services_1 = require("./model.services");
-const price_services_1 = require("./price.services");
+// import { changePriceService, fromWeiToTokenService, getTokenService } from "./price.services";
 const other_services_1 = require("./other.services");
 const createAuctionService = (chainId, inoId, collectionId, items, minPrice, bidIncreasePercent, paymentToken, seller, endTime, startTime) => __awaiter(void 0, void 0, void 0, function* () {
     const arrObjItemId = [];
@@ -50,7 +49,7 @@ exports.settleAuctionService = settleAuctionService;
 const queryAuctionService = (textSearch = "", chainId, userAddress, status, pageId, pageSize) => __awaiter(void 0, void 0, void 0, function* () {
     const queryStatus = status === "live"
         ? { isLive: true }
-        : status === "upcoming"
+        : status === "nerver coming"
             ? { isLive: false, startTime: { $gt: Math.floor(Date.now() / 1000) } }
             : status === "completed"
                 ? { isLive: false, endTime: { $lte: Math.floor(Date.now() / 1000) } }
@@ -73,53 +72,81 @@ const queryAuctionService = (textSearch = "", chainId, userAddress, status, page
     return response;
 });
 exports.queryAuctionService = queryAuctionService;
-const makeBidService = (auctionId, bidAmount, userAddress) => __awaiter(void 0, void 0, void 0, function* () {
-    const auction = yield (0, model_services_1.updateOneService)(auction_model_1.default, { _id: (0, model_services_1.createObjIdService)(auctionId) }, { highestBid: bidAmount, highestBidder: userAddress });
-    return auction;
+const makeBidService = (userAddress, auctionId, bidAmount, paymentToken, transactionHash) => __awaiter(void 0, void 0, void 0, function* () {
+    let newBid = {
+        auctionId,
+        bidAmount,
+        userAddress,
+        paymentToken,
+        transactionHash,
+    };
+    return yield (0, model_services_1.createService)(makeBid_model_1.default, newBid);
 });
 exports.makeBidService = makeBidService;
 const checkAuctionExistService = (auctionId) => __awaiter(void 0, void 0, void 0, function* () {
     return yield (0, model_services_1.queryExistService)(auction_model_1.default, { _id: (0, model_services_1.createObjIdService)(auctionId) });
 });
 exports.checkAuctionExistService = checkAuctionExistService;
-const getOneAuctionService = (queryObj) => __awaiter(void 0, void 0, void 0, function* () {
-    const auction = yield auction_model_1.default
-        .findOne(queryObj)
-        .lean()
-        .populate({
-        path: "items",
-        select: "itemTokenId itemName itemMedia owner creator",
-        populate: { path: "ownerInfo creatorInfo", select: "userAddress avatar username" },
-    })
-        .populate({ path: "infoINO", select: "addressINO ownerINO nameINO descriptionINO typeINO" })
-        .populate({ path: "collectionInfo", select: "collectionAddress" });
-    return auction;
-});
-exports.getOneAuctionService = getOneAuctionService;
-const auctionParticipateService = (auctionId, userAddress, isJoin = true) => __awaiter(void 0, void 0, void 0, function* () {
-    let result;
-    if (isJoin) {
-        result = yield (0, model_services_1.updateOneService)(auction_model_1.default, { _id: (0, model_services_1.createObjIdService)(auctionId) }, { $addToSet: { participant: userAddress.toLowerCase() } });
-    }
-    else {
-        result = yield (0, model_services_1.updateOneService)(auction_model_1.default, { _id: (0, model_services_1.createObjIdService)(auctionId) }, { $pull: { participant: userAddress.toLowerCase() } });
-    }
-    return result;
-});
-exports.auctionParticipateService = auctionParticipateService;
+// const getOneAuctionService = async (queryObj: any) => {
+// 	const auction: Auction = await auctionModel
+// 		.findOne(queryObj)
+// 		.lean()
+// 		.populate({
+// 			path: "items",
+// 			select: "itemTokenId itemName itemMedia owner creator",
+// 			populate: { path: "ownerInfo creatorInfo", select: "userAddress avatar username" },
+// 		})
+// 		.populate({ path: "infoINO", select: "addressINO ownerINO nameINO descriptionINO typeINO" })
+// 		.populate({ path: "collectionInfo", select: "collectionAddress" });
+// 	return auction;
+// };
+// const auctionParticipateService = async (
+// 	auctionId: string,
+// 	userAddress: string,
+// 	isJoin: boolean = true,
+// 	bidAmount: number,
+// ) => {
+// 	let result: Auction;
+// 	if (isJoin) {
+// 		let AuctionInfo = await auctionModel.findOne({ _id: createObjIdService(auctionId) });
+// 		if (bidAmount > AuctionInfo.highestBid) {
+// 			result = await updateOneService(
+// 				auctionModel,
+// 				{ _id: createObjIdService(auctionId) },
+// 				{
+// 					highestBid: bidAmount,
+// 					highestBidder: userAddress.toLowerCase(),
+// 					$addToSet: { participant: userAddress.toLowerCase() },
+// 				},
+// 			);
+// 		} else {
+// 			result = await updateOneService(
+// 				auctionModel,
+// 				{ _id: createObjIdService(auctionId) },
+// 				{ $addToSet: { participant: userAddress.toLowerCase() } },
+// 			);
+// 		}
+// 	} else {
+// 		result = await updateOneService(
+// 			auctionModel,
+// 			{ _id: createObjIdService(auctionId) },
+// 			{ $pull: { participant: userAddress.toLowerCase() } },
+// 		);
+// 	}
+// 	return result;
+// };
 const getManyAuctionService = (objQuery, properties = "") => __awaiter(void 0, void 0, void 0, function* () {
     const auctions = yield (0, model_services_1.findManyService)(auction_model_1.default, objQuery, properties);
     return auctions;
 });
 exports.getManyAuctionService = getManyAuctionService;
-const getAuctionByIdService = (auctionId, userAddress) => __awaiter(void 0, void 0, void 0, function* () {
-    const auction = yield getOneAuctionService({ _id: (0, model_services_1.createObjIdService)(auctionId) });
-    auction.isParticipate =
-        typeof userAddress === "string" && auction.participant.includes(userAddress.toLowerCase()) ? true : false;
-    const extraAuction = yield returnAdditionalAuctionService(auction);
-    return extraAuction;
-});
-exports.getAuctionByIdService = getAuctionByIdService;
+// const getAuctionByIdService = async (auctionId: string, userAddress: any) => {
+// 	const auction: Auction = await getOneAuctionService({ _id: createObjIdService(auctionId) });
+// 	auction.isParticipate =
+// 		typeof userAddress === "string" && auction.participant.includes(userAddress.toLowerCase()) ? true : false;
+// 	const extraAuction: ExtraAuctionInfo = await returnAdditionalAuctionService(auction);
+// 	return extraAuction;
+// };
 const getTopBidService = (limit) => __awaiter(void 0, void 0, void 0, function* () {
     const bids = yield (0, model_services_1.findManyService)(makeBid_model_1.default, {});
     const bidToAuction = bids.reduce((obj, cur) => {
@@ -156,39 +183,3 @@ const updateAuctionStatusService = () => __awaiter(void 0, void 0, void 0, funct
     yield (0, model_services_1.updateManyService)(auction_model_1.default, { endTime: { $lte: now } }, { isLive: false });
 });
 exports.updateAuctionStatusService = updateAuctionStatusService;
-const returnAdditionalAuctionService = (auction) => __awaiter(void 0, void 0, void 0, function* () {
-    const token = yield (0, price_services_1.getTokenService)({ chainId: auction.chainId, tokenAddress: auction.paymentToken });
-    const getTokenPrice = (key, weiPrice, decimal) => {
-        const obj = {};
-        const result = (0, price_services_1.fromWeiToTokenService)(weiPrice, decimal);
-        obj[key] = result;
-        return obj;
-    };
-    const getUsdPrice = (key, token, weiPrice) => __awaiter(void 0, void 0, void 0, function* () {
-        const obj = {};
-        const result = yield (0, price_services_1.changePriceService)(token, "usd", weiPrice);
-        obj[key] = result;
-        return obj;
-    });
-    const getAmountOfBid = () => __awaiter(void 0, void 0, void 0, function* () {
-        const result = yield (0, makeBid_services_1.getAmountBidService)(auction._id.toString());
-        return {
-            amountBidder: result,
-        };
-    });
-    const obj = yield (0, other_services_1.multiProcessService)([
-        getTokenPrice("minPriceToken", auction.minPrice, token.decimal),
-        getTokenPrice("highestBidToken", auction.highestBid, token.decimal),
-        getUsdPrice("minPriceUsd", token.tokenSymbol, auction.minPrice),
-        getUsdPrice("highestBidUsd", token.tokenSymbol, auction.highestBid),
-        getAmountOfBid(),
-    ]);
-    const extraAuction = Object.assign(Object.assign({}, auction), { minPrice: obj.minPriceToken, highestBid: obj.highestBidToken, minPriceUsd: obj.minPriceUsd, highestBidUsd: obj.highestBidUsd, amountBidder: obj.amountBidder, priceType: token.tokenSymbol, status: auction.isLive === true
-            ? "live"
-            : auction.isLive === false && auction.startTime > Math.floor(Date.now() / 1000)
-                ? "upcoming"
-                : auction.isLive === false && auction.endTime <= Math.floor(Date.now() / 1000)
-                    ? "completed"
-                    : "" });
-    return extraAuction;
-});

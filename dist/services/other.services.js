@@ -12,11 +12,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.postDataToURL = exports.multiProcessService = exports.paginateArrayService = exports.getSortObj = exports.getDataFromURL = exports.createTokenIdService = exports.removeUndefinedOfObj = void 0;
+exports.decodeJwt = exports.encodeJwt = exports.postDataToURL = exports.multiProcessService = exports.paginateArrayService = exports.getSortObj = exports.getDataFromURL = exports.createTokenIdService = exports.removeUndefinedOfObj = void 0;
 const ethers_1 = require("ethers");
 const axios_1 = __importDefault(require("axios"));
 const condition_constant_1 = require("../constant/condition.constant");
-const SESSION_SECRET = process.env.SESSION_SECRET;
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const SESSION_SECRET = process.env.SESSION_SECRET || "secret";
 //Remove undefine query obj
 const removeUndefinedOfObj = (obj) => {
     Object.keys(obj).forEach(key => (obj[key] === undefined ? delete obj[key] : {}));
@@ -89,3 +90,20 @@ const multiProcessService = (functionArr) => __awaiter(void 0, void 0, void 0, f
     return object;
 });
 exports.multiProcessService = multiProcessService;
+const encodeJwt = (payload, time) => {
+    const token = jsonwebtoken_1.default.sign(payload, SESSION_SECRET, {
+        expiresIn: time,
+    });
+    return token;
+};
+exports.encodeJwt = encodeJwt;
+const decodeJwt = (token) => {
+    try {
+        const decoded = jsonwebtoken_1.default.verify(token, SESSION_SECRET);
+        return decoded;
+    }
+    catch (err) {
+        return null;
+    }
+};
+exports.decodeJwt = decodeJwt;
