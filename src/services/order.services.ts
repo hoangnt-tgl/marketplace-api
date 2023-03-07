@@ -118,7 +118,7 @@ export const finalAuction = async (txHash: string, itemId: string) => {
 		let buyer = "";
 		let lister = "";
 		let price = "";
-		await new Promise(resolve => setTimeout(resolve, 1000));
+		await new Promise(resolve => setTimeout(resolve, 500));
 		const response = await axios.get(`https://fullnode.testnet.aptoslabs.com/v1/transactions/by_hash/${txHash}`);
 		let data = response.data.events;
 		data.forEach((element: any) => {
