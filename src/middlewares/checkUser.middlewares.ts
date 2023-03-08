@@ -4,6 +4,7 @@ import UserModel from "../models/user.model";
 import { ERROR_RESPONSE } from "../constant/response.constants";
 import { checkUserExistsService, getOneUserService, verifySignUserService } from "../services/user.services";
 import { encodeJwt, decodeJwt } from "../services/other.services";
+const ADMIN = JSON.parse(process.env.ADMIN || "[]");
 
 export const checkUserExist = async (req: Request, res: Response, next: NextFunction) => {
 	try {
@@ -48,6 +49,7 @@ export const checkUserAuthen = async (req: Request, res: Response, next: NextFun
 		}
 		return res.status(401).json({ error: ERROR_RESPONSE[401] });
 	} catch (error: any) {
+		console.log(error);
 		return res.status(401).json({ error: ERROR_RESPONSE[401] });
 	}
 };
@@ -69,5 +71,18 @@ export const checkBioUser = async (req: Request, res: Response, next: NextFuncti
 		next();
 	} catch (error: any) {
 		return res.status(500).json({ error: ERROR_RESPONSE[500] });
+	}
+};
+
+export const checkIsAdmin = async (req: Request, res: Response, next: NextFunction) => {
+	try {
+		let { userAddress } = req.body || req.params;
+		userAddress = userAddress.toLowerCase();
+		if (ADMIN.includes(userAddress)) {
+			return next();
+		}
+		res.status(403).json({ message: "Authentication Required" });
+	} catch (error: any) {
+		res.status(500).json({ message: error.message });
 	}
 };

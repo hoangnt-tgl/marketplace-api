@@ -9,6 +9,7 @@ import historyRouter from "./history.routes";
 import interactionRouter from "./interaction.routes";
 import testRouter from "./test.routes";
 import tokenRouter from "./token.routes";
+import eventRouter from "./event.routes";
 
 const APIRouter = express.Router();
 
@@ -21,5 +22,6 @@ APIRouter.use("/history", historyRouter);
 APIRouter.use("/interaction", interactionRouter);
 APIRouter.use("/test", testRouter);
 APIRouter.use("/token", tokenRouter);
+APIRouter.use("/event", eventRouter);
 
 export default APIRouter;

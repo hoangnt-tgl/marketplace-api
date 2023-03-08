@@ -20,7 +20,9 @@ export const DEFAULT_NAME: string = "Anonymous";
 
 export const IMAGE_MAX_SIZE: number = 50000000;
 
-export const DEFAULT_CHAIN_ID: number = 4;
+export const DEFAULT_CHAIN_ID: number = 2;
+
+export const DEFAULT_COIN_TYPE: string = "0x1::aptos_coin::AptosCoin";
 
 export const FILE_EXTEND: { [key: string]: object } = {
 	jpeg: { quality: 80 },
@@ -41,3 +43,5 @@ export const FILE_EXTEND: { [key: string]: object } = {
 };
 
 export const STATIC_FOLDER = path.join(__dirname, "../../");
+
+export const DEFAULT_COLLECTION_PREDICTION: string = "640860d07502854f7df2b20b";

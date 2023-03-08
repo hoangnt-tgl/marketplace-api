@@ -1,6 +1,6 @@
 export const TYPE_TRANSACTION: { [key: number]: string } = {
 	1: "Minted",
-	2: "Accept Offer",
+	2: "Accept Offer",	
 	3: "Sale",
 	4: "Transfer",
 	5: "Cancel",
