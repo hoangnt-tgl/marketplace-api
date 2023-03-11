@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getOrderSellItem = exports.cancelOrder = exports.sellItem = exports.buyItem = exports.getOrderByCreationNumber = exports.getOrderByInstantSaleFalseController = exports.getOrderByInstantSaleTrueController = exports.getOrderByItemIdController = exports.deleteOrderController = exports.getOrderByIdController = exports.createOrderController = void 0;
+exports.getOrderByInstantSaleTrueController = exports.getOrderByItemIdController = exports.getOrderByCreationNumber = exports.finalAuctionController = exports.getOrderSellItem = exports.cancelAuction = exports.cancelOrder = exports.sellItem = exports.buyItem = exports.getOrderByInstantSaleFalseController = exports.deleteOrderController = exports.getOrderByIdController = exports.createOrderController = void 0;
 const Order_model_1 = __importDefault(require("../models/Order.model"));
 const history_model_1 = __importDefault(require("../models/history.model"));
 const collection_model_1 = __importDefault(require("../models/collection.model"));
@@ -26,7 +26,7 @@ const sellItem = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let { userAddress, chainId } = req.params;
         userAddress = userAddress.toLowerCase();
-        let { price, quantity, itemId, to, txHash, coinType, startTime, instantSale, auctionId, endTime } = req.body;
+        let { price, quantity, itemId, to, txHash, coinType, startTime, instantSale, endTime } = req.body;
         // startTime = new Date(startTime).getTime()
         // endTime = new Date(endTime).getTime()
         //find id item
@@ -47,7 +47,6 @@ const sellItem = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 startTime: startTime,
                 expirationTime: endTime,
                 instantSale,
-                type: 6,
                 auctionId: yield (0, order_services_1.getAuctionIdService)(txHash),
             };
             // let newAuction = {
@@ -75,7 +74,6 @@ const sellItem = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 startTime: startTime,
                 expirationTime: endTime,
                 instantSale,
-                type: 6,
             };
         }
         let orderInfo = yield (0, model_services_1.createService)(Order_model_1.default, newOrder);
@@ -85,7 +83,7 @@ const sellItem = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             from: userAddress,
             to: to,
             quantity: quantity,
-            type: 6,
+            type: instantSale ? 6 : 8,
             txHash: txHash,
             price: price,
             priceType: coinType,
@@ -178,6 +176,35 @@ const cancelOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     }
 });
 exports.cancelOrder = cancelOrder;
+const cancelAuction = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { orderId, txHash } = req.body;
+        const { userAddress } = req.params;
+        const orderInfo = yield (0, model_services_1.findOneService)(Order_model_1.default, { _id: orderId, maker: userAddress });
+        const itemInfo = yield (0, model_services_1.findOneService)(item_model_1.default, { _id: orderInfo.itemInfo });
+        yield (0, model_services_1.deleteOneService)(Order_model_1.default, { _id: orderId, maker: userAddress });
+        let findOrderItemId = yield (0, model_services_1.queryExistService)(Order_model_1.default, { itemId: orderInfo.itemId });
+        if (!findOrderItemId) {
+            yield (0, model_services_1.updateOneService)(item_model_1.default, { _id: orderInfo.itemId }, { status: 0 });
+        }
+        let newHistory = {
+            collectionId: itemInfo.collectionId,
+            itemId: orderInfo.itemId,
+            from: userAddress,
+            quantity: orderInfo.amount,
+            type: 5,
+            txHash: txHash,
+            price: orderInfo.minPrice,
+            priceType: orderInfo.coinType,
+        };
+        (0, model_services_1.createService)(history_model_1.default, newHistory);
+        return res.status(200).json({ message: "Cancel auction success" });
+    }
+    catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+});
+exports.cancelAuction = cancelAuction;
 const getOrderSellItem = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let { userAddress, chainId } = req.params;
@@ -271,3 +298,15 @@ const getOrderByCreationNumber = (req, res) => __awaiter(void 0, void 0, void 0,
     }
 });
 exports.getOrderByCreationNumber = getOrderByCreationNumber;
+const finalAuctionController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { txHash, orderId, itemId } = req.body;
+        yield (0, order_services_1.finalAuction)(txHash, itemId);
+        res.status(200).json("Update successful");
+    }
+    catch (error) {
+        console.log(error);
+        res.status(500).json(error);
+    }
+});
+exports.finalAuctionController = finalAuctionController;

@@ -1,5 +1,6 @@
 import itemModel from "../models/item.model";
 import historyModel from "../models/history.model";
+import collectionModel from "../models/collection.model";
 import { Item, ItemInfoCreated } from "../interfaces/item.interfaces";
 
 import {
@@ -13,6 +14,7 @@ import {
 	updateObjService,
 	updateOneService,
 	countByQueryService,
+	deleteOneService,
 	deleteManyService,
 	updateManyService,
 } from "./model.services";
@@ -261,6 +263,21 @@ const deletaItemNotOwner = async () => {
 const updateStatusItem = async () => {
 	updateManyService(itemModel, { status: 1 }, { status: 0 });
 }
+
+const deleteItemNotCollection = async () => {
+	const items = await getAllItemService({});
+	for (let i = 0; i < items.length; i++) {
+		const item = items[i];
+		const collection = await collectionModel.findOne({ _id: item.collectionId });
+		if (!collection) {
+			await deleteOneService(itemModel, { _id: item._id });
+		}
+	}
+	console.log("Done");
+}
+
+// deleteItemNotCollection();
+
 // updateStatusItem();
 // deletaItemNotOwner();
 

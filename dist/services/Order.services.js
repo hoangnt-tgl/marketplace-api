@@ -17,10 +17,13 @@ const Order_model_1 = __importDefault(require("../models/Order.model"));
 const model_services_1 = require("./model.services");
 const axios_1 = __importDefault(require("axios"));
 const other_services_1 = require("./other.services");
+const item_model_1 = __importDefault(require("../models/item.model"));
+const aptos_services_1 = require("./aptos.services");
+const item_services_1 = require("./item.services");
 const getCreationNumService = (txn_hash) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let creationNumber = 0;
-        yield new Promise(resolve => setTimeout(resolve, 1000));
+        yield new Promise(resolve => setTimeout(resolve, 500));
         const response = yield axios_1.default.get(`https://fullnode.testnet.aptoslabs.com/v1/transactions/by_hash/${txn_hash}`);
         let data = response.data.events;
         data.forEach((element) => {
@@ -39,7 +42,7 @@ exports.getCreationNumService = getCreationNumService;
 const getAuctionIdService = (txHash) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let auctionId = 0;
-        yield new Promise(resolve => setTimeout(resolve, 1000));
+        yield new Promise(resolve => setTimeout(resolve, 500));
         const response = yield axios_1.default.get(`https://fullnode.testnet.aptoslabs.com/v1/transactions/by_hash/${txHash}`);
         let data = response.data.events;
         data.forEach((element) => {
@@ -106,18 +109,37 @@ const getOneOrderService = (query) => __awaiter(void 0, void 0, void 0, function
     return order;
 });
 exports.getOneOrderService = getOneOrderService;
-const finalAuction = (txHash) => __awaiter(void 0, void 0, void 0, function* () {
-    yield new Promise(resolve => setTimeout(resolve, 1000));
-    const response = yield axios_1.default.get(`https://fullnode.testnet.aptoslabs.com/v1/transactions/by_hash/${txHash}`);
-    let data = response.data.events;
-    data.forEach((element) => {
-        if (element.type.includes("::bid_utils::OrderExecutedEvent")) {
-            // 	creationNumber = element.data.id.creation_num;
-            console.log(element);
-            console.log(123);
+const finalAuction = (txHash, itemId) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let buyer = "";
+        let lister = "";
+        let price = "";
+        yield new Promise(resolve => setTimeout(resolve, 500));
+        const response = yield axios_1.default.get(`https://fullnode.testnet.aptoslabs.com/v1/transactions/by_hash/${txHash}`);
+        let data = response.data.events;
+        data.forEach((element) => {
+            if (element.type.includes("::bid_utils::OrderExecutedEvent")) {
+                buyer = element.data.buyer;
+                lister = element.data.lister_address;
+                price = element.data.executed_price;
+            }
+        });
+        let itemInfo = yield (0, item_services_1.getOneItemService)({ _id: itemId });
+        if (!itemInfo) {
+            return;
         }
-    });
-    // return creationNumber;
+        let owners = itemInfo.owner;
+        if (!owners.includes(buyer)) {
+            owners.push(buyer);
+        }
+        let balanceLister = yield (0, aptos_services_1.getBalanceTokenForAccount)(lister, itemInfo.creator, itemInfo.collectionInfo.collectionName, itemInfo.itemName, "2");
+        if (balanceLister === "0") {
+            owners = owners.filter(ele => ele !== lister);
+        }
+        yield (0, model_services_1.updateOneService)(item_model_1.default, { _id: itemId }, { owner: owners });
+    }
+    catch (error) {
+        console.log(error.message);
+    }
 });
 exports.finalAuction = finalAuction;
-(0, exports.finalAuction)("0x0b708af2733acb7ed37f9593a192b9868c3c4b3be7207ae58d03f311c6340e41");

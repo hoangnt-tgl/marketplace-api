@@ -12,12 +12,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkBioUser = exports.checkUserAddressValid = exports.checkUserAuthen = exports.checkUserExist = void 0;
+exports.checkIsAdmin = exports.checkBioUser = exports.checkUserAddressValid = exports.checkUserAuthen = exports.checkUserExist = void 0;
 const model_services_1 = require("../services/model.services");
 const user_model_1 = __importDefault(require("../models/user.model"));
 const response_constants_1 = require("../constant/response.constants");
 const user_services_1 = require("../services/user.services");
 const other_services_1 = require("../services/other.services");
+const ADMIN = JSON.parse(process.env.ADMIN || "[]");
 const checkUserExist = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let userAddress = req.body.userAddress || req.params.userAddress || req.query.userAddress;
@@ -66,6 +67,7 @@ const checkUserAuthen = (req, res, next) => __awaiter(void 0, void 0, void 0, fu
         return res.status(401).json({ error: response_constants_1.ERROR_RESPONSE[401] });
     }
     catch (error) {
+        console.log(error);
         return res.status(401).json({ error: response_constants_1.ERROR_RESPONSE[401] });
     }
 });
@@ -94,3 +96,17 @@ const checkBioUser = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
     }
 });
 exports.checkBioUser = checkBioUser;
+const checkIsAdmin = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let { userAddress } = req.body || req.params;
+        userAddress = userAddress.toLowerCase();
+        if (ADMIN.includes(userAddress)) {
+            return next();
+        }
+        res.status(403).json({ message: "Authentication Required" });
+    }
+    catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+exports.checkIsAdmin = checkIsAdmin;

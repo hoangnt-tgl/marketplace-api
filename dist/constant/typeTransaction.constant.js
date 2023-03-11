@@ -16,6 +16,7 @@ exports.TYPE_TRANSACTION = {
     12: "Create Staking",
     13: "Harvest Staking",
     14: "Cancel Staking",
+    15: "Predict",
 };
 exports.TYPE_NOTIFICATION = {
     1: "Offer",

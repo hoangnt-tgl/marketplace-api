@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.checkItemExistsService = exports.getAllItemService = exports.getOneItemService = exports.getVolumeItemService = exports.getVolumeAllItemService = exports.updateItemService = exports.getTransactionService = exports.getListItemByOwnerService = exports.getListItemByCreatedService = exports.getListRandomItemService = exports.getListSelectItemService = exports.checkChainIdItemService = void 0;
 const item_model_1 = __importDefault(require("../models/item.model"));
 const history_model_1 = __importDefault(require("../models/history.model"));
+const collection_model_1 = __importDefault(require("../models/collection.model"));
 const model_services_1 = require("./model.services");
 const other_services_1 = require("./other.services");
 const interaction_model_1 = __importDefault(require("../models/interaction.model"));
@@ -242,6 +243,18 @@ const deletaItemNotOwner = () => __awaiter(void 0, void 0, void 0, function* () 
 const updateStatusItem = () => __awaiter(void 0, void 0, void 0, function* () {
     (0, model_services_1.updateManyService)(item_model_1.default, { status: 1 }, { status: 0 });
 });
+const deleteItemNotCollection = () => __awaiter(void 0, void 0, void 0, function* () {
+    const items = yield getAllItemService({});
+    for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        const collection = yield collection_model_1.default.findOne({ _id: item.collectionId });
+        if (!collection) {
+            yield (0, model_services_1.deleteOneService)(item_model_1.default, { _id: item._id });
+        }
+    }
+    console.log("Done");
+});
+// deleteItemNotCollection();
 // updateStatusItem();
 // deletaItemNotOwner();
 // updateOwnerItem();

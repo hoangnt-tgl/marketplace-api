@@ -17,7 +17,7 @@ const mongoose_1 = __importDefault(require("mongoose"));
 require("dotenv").config();
 const connectDB = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        console.log(`Connecting to mongo db`, process.env.MONGO_URI);
+        mongoose_1.default.set("strictQuery", false);
         yield mongoose_1.default.connect(process.env.MONGO_URI || "");
         console.log(`Mongo db connected`);
     }

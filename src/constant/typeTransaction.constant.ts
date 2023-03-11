@@ -13,6 +13,7 @@ export const TYPE_TRANSACTION: { [key: number]: string } = {
 	12: "Create Staking",
 	13: "Harvest Staking",
 	14: "Cancel Staking",
+	15: "Predict",
 };
 
 export const TYPE_NOTIFICATION: { [key: number]: string } = {
